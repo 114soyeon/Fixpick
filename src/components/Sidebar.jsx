@@ -241,11 +241,28 @@ export default function Sidebar({
     >
       <style>{css}</style>
 
-      {/* 로고 */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 10px" }}>
+      {/* 로고 (누르면 홈으로) */}
+      <button
+        type="button"
+        className="gk-logo"
+        aria-label="고정콕 홈으로 가기"
+        onClick={() => onNavigate?.("home")}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "4px 10px",
+          margin: "-4px 0",
+          border: 0,
+          borderRadius: 12,
+          background: "transparent",
+          cursor: "pointer",
+          alignSelf: "flex-start",
+        }}
+      >
         <LogoMark size={36} />
         <Wordmark height={26} />
-      </div>
+      </button>
 
       {/* 메뉴 */}
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
