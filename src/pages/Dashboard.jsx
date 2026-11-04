@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // 사이드바는 components/Layout.jsx에서 그려요.
 
@@ -204,6 +205,7 @@ function ExpenseRow({ c, delay }) {
 }
 
 function ExpenseList() {
+  const navigate = useNavigate();
   const left = CATEGORIES.slice(0, 4);
   const right = CATEGORIES.slice(4);
   return (
@@ -224,7 +226,7 @@ function ExpenseList() {
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           {right.map((c, i) => <ExpenseRow key={c.key} c={c} delay={330 + i * 60} />)}
-          <button type="button" className="gk-fade" style={{ ...at(560), height: 50, borderRadius: 14, border: `2px dashed ${C.sky2}`, background: "transparent", color: C.sub, fontFamily: "inherit", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+                    <button type="button" className="gk-fade" onClick={() => navigate("/fix", { state: { openAdd: true } })} style={{ ...at(560), height: 50, borderRadius: 14, border: `2px dashed ${C.sky2}`, background: "transparent", color: C.sub, fontFamily: "inherit", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
             + 카테고리 추가
           </button>
         </div>
