@@ -6,9 +6,11 @@ import Calendar from "./pages/Calendar";
 import Report from "./pages/Report";
 import Setting from "./pages/Setting";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
+  { path: "/signup", element: <Signup /> },
   {
     path: "/",
     element: <Layout />,

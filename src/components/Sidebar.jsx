@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { initialOf } from "../utils/auth";
 
 const COLORS = {
   text: "#0B2A45",
@@ -55,7 +56,7 @@ const Icons = {
   ),
   settings: (
     <svg {...svgProps}>
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.730l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
       <circle cx="12" cy="12" r="3" />
     </svg>
   ),
@@ -139,6 +140,7 @@ function NotificationPanel({ items, onRead, onReadAll, onClose }) {
     </div>
   );
 }
+
 
 /* ───────── 항목 추가 창 ───────── */
 const ADD_CATEGORIES = [
@@ -330,6 +332,9 @@ const css = `
 @keyframes gkBadgePop{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
 .gk-profile{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:6px;margin:-6px;border:0;border-radius:14px;background:transparent;font:inherit;color:inherit;text-align:left;cursor:pointer;transition:background .15s}
 .gk-profile:hover{background:#F3F8FC}
+.gk-menu{width:280px}
+.gk-menu__item{height:44px;padding:0 12px;border:0;border-radius:12px;background:none;font:inherit;font-size:15px;font-weight:600;color:${COLORS.text};text-align:left;cursor:pointer}
+.gk-menu__item:hover{background:#F3F5F7}
 .gk-logo{transition:transform .15s}
 .gk-logo:hover{transform:scale(1.03)}
 .gk-logo:active{transform:scale(.97)}
@@ -369,24 +374,26 @@ export default function Sidebar({
   onAddClick,
   onAddItem,
   onNotificationClick,
-  user = { name: "00", initial: "00", subscriptionCount: 5 },
+  onLogout,
+  user = null, // 로그인 안 했으면 null
 }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState(NOTIFICATIONS);
   const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState(null);
+  const [menu, setMenu] = useState(false);
   const boxRef = useRef(null);
   const notificationCount = items.filter((n) => n.unread).length;
 
   // 바깥을 누르거나 Esc를 누르면 닫기
   useEffect(() => {
-    if (!open) return;
-    const onDown = (e) => { if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false); };
-    const onKey = (e) => { if (e.key === "Escape") setOpen(false); };
+    if (!open && !menu) return;
+    const onDown = (e) => { if (boxRef.current && !boxRef.current.contains(e.target)) { setOpen(false); setMenu(false); } };
+    const onKey = (e) => { if (e.key === "Escape") { setOpen(false); setMenu(false); } };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
     return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
-  }, [open]);
+  }, [open, menu]);
 
   const readOne = (id) => setItems((list) => list.map((n) => (n.id === id ? { ...n, unread: false } : n)));
   const readAll = () => setItems((list) => list.map((n) => ({ ...n, unread: false })));
@@ -490,37 +497,51 @@ export default function Sidebar({
           borderTop: `1px solid ${COLORS.border}`,
         }}
       >
-        <button type="button" className="gk-profile" aria-label="로그인 페이지로 가기" onClick={() => onNavigate?.("login")}>
-          <span
-            aria-hidden="true"
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: "50%",
-              background: COLORS.accent,
-              color: "#FFFFFF",
-              fontSize: 15,
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            {user.initial ?? user.name?.slice(0, 1)}
-          </span>
-          <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-            <b style={{ fontSize: 15, fontWeight: 700 }}>{user.name}님</b>
-            <span style={{ fontSize: 13, color: COLORS.muted }}>구독 {user.subscriptionCount}개</span>
-          </span>
-        </button>
+        {user ? (
+          <button type="button" className="gk-profile" aria-haspopup="menu" aria-expanded={menu} onClick={() => { setMenu((v) => !v); setOpen(false); }}>
+            <span aria-hidden="true" style={{ width: 40, height: 40, borderRadius: "50%", background: COLORS.accent, color: "#FFFFFF", fontSize: 15, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              {initialOf(user.name)}
+            </span>
+            <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+              <b style={{ fontSize: 15, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}님</b>
+              <span style={{ fontSize: 13, color: COLORS.muted }}>구독 {user.subscriptionCount ?? 0}개</span>
+            </span>
+          </button>
+        ) : (
+          <button type="button" className="gk-profile" aria-label="로그인 페이지로 가기" onClick={() => onNavigate?.("login")}>
+            <span aria-hidden="true" style={{ width: 40, height: 40, borderRadius: "50%", background: "#E9EDF1", color: "#8A9098", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
+            </span>
+            <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+              <b style={{ fontSize: 15, fontWeight: 700 }}>로그인하기</b>
+              <span style={{ fontSize: 13, color: COLORS.muted }}>내 고정지출 관리하기</span>
+            </span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={COLORS.muted} strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+          </button>
+        )}
+        {menu && user && (
+          <div className="gk-noti gk-menu" role="menu" aria-label="내 계정">
+            <div style={{ padding: "18px 20px 14px", display: "flex", alignItems: "center", gap: 12, borderBottom: `1px solid ${COLORS.border}` }}>
+              <span aria-hidden="true" style={{ width: 44, height: 44, borderRadius: "50%", background: COLORS.accent, color: "#fff", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{initialOf(user.name)}</span>
+              <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                <b style={{ fontSize: 16 }}>{user.name}님</b>
+                <span style={{ fontSize: 13, color: COLORS.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.email}</span>
+              </span>
+            </div>
+            <div style={{ padding: 8, display: "flex", flexDirection: "column" }}>
+              <button type="button" role="menuitem" className="gk-menu__item" onClick={() => { setMenu(false); onNavigate?.("settings"); }}>내 정보 · 설정</button>
+              <button type="button" role="menuitem" className="gk-menu__item" style={{ color: "#D9534F" }} onClick={() => { setMenu(false); onLogout?.(); }}>로그아웃</button>
+            </div>
+          </div>
+        )}
+        {user && (
         <button
           type="button"
           className="gk-bell"
           aria-label={notificationCount > 0 ? `알림 ${notificationCount}개` : "알림"}
           aria-haspopup="dialog"
           aria-expanded={open}
-          onClick={() => { setOpen((v) => !v); onNotificationClick?.(); }}
+          onClick={() => { setOpen((v) => !v); setMenu(false); onNotificationClick?.(); }}
           style={{
             position: "relative",
             width: 44,
@@ -564,6 +585,7 @@ export default function Sidebar({
             </span>
           )}
         </button>
+        )}
 
         {open && (
           <NotificationPanel items={items} onRead={readOne} onReadAll={readAll} onClose={() => setOpen(false)} />

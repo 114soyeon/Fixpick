@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogoMark, Wordmark } from "../components/Sidebar";
+import { login } from "../utils/auth";
 
 const C = {
   bg: "#F7F9FA",
@@ -53,6 +54,7 @@ export default function Login() {
     if (!email.includes("@")) return setError("이메일 주소를 다시 확인해 주세요.");
     if (pw.length < 4) return setError("비밀번호를 4자 이상 입력해 주세요.");
     setError("");
+    login({ email });
     navigate("/"); // 로그인 후 홈으로
   };
 
@@ -76,13 +78,13 @@ export default function Login() {
               매달 나가는 돈,<br />고정콕이 콕 짚어 드려요
             </h1>
             <p style={{ margin: 0, fontSize: 17, color: C.sub, lineHeight: 1.6 }}>
-              구독·통신·보험까지 고정지출을 한 화면에서 관리하고<br />안 쓰는 구독은 해지 타이밍까지 알려드려요.
+              주거·통신·구독까지 고정지출을 한 화면에서 관리하고<br />결제일 전에 미리 알려드려요.
             </p>
           </div>
         </div>
 
         <div className="gk-login-rise" style={{ ...at(300), display: "flex", justifyContent: "center", gap: 10 }}>
-          {["결제일 알림", "해지 추천", "가족 분담 정산"].map((t) => (
+          {["결제일 알림", "결제 캘린더", "예산 관리"].map((t) => (
             <span key={t} style={{ background: "#FFFFFF", borderRadius: 999, padding: "9px 16px", fontSize: 14, fontWeight: 600 }}>{t}</span>
           ))}
         </div>
@@ -140,7 +142,7 @@ export default function Login() {
 
           <p style={{ margin: 0, textAlign: "center", fontSize: 15, color: C.muted }}>
             아직 계정이 없나요?{" "}
-            <button type="button" className="gk-login-link" style={{ fontSize: 15, fontWeight: 700, color: C.text }}>회원가입</button>
+            <button type="button" className="gk-login-link" onClick={() => navigate("/signup")} style={{ fontSize: 15, fontWeight: 700, color: C.text }}>회원가입</button>
           </p>
         </form>
       </section>

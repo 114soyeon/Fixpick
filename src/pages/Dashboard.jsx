@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../utils/auth";
 
 // 사이드바는 components/Layout.jsx에서 그려요.
 
@@ -22,6 +23,12 @@ const ANIM_CSS = `
 .gk-arrow { transition: background .15s, transform .15s; }
 .gk-arrow:hover { background: #E6EEF5 !important; }
 .gk-arrow:active { transform: scale(.92); }
+.gk-cal-grid { cursor: pointer; }
+.gk-cal-day { transition: transform .15s, filter .15s, background-color .15s; }
+.gk-cal-day:hover { transform: translateY(-2px); filter: drop-shadow(0 6px 10px rgba(11,42,69,.12)); }
+.gk-cal-day:not(.is-pay):hover { background-color: #FFFFFF; }
+.gk-cal-up { transition: transform .15s, filter .15s; cursor: pointer; }
+.gk-cal-up:hover { transform: translateY(-2px); filter: brightness(.98); }
 @media (prefers-reduced-motion: reduce) {
   .gk-rise, .gk-reveal, .gk-grow-x, .gk-grow-y, .gk-fade, .gk-slide-next, .gk-slide-prev { animation: none; }
 }
@@ -74,7 +81,6 @@ const SHADOW = "0 1px 2px rgba(28,28,30,0.04), 0 10px 30px rgba(28,28,30,0.05)";
 const won = (n) => n.toLocaleString("ko-KR");
 
 /* ───────── 예시 데이터 ───────── */
-const USER = { name: "00", initial: "00", subscriptionCount: 5 };
 const MONTH = 11;
 
 const CATEGORIES = [
@@ -226,7 +232,7 @@ function ExpenseList() {
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           {right.map((c, i) => <ExpenseRow key={c.key} c={c} delay={330 + i * 60} />)}
-                    <button type="button" className="gk-fade" onClick={() => navigate("/fix", { state: { openAdd: true } })} style={{ ...at(560), height: 50, borderRadius: 14, border: `2px dashed ${C.sky2}`, background: "transparent", color: C.sub, fontFamily: "inherit", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+          <button type="button" className="gk-fade" onClick={() => navigate("/fix", { state: { openAdd: true } })} style={{ ...at(560), height: 50, borderRadius: 14, border: `2px dashed ${C.sky2}`, background: "transparent", color: C.sub, fontFamily: "inherit", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
             + 카테고리 추가
           </button>
         </div>
@@ -276,6 +282,7 @@ function MonthlyChart() {
 
 /* ───────── 4. 이번 달 예산 ───────── */
 function BudgetCard() {
+  const navigate = useNavigate();
   const pct = Math.round((BUDGET.used / BUDGET.limit) * 100);
   return (
     <section className="gk-rise" style={{ ...at(300), flex: "2 1 0", minWidth: 0, background: C.yellowSoft, borderRadius: 24, padding: "24px 28px", boxSizing: "border-box", display: "flex", flexDirection: "column", gap: 14 }}>
@@ -295,7 +302,7 @@ function BudgetCard() {
           <span style={{ color: C.yellowInk }}>{won(BUDGET.limit - BUDGET.used)}원 남음</span>
         </div>
       </div>
-      <button type="button" style={{ marginTop: "auto", flexShrink: 0, height: 48, borderRadius: 999, border: 0, background: C.yellow, color: C.text, fontFamily: "inherit", fontSize: 16, fontWeight: 600, cursor: "pointer" }}>
+      <button type="button" onClick={() => navigate("/report")} style={{ marginTop: "auto", flexShrink: 0, height: 48, borderRadius: 999, border: 0, background: C.yellow, color: C.text, fontFamily: "inherit", fontSize: 16, fontWeight: 600, cursor: "pointer" }}>
         예산 조정하기
       </button>
     </section>
@@ -304,6 +311,7 @@ function BudgetCard() {
 
 /* ───────── 5. 결제 캘린더 + 다가오는 결제 ───────── */
 function CalendarCard() {
+  const navigate = useNavigate();
   const [view, setView] = useState({ year: TODAY.year, month: TODAY.month });
   const [dir, setDir] = useState(null); // "next" | "prev" | null
 
@@ -329,6 +337,9 @@ function CalendarCard() {
   const isToday = (day) => viewKey === todayKey && day === TODAY.day;
   const title = view.year === TODAY.year ? `${view.month}월 결제일` : `${view.year}년 ${view.month}월 결제일`;
 
+  // 날짜를 누르면 결제 캘린더 페이지로 (누른 날짜도 같이 넘겨줘요)
+  const goCalendar = (day = null) => navigate("/calendar", { state: { year: view.year, month: view.month, day } });
+
   const arrowBtn = { width: 36, height: 36, borderRadius: "50%", border: 0, background: "#F3F5F7", color: "#4A4D52", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
 
   return (
@@ -351,7 +362,10 @@ function CalendarCard() {
         ))}
       </div>
 
-      <div key={viewKey} className={dir ? `gk-slide-${dir}` : undefined}
+      <div key={viewKey} className={`gk-cal-grid ${dir ? `gk-slide-${dir}` : ""}`}
+        role="button" tabIndex={0} aria-label="결제 캘린더로 이동"
+        onClick={(e) => { const d = e.target.closest("[data-day]")?.dataset.day; goCalendar(d ? Number(d) : null); }}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goCalendar(); } }}
         style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gridAutoRows: 66, gap: "8px 6px", fontSize: 14 }}>
         {cells.map((day, i) => {
           if (!day) return <span key={`e${i}`} />;
@@ -360,7 +374,7 @@ function CalendarCard() {
           const base = { height: 66, borderRadius: 14, boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between", opacity: past ? 0.5 : 1 };
           if (isToday(day)) {
             return (
-              <span key={day} style={{ ...base, padding: "5px 7px 6px", background: "#FFFFFF", boxShadow: `inset 0 0 0 2px ${C.sky}` }}>
+              <span key={day} data-day={day} className="gk-cal-day" style={{ ...base, padding: "5px 7px 6px", background: "#FFFFFF", boxShadow: `inset 0 0 0 2px ${C.sky}` }}>
                 <span style={{ alignSelf: "flex-start", minWidth: 24, height: 24, borderRadius: 999, background: C.sky, color: "#FFFFFF", fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>{day}</span>
                 <span style={{ fontSize: 12, fontWeight: 600 }}>오늘</span>
               </span>
@@ -368,19 +382,19 @@ function CalendarCard() {
           }
           if (pay) {
             return (
-              <span key={day} className={dir ? undefined : "gk-fade"} style={{ ...(dir ? {} : at(500 + day * 12)), ...base, padding: "7px 6px", background: pay.warn ? C.yellowSoft : C.skySoft, boxShadow: pay.warn ? `inset 0 0 0 1.5px ${C.yellow}` : "none" }}>
+              <span key={day} data-day={day} className={`gk-cal-day is-pay ${dir ? "" : "gk-fade"}`} style={{ ...(dir ? {} : at(500 + day * 12)), ...base, padding: "7px 6px", background: pay.warn ? C.yellowSoft : C.skySoft, boxShadow: pay.warn ? `inset 0 0 0 1.5px ${C.yellow}` : "none" }}>
                 <b style={{ fontSize: 14 }}>{day}</b>
                 <span style={{ fontSize: 12, fontWeight: 600, color: pay.warn ? C.yellowInk : C.text, whiteSpace: "nowrap", overflow: "hidden" }}>{pay.name}</span>
               </span>
             );
           }
-          return <span key={day} style={{ ...base, padding: "7px 8px", color: C.sub }}>{day}</span>;
+          return <span key={day} data-day={day} className="gk-cal-day" style={{ ...base, padding: "7px 8px", color: C.sub }}>{day}</span>;
         })}
       </div>
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 14 }}>
         {UPCOMING.map((u, i) => (
-          <a key={u.day} href="#" className="gk-rise" style={{ ...at(520 + i * 90), flex: 1, maxHeight: 104, display: "flex", alignItems: "center", gap: 14, borderRadius: 20, padding: "14px 16px 14px 14px", textDecoration: "none", color: C.text,
+          <a key={u.day} href="/calendar" onClick={(e) => { e.preventDefault(); navigate("/calendar", { state: { year: TODAY.year, month: TODAY.month, day: u.day } }); }} className="gk-rise gk-cal-up" style={{ ...at(520 + i * 90), flex: 1, maxHeight: 104, display: "flex", alignItems: "center", gap: 14, borderRadius: 20, padding: "14px 16px 14px 14px", textDecoration: "none", color: C.text,
             background: u.warn ? C.yellowSoft : C.skySoft }}>
             <span style={{ flexShrink: 0, width: 60, height: 60, borderRadius: 16, background: u.warn ? C.yellow : C.sky, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", lineHeight: 1.1 }}>
               <span style={{ fontSize: 12, fontWeight: 600 }}>{TODAY.month}월</span>
@@ -400,6 +414,8 @@ function CalendarCard() {
 
 /* ───────── 페이지 ───────── */
 export default function Dashboard() {
+  const user = useUser(); // 로그인 안 했으면 null
+  const navigate = useNavigate();
   return (
     <main
       style={{
@@ -418,9 +434,17 @@ export default function Dashboard() {
       }}
     >
       <style>{ANIM_CSS}</style>
-      <h1 className="gk-rise" style={{ margin: 0, fontSize: 30, fontWeight: 700, letterSpacing: "-1px", lineHeight: 1.3 }}>
-        {USER.name}님, {MONTH}월 구독 현황이에요
-      </h1>
+      <div className="gk-rise" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, minHeight: 48 }}>
+        <h1 style={{ margin: 0, fontSize: 30, fontWeight: 700, letterSpacing: "-1px", lineHeight: 1.3 }}>
+          {user ? `${user.name}님, ${MONTH}월 구독 현황이에요` : `${MONTH}월 고정지출 현황이에요`}
+        </h1>
+        {!user && (
+          <div style={{ display: "flex", alignItems: "center", gap: 14, background: C.yellowSoft, borderRadius: 999, padding: "6px 6px 6px 18px" }}>
+            <span style={{ fontSize: 15, fontWeight: 600, color: C.yellowInk }}>지금은 예시 화면이에요 · 로그인하면 내 고정지출로 바뀌어요</span>
+            <button type="button" onClick={() => navigate("/login")} style={{ height: 36, padding: "0 16px", borderRadius: 999, border: 0, background: C.text, color: "#FFFFFF", fontFamily: "inherit", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>로그인</button>
+          </div>
+        )}
+      </div>
 
       <div style={{ display: "flex", gap: 30, alignItems: "stretch" }}>
         {/* 왼쪽 */}
