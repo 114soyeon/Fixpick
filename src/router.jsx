@@ -5,8 +5,10 @@ import Fix from "./pages/Fix";
 import Calendar from "./pages/Calendar";
 import Report from "./pages/Report";
 import Setting from "./pages/Setting";
+import Login from "./pages/Login";
 
 const router = createBrowserRouter([
+  { path: "/login", element: <Login /> },
   {
     path: "/",
     element: <Layout />,

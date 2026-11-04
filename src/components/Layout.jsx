@@ -8,6 +8,7 @@ const PATHS = {
   calendar: "/calendar",
   report: "/report",
   settings: "/setting",
+  login: "/login",
 };
 
 export default function Layout() {

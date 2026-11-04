@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 const COLORS = {
   text: "#0B2A45",
@@ -139,6 +140,142 @@ function NotificationPanel({ items, onRead, onReadAll, onClose }) {
   );
 }
 
+/* ───────── 항목 추가 창 ───────── */
+const ADD_CATEGORIES = [
+  { key: "home", name: "주거", color: "#4C8DF6", tint: "#DFEAFD" },
+  { key: "phone", name: "통신", color: "#36C2CE", tint: "#DBF4F6" },
+  { key: "sub", name: "구독 서비스", color: "#FF7EB3", tint: "#FFE8F1" },
+  { key: "rental", name: "가전", color: "#5ED3A0", tint: "#E2F7EE" },
+  { key: "insure", name: "보험", color: "#9B8AFB", tint: "#EDEAFE" },
+  { key: "saving", name: "금융/저축", color: "#FFC94D", tint: "#FFF2D2" },
+  { key: "transit", name: "교통", color: "#FF9466", tint: "#FFECE3" },
+];
+const CYCLES = ["매달", "매년"];
+
+function AddItemModal({ onClose, onSubmit }) {
+  const [closing, setClosing] = useState(false);
+  const [form, setForm] = useState({ category: "sub", name: "", amount: "", day: "", cycle: "매달", remind: true });
+  const nameRef = useRef(null);
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const close = () => { setClosing(true); setTimeout(onClose, 180); };
+  const amountNum = Number(form.amount.replace(/[^0-9]/g, ""));
+  const dayNum = Number(form.day);
+  const valid = form.name.trim() && amountNum > 0 && dayNum >= 1 && dayNum <= 31;
+
+  useEffect(() => {
+    nameRef.current?.focus();
+    const onKey = (e) => { if (e.key === "Escape") close(); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (!valid) return;
+    onSubmit({ ...form, name: form.name.trim(), amount: amountNum, day: dayNum });
+    close();
+  };
+
+  const label = { fontSize: 14, fontWeight: 600, color: COLORS.text };
+  const input = { height: 48, borderRadius: 14, border: `1.5px solid ${COLORS.border}`, background: "#F7F9FA", padding: "0 16px", fontSize: 16, fontFamily: "inherit", color: COLORS.text, outline: "none", width: "100%", boxSizing: "border-box" };
+
+  return createPortal(
+    <div className={`gk-modal ${closing ? "is-closing" : ""}`} onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
+      <form className="gk-modal__box" role="dialog" aria-modal="true" aria-labelledby="gk-add-title" onSubmit={submit} style={{ fontFamily: FONT }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+          <div>
+            <h2 id="gk-add-title" style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-0.6px" }}>고정지출 항목 추가</h2>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: COLORS.muted }}>매달 나가는 돈을 등록하면 결제일에 맞춰 알려드려요.</p>
+          </div>
+          <button type="button" className="gk-noti__close" aria-label="닫기" onClick={close}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+
+        <fieldset style={{ border: 0, margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+          <legend style={{ ...label, padding: 0, marginBottom: 10 }}>카테고리</legend>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {ADD_CATEGORIES.map((c) => {
+              const on = form.category === c.key;
+              return (
+                <button key={c.key} type="button" className="gk-chip" aria-pressed={on} onClick={() => set("category", c.key)}
+                  style={{ background: on ? c.tint : "#FFFFFF", boxShadow: on ? `inset 0 0 0 2px ${c.color}` : `inset 0 0 0 1.5px ${COLORS.border}`, fontWeight: on ? 700 : 500 }}>
+                  <span style={{ width: 9, height: 9, borderRadius: "50%", background: c.color }} />
+                  {c.name}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <span style={label}>항목 이름</span>
+          <input id="gk-add-name" ref={nameRef} className="gk-input" style={input} placeholder="예) 넷플릭스, 월세, 휴대폰 요금" value={form.name} onChange={(e) => set("name", e.target.value)} maxLength={30} />
+        </label>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 12 }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <span style={label}>금액</span>
+            <div style={{ position: "relative" }}>
+              <input id="gk-add-amount" className="gk-input" inputMode="numeric" style={{ ...input, paddingRight: 44, textAlign: "right", fontWeight: 700 }} placeholder="0"
+                value={amountNum ? amountNum.toLocaleString("ko-KR") : ""} onChange={(e) => set("amount", e.target.value)} />
+              <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: COLORS.muted }}>원</span>
+            </div>
+          </label>
+          <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <span style={label}>결제일</span>
+            <div style={{ display: "flex", gap: 8 }}>
+              <select id="gk-add-cycle" className="gk-input" style={{ ...input, width: 86, padding: "0 10px" }} value={form.cycle} onChange={(e) => set("cycle", e.target.value)}>
+                {CYCLES.map((c) => <option key={c}>{c}</option>)}
+              </select>
+              <div style={{ position: "relative", flex: 1 }}>
+                <input id="gk-add-day" className="gk-input" inputMode="numeric" style={{ ...input, paddingRight: 34, textAlign: "right", fontWeight: 700 }} placeholder="10"
+                  value={form.day} onChange={(e) => set("day", e.target.value.replace(/[^0-9]/g, "").slice(0, 2))} />
+                <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: COLORS.muted }}>일</span>
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <label className="gk-toggle-row">
+          <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <span style={label}>결제 3일 전에 알림 받기</span>
+            <span style={{ fontSize: 13, color: COLORS.muted }}>사이드바 알림으로 미리 알려드려요</span>
+          </span>
+          <input id="gk-add-remind" type="checkbox" checked={form.remind} onChange={(e) => set("remind", e.target.checked)} className="gk-switch" />
+        </label>
+
+        <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+          <button type="button" className="gk-btn gk-btn--ghost" onClick={close}>취소</button>
+          <button type="submit" className="gk-btn gk-btn--primary" disabled={!valid}>추가하기</button>
+        </div>
+      </form>
+    </div>,
+    document.body
+  );
+}
+
+function Toast({ text, onDone }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 2600);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return createPortal(
+    <div className="gk-toast" role="status" style={{ fontFamily: FONT }}>
+      <span style={{ width: 24, height: 24, borderRadius: "50%", background: COLORS.accent, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+      </span>
+      {text}
+    </div>,
+    document.body
+  );
+}
+
 const MENU_ITEMS = [
   { key: "home", label: "홈", icon: Icons.home },
   { key: "expenses", label: "내 고정지출", icon: Icons.expenses },
@@ -148,7 +285,7 @@ const MENU_ITEMS = [
 ];
 
 /** 캘린더 + 메모지 + 압정 로고 그림 */
-function LogoMark({ size = 36 }) {
+export function LogoMark({ size = 36 }) {
   const uid = useId().replace(/:/g, "");
   const clipId = `gk-clip-${uid}`;
   const shadowId = `gk-shadow-${uid}`;
@@ -160,7 +297,7 @@ function LogoMark({ size = 36 }) {
 }
 
 /** "고정콕" 글씨 (주아체 모양을 도형으로 변환) */
-function Wordmark({ height = 26 }) {
+export function Wordmark({ height = 26 }) {
   return (
     <svg height={height} viewBox="44 144 942 339" role="img" aria-label="고정콕" style={{ display: "block" }}>
       <path fillRule="evenodd" fill={COLORS.text} d="M640 341 L632 341 L626 339 L623 337 L617 332 L613 324 L611 312 L611 269 L611 268 L589 268 L571 267 L565 266 L561 264 L557 261 L554 258 L552 253 L552 248 L552 240 L553 235 L554 233 L557 230 L562 226 L565 225 L571 224 L611 223 L611 222 L611 176 L611 172 L613 163 L616 157 L621 152 L628 149 L635 148 L639 149 L646 150 L651 153 L655 156 L657 159 L659 165 L660 179 L660 316 L658 325 L655 331 L653 334 L648 338 L644 340 L640 341Z M398 327 L391 327 L386 326 L380 323 L378 321 L375 318 L374 315 L374 309 L375 304 L377 300 L379 297 L393 282 L443 233 L443 233 L443 202 L443 200 L405 201 L395 200 L389 199 L383 197 L379 194 L376 191 L373 184 L372 180 L372 170 L373 166 L376 162 L381 159 L392 157 L524 156 L541 157 L551 158 L560 161 L566 166 L569 169 L570 172 L571 175 L571 180 L570 188 L568 192 L565 195 L564 196 L552 200 L545 201 L500 200 L499 202 L499 216 L499 233 L500 234 L533 263 L553 285 L558 291 L563 298 L567 307 L568 311 L567 317 L565 321 L562 323 L558 325 L554 326 L548 327 L540 326 L536 325 L525 320 L519 316 L511 310 L496 296 L478 277 L471 271 L452 290 L437 305 L432 310 L426 315 L418 320 L410 324 L404 326 L398 327Z M300 362 L292 362 L281 358 L277 355 L275 352 L271 343 L270 337 L266 301 L266 273 L264 253 L264 231 L262 225 L260 222 L258 220 L256 219 L250 219 L186 219 L125 220 L119 219 L92 219 L81 217 L76 215 L74 213 L72 211 L68 205 L67 201 L66 194 L67 188 L69 182 L72 178 L76 174 L80 171 L94 166 L105 165 L134 163 L191 163 L276 164 L289 165 L302 167 L310 171 L313 176 L316 182 L317 186 L319 196 L320 247 L319 279 L319 335 L317 345 L313 353 L308 358 L300 362Z M91 445 L80 445 L70 444 L62 442 L55 438 L51 434 L49 431 L47 424 L48 417 L49 412 L51 408 L55 404 L60 400 L66 398 L77 397 L156 396 L156 395 L156 312 L156 307 L158 300 L164 292 L168 288 L172 286 L180 285 L190 285 L194 286 L198 288 L205 294 L208 299 L209 301 L209 307 L210 335 L210 395 L211 396 L214 396 L269 396 L303 396 L315 396 L329 396 L337 398 L343 400 L349 404 L351 407 L354 411 L355 415 L356 420 L355 428 L353 434 L351 436 L347 440 L342 442 L334 444 L96 444 L91 445Z M544 473 L518 473 L496 472 L481 471 L466 469 L447 465 L437 462 L428 458 L421 454 L414 449 L407 443 L404 439 L400 431 L398 424 L397 412 L398 401 L399 396 L404 386 L407 382 L414 375 L421 370 L429 365 L439 361 L456 356 L466 354 L488 351 L506 350 L531 350 L561 350 L590 352 L604 354 L623 359 L635 364 L646 371 L654 379 L658 385 L662 394 L664 404 L664 419 L662 429 L658 438 L654 443 L648 449 L640 455 L632 459 L622 463 L607 467 L596 469 L581 471 L566 472 L544 473Z M580 430 L586 429 L595 427 L601 425 L605 422 L609 418 L610 415 L610 409 L608 405 L605 401 L596 397 L585 394 L572 392 L542 391 L504 392 L492 392 L479 394 L467 397 L461 400 L458 402 L454 407 L453 411 L454 415 L455 417 L459 420 L462 422 L473 426 L483 428 L503 430 L531 431 L559 431 L580 430Z" />
@@ -191,18 +328,53 @@ const css = `
 @keyframes gkNotiIn{from{opacity:0;transform:translateX(-8px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes gkNotiItem{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes gkBadgePop{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
-@media (prefers-reduced-motion: reduce){.gk-noti,.gk-noti__item{animation:none}}
+.gk-profile{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:6px;margin:-6px;border:0;border-radius:14px;background:transparent;font:inherit;color:inherit;text-align:left;cursor:pointer;transition:background .15s}
+.gk-profile:hover{background:#F3F8FC}
+.gk-logo{transition:transform .15s}
+.gk-logo:hover{transform:scale(1.03)}
+.gk-logo:active{transform:scale(.97)}
+.gk-modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(11,42,69,.32);backdrop-filter:blur(3px);animation:gkFadeIn .22s ease both}
+.gk-modal.is-closing{animation:gkFadeOut .18s ease both}
+.gk-modal__box{width:520px;max-width:100%;background:#FFFFFF;border-radius:28px;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px;box-shadow:0 30px 80px rgba(11,42,69,.28);color:${COLORS.text};animation:gkModalIn .34s cubic-bezier(.22,1,.36,1) both}
+.gk-modal.is-closing .gk-modal__box{animation:gkModalOut .18s ease both}
+.gk-chip{display:flex;align-items:center;gap:7px;height:38px;padding:0 14px;border:0;border-radius:999px;font:inherit;font-size:14px;color:${COLORS.text};cursor:pointer;transition:background .15s,box-shadow .15s,transform .1s}
+.gk-chip:active{transform:scale(.96)}
+.gk-input{transition:border-color .15s,background .15s,box-shadow .15s}
+.gk-input:focus{border-color:${COLORS.accent} !important;background:#FFFFFF !important;box-shadow:0 0 0 4px rgba(92,184,242,.18)}
+.gk-input::placeholder{color:#A9AFB6;font-weight:400}
+.gk-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:16px;background:#F7F9FA;cursor:pointer}
+.gk-switch{appearance:none;-webkit-appearance:none;width:46px;height:28px;border-radius:999px;background:#D5DCE3;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;margin:0}
+.gk-switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.gk-switch:checked{background:${COLORS.accent}}
+.gk-switch:checked::after{transform:translateX(18px)}
+.gk-btn{flex:1;height:52px;border:0;border-radius:16px;font:inherit;font-size:16px;font-weight:700;cursor:pointer;transition:filter .15s,background .15s,opacity .15s}
+.gk-btn--ghost{flex:0 0 120px;background:#F3F5F7;color:${COLORS.text}}
+.gk-btn--ghost:hover{background:#E6EBF0}
+.gk-btn--primary{background:${COLORS.yellow};color:${COLORS.text}}
+.gk-btn--primary:hover:not(:disabled){filter:brightness(.96)}
+.gk-btn--primary:disabled{opacity:.45;cursor:not-allowed}
+.gk-modal button:focus-visible,.gk-modal input:focus-visible{outline:2px solid ${COLORS.accent};outline-offset:2px}
+.gk-toast{position:fixed;left:50%;bottom:36px;z-index:110;display:flex;align-items:center;gap:10px;padding:14px 20px 14px 14px;border-radius:999px;background:${COLORS.text};color:#fff;font-size:15px;font-weight:600;box-shadow:0 12px 30px rgba(11,42,69,.3);animation:gkToast 2.6s cubic-bezier(.22,1,.36,1) both}
+@keyframes gkFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes gkFadeOut{from{opacity:1}to{opacity:0}}
+@keyframes gkModalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes gkModalOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(8px) scale(.98)}}
+@keyframes gkToast{0%{opacity:0;transform:translate(-50%,16px)}10%{opacity:1;transform:translate(-50%,0)}85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,8px)}}
+@media (prefers-reduced-motion: reduce){.gk-noti,.gk-noti__item,.gk-modal,.gk-modal__box,.gk-toast{animation:none}}
 `;
 
 export default function Sidebar({
   active = "home",
   onNavigate,
   onAddClick,
+  onAddItem,
   onNotificationClick,
   user = { name: "00", initial: "00", subscriptionCount: 5 },
 }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState(NOTIFICATIONS);
+  const [adding, setAdding] = useState(false);
+  const [toast, setToast] = useState(null);
   const boxRef = useRef(null);
   const notificationCount = items.filter((n) => n.unread).length;
 
@@ -284,7 +456,7 @@ export default function Sidebar({
       <button
         type="button"
         className="gk-sidebar__add"
-        onClick={onAddClick}
+        onClick={() => { setAdding(true); onAddClick?.(); }}
         style={{
           marginTop: "auto",
           height: 48,
@@ -318,28 +490,30 @@ export default function Sidebar({
           borderTop: `1px solid ${COLORS.border}`,
         }}
       >
-        <span
-          aria-hidden="true"
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            background: COLORS.accent,
-            color: "#FFFFFF",
-            fontSize: 15,
-            fontWeight: 600,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          {user.initial ?? user.name?.slice(0, 1)}
-        </span>
-        <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-          <b style={{ fontSize: 15, fontWeight: 700 }}>{user.name}님</b>
-          <span style={{ fontSize: 13, color: COLORS.muted }}>구독 {user.subscriptionCount}개</span>
-        </span>
+        <button type="button" className="gk-profile" aria-label="로그인 페이지로 가기" onClick={() => onNavigate?.("login")}>
+          <span
+            aria-hidden="true"
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: COLORS.accent,
+              color: "#FFFFFF",
+              fontSize: 15,
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            {user.initial ?? user.name?.slice(0, 1)}
+          </span>
+          <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+            <b style={{ fontSize: 15, fontWeight: 700 }}>{user.name}님</b>
+            <span style={{ fontSize: 13, color: COLORS.muted }}>구독 {user.subscriptionCount}개</span>
+          </span>
+        </button>
         <button
           type="button"
           className="gk-bell"
@@ -395,6 +569,17 @@ export default function Sidebar({
           <NotificationPanel items={items} onRead={readOne} onReadAll={readAll} onClose={() => setOpen(false)} />
         )}
       </div>
+
+      {adding && (
+        <AddItemModal
+          onClose={() => setAdding(false)}
+          onSubmit={(item) => {
+            onAddItem?.(item);
+            setToast(`'${item.name}' 항목을 추가했어요`);
+          }}
+        />
+      )}
+      {toast && <Toast key={toast} text={toast} onDone={() => setToast(null)} />}
     </nav>
   );
 }
