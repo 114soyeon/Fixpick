@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 const COLORS = {
   text: "#0B2A45",
@@ -70,6 +70,75 @@ const Icons = {
   ),
 };
 
+/* 알림 예시 데이터 */
+const NOTIFICATIONS = [
+  { id: 1, type: "pay", title: "넷플릭스 결제 예정", body: "11월 10일에 14,500원이 결제돼요.", time: "방금", unread: true },
+  { id: 2, type: "cancel", title: "티빙, 3주째 안 봤어요", body: "해지하면 매달 13,500원을 아낄 수 있어요.", time: "1시간 전", unread: true, action: "해지 도우미" },
+  { id: 3, type: "price", title: "유튜브 프리미엄 요금 인상", body: "12월부터 14,900원 → 16,400원으로 올라요.", time: "어제", unread: false },
+  { id: 4, type: "share", title: "넷플릭스 분담금 미정산", body: "동생이 3,625원을 아직 보내지 않았어요.", time: "2일 전", unread: false, action: "정산 요청" },
+  { id: 5, type: "budget", title: "이번 달 예산 94% 사용", body: "남은 예산은 82,310원이에요.", time: "3일 전", unread: false },
+];
+
+const NOTI_STYLE = {
+  pay: { bg: "#DCEFFD", ink: "#2F7FC0", path: <><rect x="3" y="5" width="18" height="16" rx="2.5" /><path d="M16 3v4M8 3v4M3 10h18" /></> },
+  cancel: { bg: "#FFF2D2", ink: "#B8891F", path: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></> },
+  price: { bg: "#FFE8F1", ink: "#C85F8B", path: <><path d="M3 17l6-6 4 4 8-8" /><path d="M15 7h6v6" /></> },
+  share: { bg: "#E2F7EE", ink: "#3F9F76", path: <><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18.5 20a6.5 6.5 0 0 0-3-5.5" /></> },
+  budget: { bg: "#EDEAFE", ink: "#7364C6", path: <><rect x="3" y="6" width="18" height="14" rx="3" /><path d="M3 10h18M16 15h2" /></> },
+};
+
+/** 알림 패널 */
+function NotificationPanel({ items, onRead, onReadAll, onClose }) {
+  const unread = items.filter((n) => n.unread).length;
+  return (
+    <div className="gk-noti" role="dialog" aria-label="알림">
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <b style={{ fontSize: 17 }}>알림</b>
+          {unread > 0 && <span style={{ fontSize: 12, fontWeight: 700, background: COLORS.badge, borderRadius: 999, padding: "2px 8px" }}>새 알림 {unread}</span>}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <button type="button" className="gk-noti__link" onClick={onReadAll} disabled={unread === 0}>모두 읽음</button>
+          <button type="button" className="gk-noti__close" aria-label="알림 닫기" onClick={onClose}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+      </div>
+
+      <ul style={{ listStyle: "none", margin: 0, padding: "0 8px 8px", display: "flex", flexDirection: "column", gap: 2, maxHeight: 440, overflowY: "auto" }}>
+        {items.map((n, i) => {
+          const st = NOTI_STYLE[n.type];
+          return (
+            <li key={n.id} className="gk-noti__item" style={{ "--i": i }}>
+              <button type="button" className="gk-noti__row" onClick={() => onRead(n.id)} style={{ background: n.unread ? "#F3F9FE" : "transparent" }}>
+                <span style={{ width: 38, height: 38, borderRadius: 12, background: st.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={st.ink} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{st.path}</svg>
+                </span>
+                <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3, textAlign: "left" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <b style={{ fontSize: 14.5, fontWeight: n.unread ? 700 : 600 }}>{n.title}</b>
+                    {n.unread && <span aria-label="안 읽음" style={{ width: 7, height: 7, borderRadius: "50%", background: COLORS.accent, flexShrink: 0 }} />}
+                  </span>
+                  <span style={{ fontSize: 13, color: COLORS.muted, lineHeight: 1.45 }}>{n.body}</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 2 }}>
+                    <span style={{ fontSize: 12, color: "#8A9098" }}>{n.time}</span>
+                    {n.action && <span style={{ fontSize: 12, fontWeight: 700, color: st.ink }}>{n.action} →</span>}
+                  </span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      <div style={{ borderTop: `1px solid ${COLORS.border}`, padding: "10px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <button type="button" className="gk-noti__link">알림 설정</button>
+        <button type="button" className="gk-noti__link" style={{ color: COLORS.text }}>전체 알림 보기 →</button>
+      </div>
+    </div>
+  );
+}
+
 const MENU_ITEMS = [
   { key: "home", label: "홈", icon: Icons.home },
   { key: "expenses", label: "내 고정지출", icon: Icons.expenses },
@@ -107,6 +176,22 @@ const css = `
 .gk-sidebar__add{transition:filter .15s}
 .gk-sidebar__add:hover{filter:brightness(0.97)}
 .gk-sidebar button:focus-visible{outline:2px solid ${COLORS.accent};outline-offset:2px}
+.gk-bell{transition:background .15s,transform .15s}
+.gk-bell:hover{background:#E6EEF5 !important}
+.gk-bell[aria-expanded="true"]{background:${COLORS.activeBg} !important;color:${COLORS.text} !important}
+.gk-noti{position:absolute;left:calc(100% + 32px);bottom:0;width:380px;background:#FFFFFF;border-radius:22px;box-shadow:0 2px 6px rgba(11,42,69,.06),0 24px 60px rgba(11,42,69,.18);transform-origin:bottom left;animation:gkNotiIn .32s cubic-bezier(.22,1,.36,1) both;z-index:50;text-align:left;color:${COLORS.text}}
+.gk-noti__item{animation:gkNotiItem .4s cubic-bezier(.22,1,.36,1) both;animation-delay:calc(60ms + var(--i) * 45ms)}
+.gk-noti__row{display:flex;gap:12px;width:100%;padding:12px;border:0;border-radius:14px;font:inherit;color:inherit;cursor:pointer;transition:background .15s}
+.gk-noti__row:hover{background:#F3F5F7 !important}
+.gk-noti__link{border:0;background:none;font:inherit;font-size:13px;font-weight:600;color:${COLORS.muted};padding:6px 8px;border-radius:8px;cursor:pointer}
+.gk-noti__link:hover:not(:disabled){background:#F3F5F7}
+.gk-noti__link:disabled{opacity:.4;cursor:default}
+.gk-noti__close{width:30px;height:30px;border:0;border-radius:50%;background:none;color:${COLORS.muted};display:flex;align-items:center;justify-content:center;cursor:pointer}
+.gk-noti__close:hover{background:#F3F5F7}
+@keyframes gkNotiIn{from{opacity:0;transform:translateX(-8px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes gkNotiItem{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes gkBadgePop{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){.gk-noti,.gk-noti__item{animation:none}}
 `;
 
 export default function Sidebar({
@@ -115,8 +200,25 @@ export default function Sidebar({
   onAddClick,
   onNotificationClick,
   user = { name: "00", initial: "00", subscriptionCount: 5 },
-  notificationCount = 2,
 }) {
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState(NOTIFICATIONS);
+  const boxRef = useRef(null);
+  const notificationCount = items.filter((n) => n.unread).length;
+
+  // 바깥을 누르거나 Esc를 누르면 닫기
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e) => { if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false); };
+    const onKey = (e) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
+  }, [open]);
+
+  const readOne = (id) => setItems((list) => list.map((n) => (n.id === id ? { ...n, unread: false } : n)));
+  const readAll = () => setItems((list) => list.map((n) => ({ ...n, unread: false })));
+
   return (
     <nav
       aria-label="주 메뉴"
@@ -161,7 +263,7 @@ export default function Sidebar({
         ))}
       </div>
 
-      {/* 구독 추가 */}
+      {/* 항목 추가 */}
       <button
         type="button"
         className="gk-sidebar__add"
@@ -189,7 +291,9 @@ export default function Sidebar({
 
       {/* 프로필 + 알림 */}
       <div
+        ref={boxRef}
         style={{
+          position: "relative",
           display: "flex",
           alignItems: "center",
           gap: 10,
@@ -221,8 +325,11 @@ export default function Sidebar({
         </span>
         <button
           type="button"
+          className="gk-bell"
           aria-label={notificationCount > 0 ? `알림 ${notificationCount}개` : "알림"}
-          onClick={onNotificationClick}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          onClick={() => { setOpen((v) => !v); onNotificationClick?.(); }}
           style={{
             position: "relative",
             width: 44,
@@ -241,7 +348,9 @@ export default function Sidebar({
           {Icons.bell}
           {notificationCount > 0 && (
             <span
+              key={notificationCount}
               style={{
+                animation: "gkBadgePop .35s ease",
                 position: "absolute",
                 top: 6,
                 right: 5,
@@ -264,6 +373,10 @@ export default function Sidebar({
             </span>
           )}
         </button>
+
+        {open && (
+          <NotificationPanel items={items} onRead={readOne} onReadAll={readAll} onClose={() => setOpen(false)} />
+        )}
       </div>
     </nav>
   );

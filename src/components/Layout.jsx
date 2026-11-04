@@ -32,10 +32,8 @@ export default function Layout() {
       <Sidebar
         active={active}
         onNavigate={(key) => navigate(PATHS[key])}
-        onAddClick={() => console.log("구독 추가")}
-        onNotificationClick={() => console.log("알림")}
+        onAddClick={() => console.log("항목 추가")}
         user={{ name: "00", initial: "00", subscriptionCount: 5 }}
-        notificationCount={2}
       />
       <div style={{ flex: 1, minWidth: 0 }}>
         <Outlet />
