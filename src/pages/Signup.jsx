@@ -21,7 +21,7 @@ const FONT = "'Pretendard', 'Noto Sans KR', system-ui, -apple-system, sans-serif
 const CSS = `
 @keyframes gkSignRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 .gk-sign-rise { animation: gkSignRise .7s cubic-bezier(.22,1,.36,1) both; animation-delay: var(--d, 0ms); }
-.gk-sign-input { width: 100%; height: 52px; box-sizing: border-box; border-radius: 16px; border: 1.5px solid ${C.line}; background: #FFFFFF; padding: 0 18px; font: inherit; font-size: 16px; color: ${C.text}; outline: none; transition: border-color .15s, box-shadow .15s; }
+.gk-sign-input { width: 100%; height: 50px; box-sizing: border-box; border-radius: 16px; border: 1.5px solid ${C.line}; background: #FFFFFF; padding: 0 18px; font: inherit; font-size: 16px; color: ${C.text}; outline: none; transition: border-color .15s, box-shadow .15s; }
 .gk-sign-input:focus { border-color: ${C.sky}; box-shadow: 0 0 0 4px rgba(92,184,242,.18); }
 .gk-sign-input::placeholder { color: #A9AFB6; }
 .gk-sign-input.is-error { border-color: ${C.danger}; }
@@ -60,6 +60,15 @@ function strengthOf(pw) {
   return pw ? Math.max(s, 1) : 0;
 }
 const STRENGTH = ["", "약해요", "보통이에요", "안전해요"];
+
+/** 숫자만 받아서 010-1234-5678 모양으로 */
+function formatPhone(v) {
+  const d = v.replace(/[^0-9]/g, "").slice(0, 11);
+  if (d.length < 4) return d;
+  if (d.length < 8) return `${d.slice(0, 3)}-${d.slice(3)}`;
+  if (d.length === 10) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+  return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
+}
 const STRENGTH_COLOR = ["#E3E8ED", C.danger, "#F0A830", C.ok];
 
 function EyeButton({ show, onClick }) {
@@ -75,7 +84,7 @@ function EyeButton({ show, onClick }) {
 
 export default function Signup() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", pw: "", pw2: "" });
+  const [form, setForm] = useState({ name: "", phone: "", email: "", pw: "", pw2: "" });
   const [showPw, setShowPw] = useState(false);
   const [agree, setAgree] = useState({ service: false, privacy: false, marketing: false });
   const [errors, setErrors] = useState({});
@@ -95,12 +104,13 @@ export default function Signup() {
     e.preventDefault();
     const next = {};
     if (!form.name.trim()) next.name = "이름을 입력해 주세요.";
+    if (!/^01[016789]-\d{3,4}-\d{4}$/.test(form.phone)) next.phone = "휴대폰 번호를 다시 확인해 주세요.";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = "이메일 주소를 다시 확인해 주세요.";
     if (form.pw.length < 8) next.pw = "비밀번호는 8자 이상으로 만들어 주세요.";
     if (form.pw !== form.pw2) next.pw2 = "비밀번호가 서로 달라요.";
     setErrors(next);
     if (Object.keys(next).length || !requiredAgreed) return;
-    signup({ name: form.name, email: form.email });
+    signup({ name: form.name, phone: form.phone, email: form.email });
     navigate("/"); // 가입 후 바로 홈으로
   };
 
@@ -146,7 +156,7 @@ export default function Signup() {
 
       {/* 오른쪽: 회원가입 폼 */}
       <section style={{ flex: "1 1 50%", display: "flex", alignItems: "center", justifyContent: "center", padding: 48, boxSizing: "border-box" }}>
-        <form onSubmit={submit} noValidate className="gk-sign-rise" style={{ ...at(80), width: 440, maxWidth: "100%", display: "flex", flexDirection: "column", gap: 18 }}>
+        <form onSubmit={submit} noValidate className="gk-sign-rise" style={{ ...at(80), width: 440, maxWidth: "100%", display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 4 }}>
             <h2 style={{ margin: 0, fontSize: 32, fontWeight: 800, letterSpacing: "-1px" }}>회원가입</h2>
             <p style={{ margin: 0, fontSize: 16, color: C.muted }}>이름은 대시보드와 프로필에 표시돼요.</p>
@@ -156,6 +166,12 @@ export default function Signup() {
             <span style={label}>이름</span>
             <input id="signup-name" autoComplete="name" maxLength={12} className={`gk-sign-input ${errors.name ? "is-error" : ""}`} placeholder="예) 김민지" value={form.name} onChange={(e) => set("name", e.target.value)} />
             {errors.name && <p role="alert" style={errText}>{errors.name}</p>}
+          </label>
+
+          <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <span style={label}>휴대폰 번호</span>
+            <input id="signup-phone" type="tel" inputMode="numeric" autoComplete="tel" className={`gk-sign-input ${errors.phone ? "is-error" : ""}`} placeholder="010-1234-5678" value={form.phone} onChange={(e) => set("phone", formatPhone(e.target.value))} />
+            {errors.phone && <p role="alert" style={errText}>{errors.phone}</p>}
           </label>
 
           <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>

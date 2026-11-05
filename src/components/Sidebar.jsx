@@ -36,8 +36,8 @@ const Icons = {
   ),
   expenses: (
     <svg {...svgProps}>
-      <rect x="2.5" y="8" width="16" height="12" rx="2.5" />
-      <path d="M6 4.5h12.5A3 3 0 0 1 21.5 7.5V16M2.5 12h16M6 16h3" />
+      <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+      <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
     </svg>
   ),
   calendar: (
@@ -48,10 +48,8 @@ const Icons = {
   ),
   report: (
     <svg {...svgProps}>
-      <path d="M3 20.5h18" />
-      <rect x="5" y="12" width="3.5" height="5.5" rx="1" />
-      <rect x="10.25" y="8" width="3.5" height="9.5" rx="1" />
-      <rect x="15.5" y="4" width="3.5" height="13.5" rx="1" />
+      <path d="M21 12c.55 0 1-.45.95-1A10 10 0 0 0 13 2.05c-.55-.05-1 .4-1 .95v8a1 1 0 0 0 1 1z" />
+      <path d="M21.2 15.9A10 10 0 1 1 8 2.8" />
     </svg>
   ),
   settings: (
