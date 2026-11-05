@@ -52,6 +52,15 @@ const saveUser = (user, keep = true) => {
 };
 const publicUser = (a) => ({ name: a.name, phone: a.phone || "", email: a.email, subscriptionCount: 5 });
 
+/** 로그인 없이 등록한 항목(gk-items:guest)을 그 계정으로 옮겨요 */
+const moveGuestItems = (email) => {
+  const guest = read("gk-items:guest", []);
+  if (!guest.length) return;
+  const key = `gk-items:${email.toLowerCase()}`;
+  write(key, [...read(key, []), ...guest]);
+  write("gk-items:guest", null);
+};
+
 export const getUser = () => cached;
 
 /** 이미 가입한 이메일인지 */
@@ -68,6 +77,7 @@ export function signup({ name, phone = "", email, password }) {
   const account = { name: name.trim(), phone, email: email.trim(), pw: hash(password) };
   accounts[key] = account;
   write(ACCOUNTS_KEY, accounts);
+  moveGuestItems(account.email);
   saveUser(publicUser(account), true);
   notify();
   return { ok: true };
@@ -84,6 +94,7 @@ export function login({ email, password, keep = true }) {
     accounts[key] = { ...account, pw: hash(password) };
     write(ACCOUNTS_KEY, accounts);
   }
+  moveGuestItems(account.email);
   saveUser(publicUser(account), keep);
   notify();
   return { ok: true };

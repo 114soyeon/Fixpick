@@ -152,12 +152,13 @@ const ADD_CATEGORIES = [
   { key: "insure", name: "보험", color: "#9B8AFB", tint: "#EDEAFE" },
   { key: "saving", name: "금융/저축", color: "#FFC94D", tint: "#FFF2D2" },
   { key: "transit", name: "교통", color: "#FF9466", tint: "#FFECE3" },
+  { key: "etc", name: "기타", color: "#A3ABB5", tint: "#EEF1F4" },
 ];
 const CYCLES = ["매달", "매년"];
 
 function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
   const [closing, setClosing] = useState(false);
-  const [form, setForm] = useState({ category: "sub", name: "", amount: "", day: "", cycle: "매달", month: new Date().getMonth() + 1, payMethod: "", remind: true });
+  const [form, setForm] = useState({ category: "sub", name: "", amount: "", amountType: "fixed", day: "", cycle: "매달", month: new Date().getMonth() + 1, payMethod: "", remind: true });
   const nameRef = useRef(null);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -221,16 +222,23 @@ function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
         </label>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <span style={label}>금액</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 28 }}>
+              <label htmlFor="gk-add-amount" style={label}>{form.amountType === "variable" ? "예상 금액" : "금액"}</label>
+              <div className="gk-amt-seg" role="group" aria-label="금액 종류">
+                {[["fixed", "고정"], ["variable", "변동"]].map(([v, t]) => (
+                  <button key={v} type="button" aria-pressed={form.amountType === v} onClick={() => set("amountType", v)}>{t}</button>
+                ))}
+              </div>
+            </div>
             <div style={{ position: "relative" }}>
-              <input id="gk-add-amount" className="gk-input" inputMode="numeric" style={{ ...input, paddingRight: 44, textAlign: "right", fontWeight: 700 }} placeholder="0"
+              <input id="gk-add-amount" className="gk-input" inputMode="numeric" style={{ ...input, paddingRight: 44, textAlign: "right", fontWeight: 700 }} placeholder={form.amountType === "variable" ? "예상 금액" : "0"}
                 value={amountNum ? amountNum.toLocaleString("ko-KR") : ""} onChange={(e) => set("amount", e.target.value)} />
               <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: COLORS.muted }}>원</span>
             </div>
-          </label>
+          </div>
           <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <span style={label}>결제일</span>
+            <span style={{ ...label, minHeight: 28, display: "flex", alignItems: "center" }}>결제일</span>
             <div style={{ display: "flex", gap: 8 }}>
               <select id="gk-add-cycle" className="gk-input" style={{ ...input, width: 78, padding: "0 8px", flexShrink: 0 }} value={form.cycle} onChange={(e) => set("cycle", e.target.value)}>
                 {CYCLES.map((c) => <option key={c}>{c}</option>)}
@@ -248,6 +256,11 @@ function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
             </div>
           </label>
         </div>
+
+        <p style={{ margin: "-8px 0 0", fontSize: 13, lineHeight: 1.5, color: form.amountType === "variable" ? "#2F7FC0" : COLORS.muted, display: "flex", gap: 6 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }} aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
+          매달 금액이 달라지면 예상 금액으로 넣고, 결제 후에 실제 금액으로 고칠 수 있어요
+        </p>
 
         <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <span style={label}>결제 수단 <span style={{ fontWeight: 400, color: COLORS.muted }}>(선택)</span></span>
@@ -364,6 +377,9 @@ const css = `
 .gk-modal.is-closing .gk-modal__box{animation:gkModalOut .18s ease both}
 .gk-chip{display:flex;align-items:center;gap:7px;height:38px;padding:0 14px;border:0;border-radius:999px;font:inherit;font-size:14px;color:${COLORS.text};cursor:pointer;transition:background .15s,box-shadow .15s,transform .1s}
 .gk-chip:active{transform:scale(.96)}
+.gk-amt-seg{display:flex;padding:3px;gap:2px;background:#F1F4F7;border-radius:10px}
+.gk-amt-seg button{height:24px;padding:0 10px;border:0;border-radius:7px;background:transparent;font:inherit;font-size:12.5px;font-weight:600;color:${COLORS.muted};cursor:pointer;transition:background .15s,color .15s}
+.gk-amt-seg button[aria-pressed="true"]{background:#FFFFFF;color:${COLORS.text};box-shadow:0 1px 3px rgba(11,42,69,.12)}
 .gk-input{transition:border-color .15s,background .15s,box-shadow .15s}
 .gk-input:focus{border-color:${COLORS.accent} !important;background:#FFFFFF !important;box-shadow:0 0 0 4px rgba(92,184,242,.18)}
 .gk-input::placeholder{color:#A9AFB6;font-weight:400}
@@ -639,9 +655,9 @@ export default function Sidebar({
           payMethods={usedPayMethods}
           onClose={() => setAdding(false)}
           onSubmit={(item) => {
-            const saved = addItem(item); // 로그인한 사람 계정에 저장
+            addItem(item); // 로그인했으면 내 계정, 아니면 이 브라우저에 저장 (가입하면 계정으로 옮겨져요)
             onAddItem?.(item);
-            setToast(saved ? `'${item.name}' 항목을 추가했어요` : "로그인하면 내 고정지출로 저장돼요");
+            setToast(`'${item.name}' 항목을 추가했어요`);
           }}
         />
       )}

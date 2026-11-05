@@ -3,16 +3,20 @@ import { getUser, useUser } from "./auth";
 
 /*
  * 사람마다 등록한 고정지출 항목을 브라우저에 따로 저장해요.
- * 저장 위치: localStorage "gk-items:<이메일>"
- * 항목 모양: { id, category, name, amount, day, cycle("매달"|"매년"), month(매년일 때), payMethod, remind }
+ * 저장 위치: localStorage "gk-items:<이메일>" (로그인 안 했으면 "gk-items:guest")
+ *   → 로그인 안 하고 등록한 항목은 가입·로그인할 때 그 계정으로 옮겨져요 (auth.js)
+ * 항목 모양: { id, category, name, amount, amountType("fixed"|"variable"), day, cycle("매달"|"매년"), month(매년일 때), payMethod, remind }
  */
 const EVENT = "gk-items-change";
 const EMPTY = [];
 const cache = new Map();
-const keyOf = (email) => `gk-items:${email.toLowerCase()}`;
+const GUEST = "guest";
+const keyOf = (email) => `gk-items:${(email || GUEST).toLowerCase()}`;
+
+// 로그인·로그아웃하면 저장된 목록을 다시 읽어요
+window.addEventListener("gk-auth-change", () => { cache.clear(); window.dispatchEvent(new Event(EVENT)); });
 
 function readItems(email) {
-  if (!email) return EMPTY;
   const key = keyOf(email);
   if (!cache.has(key)) {
     try { cache.set(key, JSON.parse(localStorage.getItem(key) || "[]")); } catch { cache.set(key, []); }
@@ -27,24 +31,27 @@ function writeItems(email, list) {
   window.dispatchEvent(new Event(EVENT));
 }
 
-/** 항목 추가 (로그인 안 했으면 false) */
+const owner = () => getUser()?.email || GUEST;
+
+/** 항목 추가 (로그인 안 해도 돼요) */
 export function addItem(item) {
-  const user = getUser();
-  if (!user) return false;
   const now = new Date();
-  const next = [...readItems(user.email), { id: Date.now(), month: now.getMonth() + 1, ...item }];
-  writeItems(user.email, next);
+  const next = [...readItems(owner()), { id: Date.now(), month: now.getMonth() + 1, amountType: "fixed", ...item }];
+  writeItems(owner(), next);
   return true;
+}
+
+/** 항목 고치기 (예: 변동 금액을 결제 후 실제 금액으로) */
+export function updateItem(id, changes) {
+  writeItems(owner(), readItems(owner()).map((it) => (it.id === id ? { ...it, ...changes } : it)));
 }
 
 /** 항목 지우기 */
 export function removeItem(id) {
-  const user = getUser();
-  if (!user) return;
-  writeItems(user.email, readItems(user.email).filter((it) => it.id !== id));
+  writeItems(owner(), readItems(owner()).filter((it) => it.id !== id));
 }
 
-/** 지금 로그인한 사람의 항목 목록 (로그아웃 상태면 빈 배열) */
+/** 지금 쓰는 사람의 항목 목록 (로그인 안 했으면 이 브라우저에서 등록한 항목) */
 export function useItems() {
   const user = useUser();
   return useSyncExternalStore(

@@ -256,7 +256,7 @@ export default function Signup() {
 
           <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <span style={label}>이름</span>
-            <input id="signup-name" autoComplete="name" maxLength={12} className={`gk-sign-input ${errors.name ? "is-error" : ""}`} placeholder="예) 김민지" value={form.name} onChange={(e) => set("name", e.target.value)} />
+            <input id="signup-name" autoComplete="name" maxLength={12} className={`gk-sign-input ${errors.name ? "is-error" : ""}`} placeholder="이름" value={form.name} onChange={(e) => set("name", e.target.value)} />
             {errors.name && <p role="alert" style={errText}>{errors.name}</p>}
           </label>
 
