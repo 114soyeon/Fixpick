@@ -55,7 +55,7 @@ export default function Login() {
     if (pw.length < 4) return setError("비밀번호를 4자 이상 입력해 주세요.");
     setError("");
     login({ email });
-    navigate("/"); // 로그인 후 홈으로
+    navigate("/");
   };
 
   return (

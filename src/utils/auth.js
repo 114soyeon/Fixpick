@@ -1,9 +1,5 @@
 import { useSyncExternalStore } from "react";
 
-/*
- * 로그인 정보를 브라우저(localStorage)에 저장하는 간단한 도구예요.
- * 나중에 서버(API)를 붙이면 login / signup 안쪽만 바꾸면 돼요.
- */
 const USER_KEY = "gk-user";
 const ACCOUNTS_KEY = "gk-accounts";
 const EVENT = "gk-auth-change";
@@ -21,7 +17,6 @@ const write = (key, value) => {
     if (value === null) localStorage.removeItem(key);
     else localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    /* 저장 실패는 무시 */
   }
 };
 

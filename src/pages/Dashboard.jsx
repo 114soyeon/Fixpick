@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../utils/auth";
 
-// 사이드바는 components/Layout.jsx에서 그려요.
-
 /* ───────── 화면 등장 효과 ───────── */
 const ANIM_CSS = `
 @keyframes gkRise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
