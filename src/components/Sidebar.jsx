@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { initialOf } from "../utils/auth";
+import { addItem, useItems } from "../utils/items";
 
 const COLORS = {
   text: "#0B2A45",
@@ -154,9 +155,9 @@ const ADD_CATEGORIES = [
 ];
 const CYCLES = ["매달", "매년"];
 
-function AddItemModal({ onClose, onSubmit }) {
+function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
   const [closing, setClosing] = useState(false);
-  const [form, setForm] = useState({ category: "sub", name: "", amount: "", day: "", cycle: "매달", remind: true });
+  const [form, setForm] = useState({ category: "sub", name: "", amount: "", day: "", cycle: "매달", month: new Date().getMonth() + 1, payMethod: "", remind: true });
   const nameRef = useRef(null);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -178,7 +179,7 @@ function AddItemModal({ onClose, onSubmit }) {
   const submit = (e) => {
     e.preventDefault();
     if (!valid) return;
-    onSubmit({ ...form, name: form.name.trim(), amount: amountNum, day: dayNum });
+    onSubmit({ ...form, name: form.name.trim(), payMethod: form.payMethod.trim(), amount: amountNum, day: dayNum, month: Number(form.month) });
     close();
   };
 
@@ -219,7 +220,7 @@ function AddItemModal({ onClose, onSubmit }) {
           <input id="gk-add-name" ref={nameRef} className="gk-input" style={input} placeholder="예) 넷플릭스, 월세, 휴대폰 요금" value={form.name} onChange={(e) => set("name", e.target.value)} maxLength={30} />
         </label>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <span style={label}>금액</span>
             <div style={{ position: "relative" }}>
@@ -231,9 +232,14 @@ function AddItemModal({ onClose, onSubmit }) {
           <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <span style={label}>결제일</span>
             <div style={{ display: "flex", gap: 8 }}>
-              <select id="gk-add-cycle" className="gk-input" style={{ ...input, width: 86, padding: "0 10px" }} value={form.cycle} onChange={(e) => set("cycle", e.target.value)}>
+              <select id="gk-add-cycle" className="gk-input" style={{ ...input, width: 78, padding: "0 8px", flexShrink: 0 }} value={form.cycle} onChange={(e) => set("cycle", e.target.value)}>
                 {CYCLES.map((c) => <option key={c}>{c}</option>)}
               </select>
+              {form.cycle === "매년" && (
+                <select id="gk-add-month" className="gk-input" aria-label="결제 월" style={{ ...input, width: 70, padding: "0 6px", flexShrink: 0 }} value={form.month} onChange={(e) => set("month", e.target.value)}>
+                  {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}월</option>)}
+                </select>
+              )}
               <div style={{ position: "relative", flex: 1 }}>
                 <input id="gk-add-day" className="gk-input" inputMode="numeric" style={{ ...input, paddingRight: 34, textAlign: "right", fontWeight: 700 }} placeholder="10"
                   value={form.day} onChange={(e) => set("day", e.target.value.replace(/[^0-9]/g, "").slice(0, 2))} />
@@ -242,6 +248,20 @@ function AddItemModal({ onClose, onSubmit }) {
             </div>
           </label>
         </div>
+
+        <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <span style={label}>결제 수단 <span style={{ fontWeight: 400, color: COLORS.muted }}>(선택)</span></span>
+          <input id="gk-add-pay" className="gk-input" style={input} list="gk-pay-list" maxLength={20} placeholder="예) 국민카드, 카카오뱅크 계좌" value={form.payMethod} onChange={(e) => set("payMethod", e.target.value)} />
+          <datalist id="gk-pay-list">{payMethods.map((m) => <option key={m} value={m} />)}</datalist>
+          {payMethods.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {payMethods.slice(0, 4).map((m) => (
+                <button key={m} type="button" className="gk-chip" onClick={() => set("payMethod", m)}
+                  style={{ height: 30, fontSize: 13, background: form.payMethod === m ? "#DCEFFD" : "#F3F5F7" }}>{m}</button>
+              ))}
+            </div>
+          )}
+        </label>
 
         <label className="gk-toggle-row">
           <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -394,6 +414,15 @@ export default function Sidebar({
   const [toast, setToast] = useState(null);
   const [menu, setMenu] = useState(false);
   const boxRef = useRef(null);
+  const myItems = useItems(); // 내가 등록한 고정지출
+  const usedPayMethods = [...new Set(myItems.map((it) => it.payMethod).filter(Boolean))];
+
+  // 메인페이지의 "첫 고정지출 등록하기" 버튼에서도 이 창을 열 수 있게
+  useEffect(() => {
+    const openAdd = () => setAdding(true);
+    window.addEventListener("gk-open-add", openAdd);
+    return () => window.removeEventListener("gk-open-add", openAdd);
+  }, []);
   const notificationCount = items.filter((n) => n.unread).length;
 
   // 바깥을 누르거나 Esc를 누르면 닫기
@@ -517,7 +546,7 @@ export default function Sidebar({
             </span>
             <span className="gk-sb-label" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
               <b style={{ fontSize: 15, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}님</b>
-              <span style={{ fontSize: 13, color: COLORS.muted }}>구독 {user.subscriptionCount ?? 0}개</span>
+              <span style={{ fontSize: 13, color: COLORS.muted, whiteSpace: "nowrap" }}>{myItems.length ? `고정지출 ${myItems.length}건` : "등록한 항목 없음"}</span>
             </span>
           </button>
         ) : (
@@ -607,10 +636,12 @@ export default function Sidebar({
 
       {adding && (
         <AddItemModal
+          payMethods={usedPayMethods}
           onClose={() => setAdding(false)}
           onSubmit={(item) => {
+            const saved = addItem(item); // 로그인한 사람 계정에 저장
             onAddItem?.(item);
-            setToast(`'${item.name}' 항목을 추가했어요`);
+            setToast(saved ? `'${item.name}' 항목을 추가했어요` : "로그인하면 내 고정지출로 저장돼요");
           }}
         />
       )}
