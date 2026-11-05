@@ -56,7 +56,7 @@ const Icons = {
   ),
   settings: (
     <svg {...svgProps}>
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.730l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
       <circle cx="12" cy="12" r="3" />
     </svg>
   ),
@@ -90,7 +90,7 @@ const NOTI_STYLE = {
 };
 
 /** 알림 패널 */
-function NotificationPanel({ items, onRead, onReadAll, onClose }) {
+function NotificationPanel({ items, onRead, onReadAll, onClose, onSettings }) {
   const unread = items.filter((n) => n.unread).length;
   return (
     <div className="gk-noti" role="dialog" aria-label="알림">
@@ -134,7 +134,7 @@ function NotificationPanel({ items, onRead, onReadAll, onClose }) {
       </ul>
 
       <div style={{ borderTop: `1px solid ${COLORS.border}`, padding: "10px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <button type="button" className="gk-noti__link">알림 설정</button>
+        <button type="button" className="gk-noti__link" onClick={onSettings}>알림 설정</button>
         <button type="button" className="gk-noti__link" style={{ color: COLORS.text }}>전체 알림 보기 →</button>
       </div>
     </div>
@@ -588,7 +588,7 @@ export default function Sidebar({
         )}
 
         {open && (
-          <NotificationPanel items={items} onRead={readOne} onReadAll={readAll} onClose={() => setOpen(false)} />
+          <NotificationPanel items={items} onRead={readOne} onReadAll={readAll} onClose={() => setOpen(false)} onSettings={() => { setOpen(false); onNavigate?.("settings"); }} />
         )}
       </div>
 
