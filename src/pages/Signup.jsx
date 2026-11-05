@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogoMark, Wordmark } from "../components/Sidebar";
-import { signup } from "../utils/auth";
+import { emailExists, signup } from "../utils/auth";
 
 const C = {
   bg: "#F7F9FA",
@@ -21,7 +21,7 @@ const FONT = "'Pretendard', 'Noto Sans KR', system-ui, -apple-system, sans-serif
 const CSS = `
 @keyframes gkSignRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 .gk-sign-rise { animation: gkSignRise .7s cubic-bezier(.22,1,.36,1) both; animation-delay: var(--d, 0ms); }
-.gk-sign-input { width: 100%; height: 50px; box-sizing: border-box; border-radius: 16px; border: 1.5px solid ${C.line}; background: #FFFFFF; padding: 0 18px; font: inherit; font-size: 16px; color: ${C.text}; outline: none; transition: border-color .15s, box-shadow .15s; }
+.gk-sign-input { width: 100%; height: 48px; box-sizing: border-box; border-radius: 16px; border: 1.5px solid ${C.line}; background: #FFFFFF; padding: 0 18px; font: inherit; font-size: 16px; color: ${C.text}; outline: none; transition: border-color .15s, box-shadow .15s; }
 .gk-sign-input:focus { border-color: ${C.sky}; box-shadow: 0 0 0 4px rgba(92,184,242,.18); }
 .gk-sign-input::placeholder { color: #A9AFB6; }
 .gk-sign-input.is-error { border-color: ${C.danger}; }
@@ -43,13 +43,30 @@ const CSS = `
 .gk-term__body { overflow-y: auto; padding: 4px 28px 8px; display: flex; flex-direction: column; gap: 18px; }
 .gk-term__body h4 { margin: 0 0 6px; font-size: 15px; font-weight: 700; }
 .gk-term__body p { margin: 0; font-size: 14px; line-height: 1.7; color: ${C.sub}; white-space: pre-line; }
+.gk-sign-mini { flex-shrink: 0; height: 48px; padding: 0 16px; border: 0; border-radius: 14px; background: ${C.text}; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: opacity .15s, filter .15s; }
+.gk-sign-mini:hover:not(:disabled) { filter: brightness(1.15); }
+.gk-sign-mini:disabled { opacity: .35; cursor: default; }
+.gk-sign-mini--light { background: #F1F4F7; color: ${C.text}; }
+@keyframes gkSignPop { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+.gk-sign-pop { animation: gkSignPop .5s cubic-bezier(.22,1,.36,1) both; }
 .gk-sign-page button:focus-visible, .gk-sign-page input:focus-visible { outline: 2px solid ${C.sky}; outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .gk-sign-rise { animation: none; } }
+.gk-sign-mobile-logo { display: none; }
+/* 작은 화면 */
+@media (max-width: 1440px) {
+  .gk-sign-brand { padding: 40px 48px !important; }
+  .gk-sign-brand h1 { font-size: 34px !important; }
+}
+@media (max-width: 1000px) {
+  .gk-sign-brand { display: none !important; }
+  .gk-sign-mobile-logo { display: flex; }
+  .gk-sign-form-wrap { padding: 32px 24px !important; }
+}
+@media (prefers-reduced-motion: reduce) { .gk-sign-rise, .gk-sign-pop, .gk-term, .gk-term__box { animation: none; } }
 `;
 const at = (ms) => ({ "--d": `${ms}ms` });
 
 const STEPS = [
-  { n: 1, title: "이름과 이메일로 가입", desc: "1분이면 끝나요" },
+  { n: 1, title: "간단한 정보로 가입", desc: "이름·휴대폰·이메일만 있으면 1분이면 끝나요" },
   { n: 2, title: "고정지출 등록", desc: "월세·통신비·구독료를 한 번에" },
   { n: 3, title: "결제일 알림 받기", desc: "돈 나가기 3일 전에 알려드려요" },
 ];
@@ -106,6 +123,7 @@ function formatPhone(v) {
   return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
 }
 const STRENGTH_COLOR = ["#E3E8ED", C.danger, "#F0A830", C.ok];
+const DEMO_CODE = "123456"; // 포트폴리오용 테스트 인증번호 (실제로는 문자로 보내야 해요)
 
 function EyeButton({ show, onClick }) {
   return (
@@ -125,6 +143,32 @@ export default function Signup() {
   const [agree, setAgree] = useState({ service: false, privacy: false, marketing: false });
   const [errors, setErrors] = useState({});
   const [viewing, setViewing] = useState(null); // 보고 있는 약관
+  const [verify, setVerify] = useState({ sent: false, code: "", ok: false, left: 0 }); // 휴대폰 인증
+  const [done, setDone] = useState(null); // 가입 완료한 사람 이름
+
+  // 인증번호 남은 시간 (3분)
+  useEffect(() => {
+    if (!verify.sent || verify.ok || verify.left <= 0) return;
+    const t = setTimeout(() => setVerify((v) => ({ ...v, left: v.left - 1 })), 1000);
+    return () => clearTimeout(t);
+  }, [verify]);
+
+  const phoneValid = /^01[016789]-\d{3,4}-\d{4}$/.test(form.phone);
+  const sendCode = () => {
+    if (!phoneValid) return setErrors((e) => ({ ...e, phone: "휴대폰 번호를 다시 확인해 주세요." }));
+    setErrors((e) => ({ ...e, phone: "", code: "" }));
+    setVerify({ sent: true, code: "", ok: false, left: 180 });
+  };
+  const checkCode = () => {
+    if (verify.left <= 0) return setErrors((e) => ({ ...e, code: "시간이 지났어요. 인증번호를 다시 받아 주세요." }));
+    if (verify.code !== DEMO_CODE) return setErrors((e) => ({ ...e, code: "인증번호가 맞지 않아요." }));
+    setErrors((e) => ({ ...e, code: "", phone: "" }));
+    setVerify((v) => ({ ...v, ok: true }));
+  };
+  const mmss = `${Math.floor(verify.left / 60)}:${String(verify.left % 60).padStart(2, "0")}`;
+  const checkEmail = () => {
+    if (form.email && emailExists(form.email)) setErrors((e) => ({ ...e, email: "이미 가입된 이메일이에요." }));
+  };
 
   const set = (k, v) => { setForm((f) => ({ ...f, [k]: v })); setErrors((e) => ({ ...e, [k]: "" })); };
   const allAgreed = TERMS.every((t) => agree[t.key]);
@@ -141,14 +185,17 @@ export default function Signup() {
     e.preventDefault();
     const next = {};
     if (!form.name.trim()) next.name = "이름을 입력해 주세요.";
-    if (!/^01[016789]-\d{3,4}-\d{4}$/.test(form.phone)) next.phone = "휴대폰 번호를 다시 확인해 주세요.";
+    if (!phoneValid) next.phone = "휴대폰 번호를 다시 확인해 주세요.";
+    else if (!verify.ok) next.phone = "휴대폰 인증을 해 주세요.";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = "이메일 주소를 다시 확인해 주세요.";
+    else if (emailExists(form.email)) next.email = "이미 가입된 이메일이에요.";
     if (form.pw.length < 8) next.pw = "비밀번호는 8자 이상으로 만들어 주세요.";
     if (form.pw !== form.pw2) next.pw2 = "비밀번호가 서로 달라요.";
     setErrors(next);
     if (Object.keys(next).length || !requiredAgreed) return;
-    signup({ name: form.name, phone: form.phone, email: form.email });
-    navigate("/"); // 가입 후 바로 홈으로
+    const res = signup({ name: form.name, phone: form.phone, email: form.email, password: form.pw });
+    if (!res.ok) return setErrors({ [res.field]: res.message });
+    setDone(form.name.trim()); // 가입 완료 화면으로
   };
 
   const label = { fontSize: 14, fontWeight: 600 };
@@ -159,7 +206,7 @@ export default function Signup() {
       <style>{CSS}</style>
 
       {/* 왼쪽: 브랜드 + 가입 후 흐름 */}
-      <section style={{ flex: "1 1 50%", background: C.skySoft, display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "48px 64px", boxSizing: "border-box" }}>
+      <section className="gk-sign-brand" style={{ flex: "1 1 50%", background: C.skySoft, display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "48px 64px", boxSizing: "border-box" }}>
         <button type="button" onClick={() => navigate("/")} aria-label="고정콕 홈으로 가기" style={{ display: "flex", alignItems: "center", gap: 10, border: 0, background: "none", padding: 0, cursor: "pointer", alignSelf: "flex-start" }}>
           <LogoMark size={44} />
           <Wordmark height={32} />
@@ -171,7 +218,7 @@ export default function Signup() {
               가입하고 3단계면<br />고정지출 관리 끝!
             </h1>
             <p style={{ margin: 0, fontSize: 17, color: C.sub, lineHeight: 1.6 }}>
-              매달 빠져나가는 돈을 한눈에 보고,<br />안 쓰는 구독은 바로 정리해 보세요.
+              매달 빠져나가는 돈을 한눈에 보고,<br />결제일 전에 미리 알림을 받아 보세요.
             </p>
           </div>
 
@@ -192,8 +239,16 @@ export default function Signup() {
       </section>
 
       {/* 오른쪽: 회원가입 폼 */}
-      <section style={{ flex: "1 1 50%", display: "flex", alignItems: "center", justifyContent: "center", padding: 48, boxSizing: "border-box" }}>
-        <form onSubmit={submit} noValidate className="gk-sign-rise" style={{ ...at(80), width: 440, maxWidth: "100%", display: "flex", flexDirection: "column", gap: 16 }}>
+      <section className="gk-sign-form-wrap" style={{ flex: "1 1 50%", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 48px", boxSizing: "border-box" }}>
+        {done ? (
+          <Complete name={done} onHome={() => navigate("/")} onAdd={() => navigate("/fix", { state: { openAdd: true } })} />
+        ) : (
+        <form onSubmit={submit} noValidate className="gk-sign-rise" style={{ ...at(80), width: 440, maxWidth: "100%", display: "flex", flexDirection: "column", gap: 14 }}>
+          {/* 작은 화면에서만 보이는 로고 */}
+          <button type="button" className="gk-sign-mobile-logo" onClick={() => navigate("/")} aria-label="고정콕 홈으로 가기" style={{ alignItems: "center", gap: 8, border: 0, background: "none", padding: 0, cursor: "pointer", alignSelf: "flex-start" }}>
+            <LogoMark size={36} />
+            <Wordmark height={26} />
+          </button>
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 4 }}>
             <h2 style={{ margin: 0, fontSize: 32, fontWeight: 800, letterSpacing: "-1px" }}>회원가입</h2>
             <p style={{ margin: 0, fontSize: 16, color: C.muted }}>이름은 대시보드와 프로필에 표시돼요.</p>
@@ -205,16 +260,47 @@ export default function Signup() {
             {errors.name && <p role="alert" style={errText}>{errors.name}</p>}
           </label>
 
-          <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <span style={label}>휴대폰 번호</span>
-            <input id="signup-phone" type="tel" inputMode="numeric" autoComplete="tel" className={`gk-sign-input ${errors.phone ? "is-error" : ""}`} placeholder="010-1234-5678" value={form.phone} onChange={(e) => set("phone", formatPhone(e.target.value))} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <label htmlFor="signup-phone" style={label}>휴대폰 번호</label>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input id="signup-phone" type="tel" inputMode="numeric" autoComplete="tel" disabled={verify.ok} className={`gk-sign-input ${errors.phone ? "is-error" : ""}`} placeholder="010-1234-5678" value={form.phone}
+                onChange={(e) => { set("phone", formatPhone(e.target.value)); setVerify({ sent: false, code: "", ok: false, left: 0 }); }}
+                style={{ flex: 1, background: verify.ok ? "#F3F5F7" : "#FFFFFF" }} />
+              {verify.ok ? (
+                <span style={{ flexShrink: 0, height: 48, padding: "0 14px", borderRadius: 14, background: "#E3F5EC", color: C.ok, fontSize: 14, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                  인증 완료
+                </span>
+              ) : (
+                <button type="button" className={`gk-sign-mini ${verify.sent ? "gk-sign-mini--light" : ""}`} disabled={!phoneValid} onClick={sendCode}>{verify.sent ? "다시 받기" : "인증번호 받기"}</button>
+              )}
+            </div>
+            {verify.sent && !verify.ok && (
+              <div className="gk-sign-rise" style={{ display: "flex", gap: 8 }}>
+                <div style={{ position: "relative", flex: 1 }}>
+                  <input id="signup-code" inputMode="numeric" autoComplete="one-time-code" className={`gk-sign-input ${errors.code ? "is-error" : ""}`} placeholder="인증번호 6자리" value={verify.code}
+                    onChange={(e) => { setVerify((v) => ({ ...v, code: e.target.value.replace(/[^0-9]/g, "").slice(0, 6) })); setErrors((er) => ({ ...er, code: "" })); }}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); checkCode(); } }}
+                    style={{ paddingRight: 64, letterSpacing: 2 }} />
+                  <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontSize: 14, fontWeight: 700, color: verify.left > 30 ? C.sky : C.danger }}>{mmss}</span>
+                </div>
+                <button type="button" className="gk-sign-mini" disabled={verify.code.length !== 6} onClick={checkCode}>확인</button>
+              </div>
+            )}
+            {verify.sent && !verify.ok && !errors.code && <p style={{ margin: 0, fontSize: 13, color: C.muted }}>문자로 받은 6자리를 입력해 주세요. (테스트용 인증번호: {DEMO_CODE})</p>}
+            {errors.code && <p role="alert" style={errText}>{errors.code}</p>}
             {errors.phone && <p role="alert" style={errText}>{errors.phone}</p>}
-          </label>
+          </div>
 
           <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <span style={label}>이메일</span>
-            <input id="signup-email" type="email" autoComplete="email" className={`gk-sign-input ${errors.email ? "is-error" : ""}`} placeholder="example@email.com" value={form.email} onChange={(e) => set("email", e.target.value)} />
-            {errors.email && <p role="alert" style={errText}>{errors.email}</p>}
+            <input id="signup-email" type="email" autoComplete="email" className={`gk-sign-input ${errors.email ? "is-error" : ""}`} placeholder="example@email.com" value={form.email} onChange={(e) => set("email", e.target.value)} onBlur={checkEmail} />
+            {errors.email && (
+              <p role="alert" style={errText}>
+                {errors.email}{" "}
+                {errors.email.includes("이미") && <button type="button" className="gk-sign-link" style={{ fontSize: 13 }} onClick={() => navigate("/login")}>로그인하기</button>}
+              </p>
+            )}
           </label>
 
           <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -273,12 +359,46 @@ export default function Signup() {
             <button type="button" className="gk-sign-link" onClick={() => navigate("/login")}>로그인</button>
           </p>
         </form>
+        )}
       </section>
 
       {viewing && (
         <TermsModal term={viewing} onClose={() => setViewing(null)}
           onAgree={() => { setAgree((a) => ({ ...a, [viewing.key]: true })); setViewing(null); }} />
       )}
+    </div>
+  );
+}
+
+/** 가입 완료 화면 */
+function Complete({ name, onHome, onAdd }) {
+  return (
+    <div className="gk-sign-rise" style={{ width: 440, maxWidth: "100%", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 22 }}>
+      <span className="gk-sign-pop" style={{ width: 96, height: 96, borderRadius: "50%", background: C.yellow, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 16px 40px rgba(255,212,59,.45)" }}>
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke={C.text} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+      </span>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <h2 style={{ margin: 0, fontSize: 32, fontWeight: 800, letterSpacing: "-1px" }}>가입을 마쳤어요!</h2>
+        <p style={{ margin: 0, fontSize: 17, color: C.sub, lineHeight: 1.6 }}>
+          <b style={{ color: C.text }}>{name}님</b>, 고정콕에 오신 걸 환영해요.<br />매달 나가는 돈을 하나씩 등록해 볼까요?
+        </p>
+      </div>
+      <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10, background: "#FFFFFF", border: `1.5px solid ${C.line}`, borderRadius: 20, padding: "18px 20px", textAlign: "left", boxSizing: "border-box" }}>
+        {[
+          ["1", "월세·통신비·구독료를 등록해요"],
+          ["2", "결제일 캘린더에서 날짜를 확인해요"],
+          ["3", "결제일 전에 알림을 받아요"],
+        ].map(([n, t]) => (
+          <div key={n} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 15 }}>
+            <span style={{ width: 26, height: 26, borderRadius: 8, background: C.skySoft, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800 }}>{n}</span>
+            {t}
+          </div>
+        ))}
+      </div>
+      <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
+        <button type="button" className="gk-sign-btn" onClick={onAdd}>첫 고정지출 등록하기</button>
+        <button type="button" className="gk-sign-btn" style={{ background: "#F1F4F7" }} onClick={onHome}>홈으로 가기</button>
+      </div>
     </div>
   );
 }

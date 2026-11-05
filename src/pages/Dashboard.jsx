@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../utils/auth";
 
+// 사이드바는 components/Layout.jsx에서 그려요.
+
 /* ───────── 화면 등장 효과 ───────── */
 const ANIM_CSS = `
 @keyframes gkRise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
@@ -27,6 +29,32 @@ const ANIM_CSS = `
 .gk-cal-day:not(.is-pay):hover { background-color: #FFFFFF; }
 .gk-cal-up { transition: transform .15s, filter .15s; cursor: pointer; }
 .gk-cal-up:hover { transform: translateY(-2px); filter: brightness(.98); }
+.gk-dash-copy { position: relative; left: -124px; }
+/* 작은 화면 */
+@media (max-width: 1600px) {
+  .gk-dash-num { font-size: 68px !important; letter-spacing: -2.8px !important; }
+  .gk-dash-total-row { gap: 36px !important; }
+}
+@media (max-width: 1440px) {
+  .gk-dash-main { justify-content: flex-start !important; }
+  .gk-dash-cols { flex-direction: column !important; }
+  .gk-dash-right { max-width: none !important; flex: none !important; }
+  .gk-cal-card { flex-direction: row !important; gap: 32px !important; }
+  .gk-cal-main { flex: 1.25 1 0 !important; }
+  .gk-cal-side { flex: 1 1 0 !important; justify-content: center !important; }
+}
+@media (max-width: 1100px) {
+  .gk-dash-main { padding: 24px !important; gap: 22px !important; }
+  .gk-dash-head { flex-direction: column !important; align-items: flex-start !important; }
+  .gk-dash-total-row { flex-direction: column !important; align-items: stretch !important; gap: 20px !important; }
+  .gk-dash-num { font-size: 56px !important; }
+  .gk-dash-expense-grid { grid-template-columns: 1fr !important; gap: 4px !important; }
+  .gk-dash-bottom { flex-direction: column !important; }
+  .gk-dash-copy { left: -42px; }
+}
+@media (max-width: 820px) {
+  .gk-cal-card { flex-direction: column !important; }
+}
 @media (prefers-reduced-motion: reduce) {
   .gk-rise, .gk-reveal, .gk-grow-x, .gk-grow-y, .gk-fade, .gk-slide-next, .gk-slide-prev { animation: none; }
 }
@@ -78,8 +106,14 @@ const FONT = "'Pretendard', 'Noto Sans KR', system-ui, -apple-system, sans-serif
 const SHADOW = "0 1px 2px rgba(28,28,30,0.04), 0 10px 30px rgba(28,28,30,0.05)";
 const won = (n) => n.toLocaleString("ko-KR");
 
+/* ───────── 이번 달 (실제 날짜로 자동) ───────── */
+const now = new Date();
+const TODAY = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+const MONTH = TODAY.month;
+const monthAgo = (n) => ((MONTH - n - 1 + 120) % 12) + 1; // n달 전이 몇 월인지
+const PREV = monthAgo(1);
+
 /* ───────── 예시 데이터 ───────── */
-const MONTH = 11;
 
 const CATEGORIES = [
   { key: "home", name: "주거", desc: "월세·관리비·공과금", amount: 486400, count: 4, color: "#4C8DF6", tint: "#DFEAFD", ink: "#3664AF", icon: "building" },
@@ -93,20 +127,17 @@ const CATEGORIES = [
 const TOTAL = CATEGORIES.reduce((s, c) => s + c.amount, 0);
 const TOTAL_COUNT = CATEGORIES.reduce((s, c) => s + c.count, 0);
 
-const MONTHLY = [
-  { label: "6월", value: 52300 },
-  { label: "7월", value: 54800 },
-  { label: "8월", value: 61200 },
-  { label: "9월", value: 63500 },
-  { label: "10월", value: 65600 },
-  { label: "11월 예정", value: 57790, current: true },
-];
+/* 구독 서비스 최근 6개월 (예시) */
+const MONTHLY = [52300, 54800, 61200, 63500, 65600, 57790].map((value, i) => ({
+  label: i === 5 ? `${MONTH}월 예정` : `${monthAgo(5 - i)}월`,
+  value,
+  current: i === 5,
+}));
 
-const BUDGET = { limit: 1300000, used: TOTAL };
-
-/* 오늘 날짜 (실제 날짜) */
-const now = new Date();
-const TODAY = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+/* 예산: 설정·지출 리포트 페이지에서 바꾼 값을 읽어와요 */
+const loadBudget = () => {
+  try { return JSON.parse(localStorage.getItem("gk-settings") || "{}").budget ?? 1300000; } catch { return 1300000; }
+};
 
 /* 매달 같은 날 나가는 결제 (날짜: 이름) */
 const PAYMENTS = {
@@ -118,9 +149,9 @@ const PAYMENTS = {
 };
 
 const UPCOMING = [
-  { day: 10, title: "넷플릭스 14,500원", sub: "가족 3명 분담 예정" },
-  { day: 12, title: "유튜브 프리미엄 14,900원", sub: "개인 결제 · 국민카드" },
-  { day: 15, title: "티빙 13,500원", sub: "3주째 안 봤어요", warn: true },
+  { day: 10, title: "넷플릭스 14,500원", sub: "국민카드 · 매달 10일" },
+  { day: 12, title: "유튜브 프리미엄 14,900원", sub: "신한 체크카드 · 매달 12일" },
+  { day: 15, title: "티빙 13,500원", sub: "같은 주에 결제 3건 · 잔액 확인", warn: true },
 ];
 
 /* ───────── 아이콘 ───────── */
@@ -142,7 +173,7 @@ const Icon = ({ name, size = 18, color = "currentColor" }) => (
 const card = { background: C.card, borderRadius: 24, boxShadow: SHADOW, boxSizing: "border-box" };
 const h2 = { margin: 0, fontSize: 19, fontWeight: 600 };
 
-/* ───────── 1. 11월에 나갈 구독료 ───────── */
+/* ───────── 1. 이번 달에 나갈 고정지출 ───────── */
 function TotalCard() {
   const shown = useCountUp(TOTAL);
   return (
@@ -153,12 +184,12 @@ function TotalCard() {
           <span style={{ width: 22, height: 22, borderRadius: "50%", background: C.sky, color: "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg width="13" height="13" viewBox="0 0 24 24" {...line} strokeWidth="3" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6" /></svg>
           </span>
-          10월보다 7,810원 줄었어요
+          {PREV}월보다 7,810원 줄었어요
         </span>
       </div>
 
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 56 }}>
-        <span style={{ fontSize: 84, fontWeight: 700, letterSpacing: "-3.6px", lineHeight: 1, whiteSpace: "nowrap" }}>
+      <div className="gk-dash-total-row" style={{ display: "flex", alignItems: "flex-end", gap: 56 }}>
+        <span className="gk-dash-num" style={{ fontSize: 84, fontWeight: 700, letterSpacing: "-3.6px", lineHeight: 1, whiteSpace: "nowrap" }}>
           {won(shown)}<span style={{ fontSize: 38, fontWeight: 600, letterSpacing: 0, marginLeft: 8 }}>원</span>
         </span>
 
@@ -224,7 +255,7 @@ function ExpenseList() {
           <span style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.6px" }}>{won(TOTAL)}원</span>
         </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+      <div className="gk-dash-expense-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           {left.map((c, i) => <ExpenseRow key={c.key} c={c} delay={300 + i * 60} />)}
         </div>
@@ -246,12 +277,12 @@ function MonthlyChart() {
     <section className="gk-rise" style={{ ...at(240), ...card, flex: "3 1 0", minWidth: 0, padding: "22px 24px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <h2 style={h2}>월별 지출</h2>
+          <h2 style={h2}>구독 서비스 월별 지출</h2>
           <span style={{ fontSize: 14, color: C.muted }}>최근 6개월 · 평균 59,198원</span>
         </div>
-        <span style={{ fontSize: 14, fontWeight: 600, background: C.skySoft, padding: "7px 12px", borderRadius: 999 }}>10월보다 7,810원 ↓</span>
+        <span style={{ fontSize: 14, fontWeight: 600, background: C.skySoft, padding: "7px 12px", borderRadius: 999 }}>{PREV}월보다 7,810원 ↓</span>
       </div>
-      <svg viewBox={`0 0 ${W} 180`} width="100%" role="img" aria-label={MONTHLY.map((m) => `${m.label} ${won(m.value)}원`).join(", ")} style={{ display: "block", flex: 1, minHeight: 0 }}>
+      <svg viewBox={`0 0 ${W} 180`} width="100%" role="img" aria-label={MONTHLY.map((m) => `${m.label} ${won(m.value)}원`).join(", ")} style={{ display: "block", flex: 1, minHeight: 0, maxHeight: 240 }}>
         <line x1="0" y1={base} x2={W} y2={base} stroke="#E4E7EB" />
         {MONTHLY.map((m, i) => {
           const cx = step * i + step / 2;
@@ -281,7 +312,10 @@ function MonthlyChart() {
 /* ───────── 4. 이번 달 예산 ───────── */
 function BudgetCard() {
   const navigate = useNavigate();
+  const [limit] = useState(loadBudget);
+  const BUDGET = { limit, used: TOTAL };
   const pct = Math.round((BUDGET.used / BUDGET.limit) * 100);
+  const over = BUDGET.used > BUDGET.limit;
   return (
     <section className="gk-rise" style={{ ...at(300), flex: "2 1 0", minWidth: 0, background: C.yellowSoft, borderRadius: 24, padding: "24px 28px", boxSizing: "border-box", display: "flex", flexDirection: "column", gap: 14 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -293,11 +327,11 @@ function BudgetCard() {
       </h2>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <div style={{ height: 14, borderRadius: 7, background: C.yellowLine }}>
-          <div className="gk-grow-x" style={{ ...at(650), width: `${Math.min(pct, 100)}%`, height: "100%", borderRadius: 7, background: C.yellowDeep }} />
+          <div className="gk-grow-x" style={{ ...at(650), width: `${Math.min(pct, 100)}%`, height: "100%", borderRadius: 7, background: over ? "#FF9466" : C.yellowDeep }} />
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 600 }}>
           <span>{won(BUDGET.used)}원 사용</span>
-          <span style={{ color: C.yellowInk }}>{won(BUDGET.limit - BUDGET.used)}원 남음</span>
+          <span style={{ color: C.yellowInk }}>{over ? `${won(BUDGET.used - BUDGET.limit)}원 초과` : `${won(BUDGET.limit - BUDGET.used)}원 남음`}</span>
         </div>
       </div>
       <button type="button" onClick={() => navigate("/report")} style={{ marginTop: "auto", flexShrink: 0, height: 48, borderRadius: 999, border: 0, background: C.yellow, color: C.text, fontFamily: "inherit", fontSize: 16, fontWeight: 600, cursor: "pointer" }}>
@@ -341,7 +375,8 @@ function CalendarCard() {
   const arrowBtn = { width: 36, height: 36, borderRadius: "50%", border: 0, background: "#F3F5F7", color: "#4A4D52", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
 
   return (
-    <section className="gk-rise" style={{ ...at(120), ...card, flex: 1, borderRadius: 28, padding: 26, display: "flex", flexDirection: "column", gap: 14 }}>
+    <section className="gk-rise gk-cal-card" style={{ ...at(120), ...card, flex: 1, borderRadius: 28, padding: 26, display: "flex", flexDirection: "column", gap: 14 }}>
+      <div className="gk-cal-main" style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <h2 style={h2} aria-live="polite">{title}</h2>
         <div style={{ display: "flex", gap: 6 }}>
@@ -390,7 +425,9 @@ function CalendarCard() {
         })}
       </div>
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 14 }}>
+      </div>
+
+      <div className="gk-cal-side" style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 14, minWidth: 0 }}>
         {UPCOMING.map((u, i) => (
           <a key={u.day} href="/calendar" onClick={(e) => { e.preventDefault(); navigate("/calendar", { state: { year: TODAY.year, month: TODAY.month, day: u.day } }); }} className="gk-rise gk-cal-up" style={{ ...at(520 + i * 90), flex: 1, maxHeight: 104, display: "flex", alignItems: "center", gap: 14, borderRadius: 20, padding: "14px 16px 14px 14px", textDecoration: "none", color: C.text,
             background: u.warn ? C.yellowSoft : C.skySoft }}>
@@ -416,6 +453,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   return (
     <main
+      className="gk-dash-main"
       style={{
         minHeight: "100vh",
         padding: "28px 40px",
@@ -432,7 +470,7 @@ export default function Dashboard() {
       }}
     >
       <style>{ANIM_CSS}</style>
-      <div className="gk-rise" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, minHeight: 48 }}>
+      <div className="gk-rise gk-dash-head" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, minHeight: 48 }}>
         <h1 style={{ margin: 0, fontSize: 30, fontWeight: 700, letterSpacing: "-1px", lineHeight: 1.3 }}>
           {user ? `${user.name}님, ${MONTH}월 구독 현황이에요` : `${MONTH}월 고정지출 현황이에요`}
         </h1>
@@ -444,25 +482,26 @@ export default function Dashboard() {
         )}
       </div>
 
-      <div style={{ display: "flex", gap: 30, alignItems: "stretch" }}>
+      <div className="gk-dash-cols" style={{ display: "flex", gap: 30, alignItems: "stretch" }}>
         {/* 왼쪽 */}
         <div style={{ flex: "999 1 640px", minWidth: 0, display: "flex", flexDirection: "column", gap: 30 }}>
           <TotalCard />
           <ExpenseList />
-          <div style={{ display: "flex", gap: 30, flex: 1, minHeight: 0 }}>
+          <div className="gk-dash-bottom" style={{ display: "flex", gap: 30, flex: 1, minHeight: 0 }}>
             <MonthlyChart />
             <BudgetCard />
           </div>
         </div>
 
         {/* 오른쪽 */}
-        <div style={{ flex: "1 1 520px", maxWidth: 540, minWidth: 0, display: "flex", flexDirection: "column" }}>
+        <div className="gk-dash-right" style={{ flex: "1 1 520px", maxWidth: 540, minWidth: 0, display: "flex", flexDirection: "column" }}>
           <CalendarCard />
         </div>
       </div>
 
-      <footer style={{ marginTop: -10, textAlign: "center", fontSize: 13, color: "#8A9098", position: "relative", left: -124 }}>
-        Copyright © 2026. Fixpick All rights reserved.
+      {/* 글자만 사이드바 폭의 절반만큼 왼쪽으로 옮겨서 화면 전체의 가운데에 놓아요 */}
+      <footer style={{ marginTop: -10, textAlign: "center", fontSize: 13, color: "#8A9098" }}>
+        <span className="gk-dash-copy">Copyright © 2026. Fixpick All rights reserved.</span>
       </footer>
     </main>
   );

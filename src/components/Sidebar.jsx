@@ -70,25 +70,27 @@ const Icons = {
   ),
 };
 
-/* 알림 예시 데이터 */
+/* 알림 예시 데이터 (설정 페이지의 알림 종류와 맞춰져 있어요) */
+const THIS_MONTH = new Date().getMonth() + 1;
+const NEXT_MONTH = (THIS_MONTH % 12) + 1;
 const NOTIFICATIONS = [
-  { id: 1, type: "pay", title: "넷플릭스 결제 예정", body: "11월 10일에 14,500원이 결제돼요.", time: "방금", unread: true },
-  { id: 2, type: "cancel", title: "티빙, 3주째 안 봤어요", body: "해지하면 매달 13,500원을 아낄 수 있어요.", time: "1시간 전", unread: true, action: "해지 도우미" },
-  { id: 3, type: "price", title: "유튜브 프리미엄 요금 인상", body: "12월부터 14,900원 → 16,400원으로 올라요.", time: "어제", unread: false },
-  { id: 4, type: "share", title: "넷플릭스 분담금 미정산", body: "동생이 3,625원을 아직 보내지 않았어요.", time: "2일 전", unread: false, action: "정산 요청" },
-  { id: 5, type: "budget", title: "이번 달 예산 94% 사용", body: "남은 예산은 82,310원이에요.", time: "3일 전", unread: false },
+  { id: 1, type: "pay", title: "넷플릭스 결제 예정", body: `${THIS_MONTH}월 10일에 14,500원이 국민카드로 결제돼요.`, time: "방금", unread: true, action: "캘린더 보기", to: "calendar" },
+  { id: 2, type: "big", title: "큰 지출이 다가와요", body: `${THIS_MONTH}월 25일에 월세 486,400원이 빠져나가요.`, time: "1시간 전", unread: true, action: "캘린더 보기", to: "calendar" },
+  { id: 3, type: "contract", title: "휴대폰 약정이 곧 끝나요", body: `${NEXT_MONTH}월 18일에 24개월 약정이 끝나요. 요금제를 확인해 보세요.`, time: "어제", unread: false, action: "내 고정지출", to: "expenses" },
+  { id: 4, type: "budget", title: "예산의 90%를 넘었어요", body: `${THIS_MONTH}월 예산이 얼마 남지 않았어요. 리포트에서 확인해 보세요.`, time: "2일 전", unread: false, action: "리포트 보기", to: "report" },
+  { id: 5, type: "done", title: "결제 완료", body: `${THIS_MONTH}월 1일에 관리비 182,400원이 결제됐어요.`, time: "4일 전", unread: false },
 ];
 
 const NOTI_STYLE = {
   pay: { bg: "#DCEFFD", ink: "#2F7FC0", path: <><rect x="3" y="5" width="18" height="16" rx="2.5" /><path d="M16 3v4M8 3v4M3 10h18" /></> },
-  cancel: { bg: "#FFF2D2", ink: "#B8891F", path: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></> },
-  price: { bg: "#FFE8F1", ink: "#C85F8B", path: <><path d="M3 17l6-6 4 4 8-8" /><path d="M15 7h6v6" /></> },
-  share: { bg: "#E2F7EE", ink: "#3F9F76", path: <><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18.5 20a6.5 6.5 0 0 0-3-5.5" /></> },
+  big: { bg: "#FFECE3", ink: "#98583D", path: <><path d="M12 3v12M7 10l5 5 5-5" /><path d="M4 20h16" /></> },
+  contract: { bg: "#FFF2D2", ink: "#8A6A12", path: <><rect x="4" y="3" width="16" height="18" rx="2.5" /><path d="M8 8h8M8 12h8M8 16h4" /></> },
+  done: { bg: "#E2F7EE", ink: "#35765A", path: <><circle cx="12" cy="12" r="9" /><path d="M8 12.5l2.8 2.8L16.5 9.5" /></> },
   budget: { bg: "#EDEAFE", ink: "#7364C6", path: <><rect x="3" y="6" width="18" height="14" rx="3" /><path d="M3 10h18M16 15h2" /></> },
 };
 
 /** 알림 패널 */
-function NotificationPanel({ items, onRead, onReadAll, onClose, onSettings }) {
+function NotificationPanel({ items, onRead, onReadAll, onClose, onSettings, onGo }) {
   const unread = items.filter((n) => n.unread).length;
   return (
     <div className="gk-noti" role="dialog" aria-label="알림">
@@ -110,7 +112,7 @@ function NotificationPanel({ items, onRead, onReadAll, onClose, onSettings }) {
           const st = NOTI_STYLE[n.type];
           return (
             <li key={n.id} className="gk-noti__item" style={{ "--i": i }}>
-              <button type="button" className="gk-noti__row" onClick={() => onRead(n.id)} style={{ background: n.unread ? "#F3F9FE" : "transparent" }}>
+              <button type="button" className="gk-noti__row" onClick={() => { onRead(n.id); if (n.to) onGo(n.to); }} style={{ background: n.unread ? "#F3F9FE" : "transparent" }}>
                 <span style={{ width: 38, height: 38, borderRadius: 12, background: st.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={st.ink} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{st.path}</svg>
                 </span>
@@ -133,7 +135,7 @@ function NotificationPanel({ items, onRead, onReadAll, onClose, onSettings }) {
 
       <div style={{ borderTop: `1px solid ${COLORS.border}`, padding: "10px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <button type="button" className="gk-noti__link" onClick={onSettings}>알림 설정</button>
-        <button type="button" className="gk-noti__link" style={{ color: COLORS.text }}>전체 알림 보기 →</button>
+        <span style={{ fontSize: 12, color: "#8A9098", paddingRight: 8 }}>최근 7일 알림</span>
       </div>
     </div>
   );
@@ -363,6 +365,17 @@ const css = `
 @keyframes gkModalIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
 @keyframes gkModalOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(8px) scale(.98)}}
 @keyframes gkToast{0%{opacity:0;transform:translate(-50%,16px)}10%{opacity:1;transform:translate(-50%,0)}85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,8px)}}
+/* 작은 화면: 1100px 이하에서는 아이콘만 보이는 좁은 사이드바 */
+@media (max-width:1100px){
+.gk-sidebar{flex:0 0 84px !important;width:84px !important;padding:24px 12px !important;align-items:center}
+.gk-sidebar .gk-sb-label{display:none !important}
+.gk-sidebar .gk-logo{padding:4px !important;align-self:center !important}
+.gk-sidebar__item{justify-content:center;padding:0 !important;width:56px !important}
+.gk-sidebar__add{width:56px !important;padding:0 !important}
+.gk-sb-foot{flex-direction:column !important;padding:12px 0 0 !important;width:100%}
+.gk-profile{flex:none !important;margin:0 !important;justify-content:center}
+.gk-noti{left:calc(100% + 20px) !important}
+}
 @media (prefers-reduced-motion: reduce){.gk-noti,.gk-noti__item,.gk-modal,.gk-modal__box,.gk-toast{animation:none}}
 `;
 
@@ -438,7 +451,7 @@ export default function Sidebar({
         }}
       >
         <LogoMark size={36} />
-        <Wordmark height={26} />
+        <span className="gk-sb-label"><Wordmark height={26} /></span>
       </button>
 
       {/* 메뉴 */}
@@ -449,10 +462,11 @@ export default function Sidebar({
             type="button"
             className="gk-sidebar__item"
             aria-current={active === item.key ? "page" : undefined}
+            title={item.label}
             onClick={() => onNavigate?.(item.key)}
           >
             {item.icon}
-            {item.label}
+            <span className="gk-sb-label">{item.label}</span>
           </button>
         ))}
       </div>
@@ -480,12 +494,13 @@ export default function Sidebar({
         }}
       >
         {Icons.plus}
-        항목 추가
+        <span className="gk-sb-label">항목 추가</span>
       </button>
 
       {/* 프로필 + 알림 */}
       <div
         ref={boxRef}
+        className="gk-sb-foot"
         style={{
           position: "relative",
           display: "flex",
@@ -500,7 +515,7 @@ export default function Sidebar({
             <span aria-hidden="true" style={{ width: 40, height: 40, borderRadius: "50%", background: COLORS.accent, color: "#FFFFFF", fontSize: 15, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               {initialOf(user.name)}
             </span>
-            <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+            <span className="gk-sb-label" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
               <b style={{ fontSize: 15, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name}님</b>
               <span style={{ fontSize: 13, color: COLORS.muted }}>구독 {user.subscriptionCount ?? 0}개</span>
             </span>
@@ -510,11 +525,11 @@ export default function Sidebar({
             <span aria-hidden="true" style={{ width: 40, height: 40, borderRadius: "50%", background: "#E9EDF1", color: "#8A9098", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
             </span>
-            <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+            <span className="gk-sb-label" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
               <b style={{ fontSize: 15, fontWeight: 700 }}>로그인하기</b>
-              <span style={{ fontSize: 13, color: COLORS.muted }}>내 고정지출 관리하기</span>
+              <span style={{ fontSize: 13, color: COLORS.muted, whiteSpace: "nowrap" }}>내 고정지출 관리하기</span>
             </span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={COLORS.muted} strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+            <svg className="gk-sb-label" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={COLORS.muted} strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
           </button>
         )}
         {menu && user && (
@@ -586,7 +601,7 @@ export default function Sidebar({
         )}
 
         {open && (
-          <NotificationPanel items={items} onRead={readOne} onReadAll={readAll} onClose={() => setOpen(false)} onSettings={() => { setOpen(false); onNavigate?.("settings"); }} />
+          <NotificationPanel items={items} onRead={readOne} onReadAll={readAll} onClose={() => setOpen(false)} onSettings={() => { setOpen(false); onNavigate?.("settings"); }} onGo={(key) => { setOpen(false); onNavigate?.(key); }} />
         )}
       </div>
 
