@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogoMark, Wordmark } from "../components/Sidebar";
 import { signup } from "../utils/auth";
@@ -34,6 +34,15 @@ const CSS = `
 .gk-sign-check { width: 20px; height: 20px; accent-color: ${C.sky}; margin: 0; flex-shrink: 0; cursor: pointer; }
 .gk-sign-eye { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border: 0; border-radius: 10px; background: none; color: ${C.muted}; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .gk-sign-eye:hover { background: #F3F5F7; }
+.gk-sign-view { flex-shrink: 0; border: 0; background: none; padding: 4px 6px; margin-left: auto; border-radius: 8px; font: inherit; font-size: 13px; font-weight: 600; color: ${C.muted}; cursor: pointer; display: flex; align-items: center; gap: 2px; }
+.gk-sign-view:hover { background: #F3F5F7; color: ${C.text}; }
+@keyframes gkTermFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes gkTermIn { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
+.gk-term { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(11,42,69,.32); backdrop-filter: blur(3px); animation: gkTermFade .2s ease both; }
+.gk-term__box { width: 560px; max-width: 100%; max-height: 86vh; background: #FFFFFF; border-radius: 28px; box-shadow: 0 30px 80px rgba(11,42,69,.28); display: flex; flex-direction: column; overflow: hidden; animation: gkTermIn .32s cubic-bezier(.22,1,.36,1) both; }
+.gk-term__body { overflow-y: auto; padding: 4px 28px 8px; display: flex; flex-direction: column; gap: 18px; }
+.gk-term__body h4 { margin: 0 0 6px; font-size: 15px; font-weight: 700; }
+.gk-term__body p { margin: 0; font-size: 14px; line-height: 1.7; color: ${C.sub}; white-space: pre-line; }
 .gk-sign-page button:focus-visible, .gk-sign-page input:focus-visible { outline: 2px solid ${C.sky}; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .gk-sign-rise { animation: none; } }
 `;
@@ -46,9 +55,36 @@ const STEPS = [
 ];
 
 const TERMS = [
-  { key: "service", label: "[필수] 서비스 이용약관 동의", required: true },
-  { key: "privacy", label: "[필수] 개인정보 수집·이용 동의", required: true },
-  { key: "marketing", label: "[선택] 혜택·이벤트 알림 받기", required: false },
+  {
+    key: "service", label: "[필수] 서비스 이용약관 동의", title: "고정콕 서비스 이용약관", required: true,
+    body: [
+      ["제1조 (목적)", "이 약관은 고정콕(이하 \"서비스\")이 제공하는 고정지출 관리 서비스를 이용하는 데 필요한 회원과 서비스 사이의 권리, 의무 및 책임 사항을 정하는 것을 목적으로 합니다."],
+      ["제2조 (용어의 뜻)", "① \"회원\"이란 이 약관에 동의하고 가입하여 서비스를 이용하는 사람을 말합니다.\n② \"고정지출\"이란 회원이 직접 등록한 월세·통신비·구독료·보험료 등 정기적으로 나가는 돈을 말합니다."],
+      ["제3조 (서비스 내용)", "서비스는 다음 기능을 제공합니다.\n1. 고정지출 등록과 카테고리별 정리\n2. 결제일 캘린더와 결제일 알림\n3. 월별 지출 리포트와 예산 관리"],
+      ["제4조 (회원의 의무)", "회원은 가입할 때 정확한 정보를 입력해야 하며, 자신의 계정을 다른 사람이 쓰지 않도록 관리해야 합니다."],
+      ["제5조 (서비스 이용 제한)", "서비스는 회원이 이 약관을 위반하거나 서비스 운영을 방해하는 경우 이용을 제한할 수 있습니다."],
+      ["제6조 (책임의 한계)", "서비스가 보여주는 금액과 결제일은 회원이 입력한 정보를 바탕으로 하며, 실제 결제 내역과 다를 수 있습니다. 정확한 결제 정보는 각 카드사·금융사에서 확인해 주세요."],
+      ["제7조 (회원 탈퇴)", "회원은 언제든지 설정 페이지에서 탈퇴할 수 있으며, 탈퇴하면 등록한 고정지출과 설정 정보는 바로 삭제됩니다."],
+    ],
+  },
+  {
+    key: "privacy", label: "[필수] 개인정보 수집·이용 동의", title: "개인정보 수집·이용 동의", required: true,
+    body: [
+      ["1. 수집하는 항목", "이름, 휴대폰 번호, 이메일 주소, 비밀번호"],
+      ["2. 수집·이용 목적", "회원 가입과 본인 확인, 결제일 알림 발송, 고객 문의 응대"],
+      ["3. 보관 기간", "회원 탈퇴 시까지 보관하며, 탈퇴하면 바로 삭제합니다. 단, 관련 법령에 따라 보관해야 하는 정보는 정해진 기간 동안 보관합니다."],
+      ["4. 동의를 거부할 권리", "개인정보 수집·이용에 동의하지 않을 수 있습니다. 다만 필수 항목이라 동의하지 않으면 회원가입을 할 수 없어요."],
+    ],
+  },
+  {
+    key: "marketing", label: "[선택] 혜택·이벤트 알림 받기", title: "혜택·이벤트 알림 수신 동의", required: false,
+    body: [
+      ["1. 받는 내용", "새 기능 소개, 이벤트, 고정지출을 아끼는 팁 같은 소식을 보내드려요."],
+      ["2. 받는 방법", "이메일, 문자(SMS)"],
+      ["3. 보관 기간", "동의를 철회하거나 회원 탈퇴할 때까지"],
+      ["4. 동의하지 않아도 돼요", "선택 항목이라 동의하지 않아도 가입과 서비스 이용에는 아무 문제가 없어요. 설정 페이지에서 언제든 바꿀 수 있어요."],
+    ],
+  },
 ];
 
 /** 비밀번호 강도: 0~3 */
@@ -88,6 +124,7 @@ export default function Signup() {
   const [showPw, setShowPw] = useState(false);
   const [agree, setAgree] = useState({ service: false, privacy: false, marketing: false });
   const [errors, setErrors] = useState({});
+  const [viewing, setViewing] = useState(null); // 보고 있는 약관
 
   const set = (k, v) => { setForm((f) => ({ ...f, [k]: v })); setErrors((e) => ({ ...e, [k]: "" })); };
   const allAgreed = TERMS.every((t) => agree[t.key]);
@@ -216,10 +253,16 @@ export default function Signup() {
               <b style={{ fontSize: 15 }}>전체 동의하기</b>
             </label>
             {TERMS.map((t) => (
-              <label key={t.key} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 0", cursor: "pointer", fontSize: 14, color: C.sub }}>
-                <input id={`signup-agree-${t.key}`} type="checkbox" className="gk-sign-check" checked={agree[t.key]} onChange={(e) => setAgree((a) => ({ ...a, [t.key]: e.target.checked }))} />
-                {t.label}
-              </label>
+              <div key={t.key} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14, color: C.sub }}>
+                  <input id={`signup-agree-${t.key}`} type="checkbox" className="gk-sign-check" checked={agree[t.key]} onChange={(e) => setAgree((a) => ({ ...a, [t.key]: e.target.checked }))} />
+                  {t.label}
+                </label>
+                <button type="button" className="gk-sign-view" onClick={() => setViewing(t)} aria-label={`${t.title} 보기`}>
+                  보기
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                </button>
+              </div>
             ))}
           </div>
 
@@ -231,6 +274,48 @@ export default function Signup() {
           </p>
         </form>
       </section>
+
+      {viewing && (
+        <TermsModal term={viewing} onClose={() => setViewing(null)}
+          onAgree={() => { setAgree((a) => ({ ...a, [viewing.key]: true })); setViewing(null); }} />
+      )}
+    </div>
+  );
+}
+
+/** 약관 보기 창 */
+function TermsModal({ term, onClose, onAgree }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div className="gk-term" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="gk-term__box" role="dialog" aria-modal="true" aria-labelledby="gk-term-title">
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, padding: "26px 28px 18px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={{ alignSelf: "flex-start", fontSize: 12, fontWeight: 700, padding: "3px 9px", borderRadius: 999, background: term.required ? C.skySoft : "#F1F4F7", color: C.text }}>{term.required ? "필수" : "선택"}</span>
+            <h3 id="gk-term-title" style={{ margin: 0, fontSize: 21, fontWeight: 800, letterSpacing: "-0.6px" }}>{term.title}</h3>
+          </div>
+          <button type="button" className="gk-sign-eye" style={{ position: "static", transform: "none" }} aria-label="닫기" onClick={onClose}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+        <div className="gk-term__body">
+          {term.body.map(([h, p]) => (
+            <section key={h}>
+              <h4>{h}</h4>
+              <p>{p}</p>
+            </section>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 10, padding: "18px 28px 24px", borderTop: `1px solid ${C.line}` }}>
+          <button type="button" className="gk-sign-btn" style={{ flex: "0 0 120px", height: 52, background: "#F3F5F7" }} onClick={onClose}>닫기</button>
+          <button type="button" className="gk-sign-btn" style={{ flex: 1, height: 52 }} onClick={onAgree}>동의하기</button>
+        </div>
+      </div>
     </div>
   );
 }
