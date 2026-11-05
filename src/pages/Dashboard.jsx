@@ -460,6 +460,10 @@ export default function Dashboard() {
           <CalendarCard />
         </div>
       </div>
+
+      <footer style={{ marginTop: -10, textAlign: "center", fontSize: 13, color: "#8A9098", position: "relative", left: -124 }}>
+        Copyright © 2026. Fixpick All rights reserved.
+      </footer>
     </main>
   );
 }
