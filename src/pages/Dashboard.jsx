@@ -82,13 +82,13 @@ const won = (n) => n.toLocaleString("ko-KR");
 const MONTH = 11;
 
 const CATEGORIES = [
-  { key: "home", name: "주거", desc: "월세·관리비·공과금", amount: 486400, count: 4, color: "#4C8DF6", tint: "#DFEAFD", ink: "#3A6CC0", icon: "building" },
-  { key: "phone", name: "통신", desc: "휴대폰·인터넷·IPTV", amount: 98700, count: 3, color: "#36C2CE", tint: "#DBF4F6", ink: "#2696A0", icon: "phone" },
-  { key: "sub", name: "구독 서비스", desc: "OTT·음악·멤버십", amount: 57790, count: 5, color: "#FF7EB3", tint: "#FFE8F1", ink: "#C85F8B", icon: "play", highlight: true },
-  { key: "rental", name: "가전", desc: "정수기·안마의자·건조기", amount: 64800, count: 2, color: "#5ED3A0", tint: "#E2F7EE", ink: "#3F9F76", icon: "washer" },
-  { key: "insure", name: "보험", desc: "실손·자동차·운전자", amount: 142000, count: 3, color: "#9B8AFB", tint: "#EDEAFE", ink: "#7364C6", icon: "shield" },
-  { key: "saving", name: "금융/저축", desc: "적금·청약·대출이자", amount: 300000, count: 2, color: "#FFC94D", tint: "#FFF2D2", ink: "#C6982F", icon: "piggy" },
-  { key: "transit", name: "교통", desc: "교통카드·주차", amount: 68000, count: 2, color: "#FF9466", tint: "#FFECE3", ink: "#C96F48", icon: "bus" },
+  { key: "home", name: "주거", desc: "월세·관리비·공과금", amount: 486400, count: 4, color: "#4C8DF6", tint: "#DFEAFD", ink: "#3664AF", icon: "building" },
+  { key: "phone", name: "통신", desc: "휴대폰·인터넷·IPTV", amount: 98700, count: 3, color: "#36C2CE", tint: "#DBF4F6", ink: "#20727A", icon: "phone" },
+  { key: "sub", name: "구독 서비스", desc: "OTT·음악·멤버십", amount: 57790, count: 5, color: "#FF7EB3", tint: "#FFE8F1", ink: "#9D4D6E", icon: "play", highlight: true },
+  { key: "rental", name: "가전", desc: "정수기·안마의자·건조기", amount: 64800, count: 2, color: "#5ED3A0", tint: "#E2F7EE", ink: "#35765A", icon: "washer" },
+  { key: "insure", name: "보험", desc: "실손·자동차·운전자", amount: 142000, count: 3, color: "#9B8AFB", tint: "#EDEAFE", ink: "#685CA8", icon: "shield" },
+  { key: "saving", name: "금융/저축", desc: "적금·청약·대출이자", amount: 300000, count: 2, color: "#FFC94D", tint: "#FFF2D2", ink: "#5E5300", icon: "piggy" },
+  { key: "transit", name: "교통", desc: "교통카드·주차", amount: 68000, count: 2, color: "#FF9466", tint: "#FFECE3", ink: "#98583D", icon: "bus" },
 ];
 const TOTAL = CATEGORIES.reduce((s, c) => s + c.amount, 0);
 const TOTAL_COUNT = CATEGORIES.reduce((s, c) => s + c.count, 0);
