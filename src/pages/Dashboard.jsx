@@ -131,8 +131,8 @@ const CATEGORIES = [
   { key: "insure", name: "보험", desc: "실손·자동차·운전자", color: "#9B8AFB", tint: "#EDEAFE", ink: "#685CA8", icon: "shield" },
   { key: "saving", name: "금융/저축", desc: "적금·청약·대출이자", color: "#FFC94D", tint: "#FFF2D2", ink: "#5E5300", icon: "piggy" },
   { key: "transit", name: "교통", desc: "교통카드·주차", color: "#FF9466", tint: "#FFECE3", ink: "#98583D", icon: "bus" },
-  { key: "car", name: "자동차", desc: "할부·주유·자동차보험", color: "#9A8D82", tint: "#F0ECE8", ink: "#4E433C", icon: "car" },
-  { key: "etc", name: "기타", desc: "경조사비·세금·관리", color: "#A3ABB5", tint: "#EEF1F4", ink: "#5B636D", icon: "shapes" },
+  { key: "car", name: "자동차", desc: "할부·주유·자동차보험", color: "#8796AA", tint: "#EEF1F5", ink: "#536579", icon: "car" },
+  { key: "etc", name: "기타", desc: "경조사비·세금·관리", color: "#9A8D82", tint: "#F0ECE8", ink: "#4E433C", icon: "shapes" },
 ];
 
 const monthlyRows = (values) => values.map((value, i) => ({

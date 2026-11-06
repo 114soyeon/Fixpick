@@ -152,10 +152,23 @@ const ADD_CATEGORIES = [
   { key: "insure", name: "보험", color: "#9B8AFB", tint: "#EDEAFE" },
   { key: "saving", name: "금융/저축", color: "#FFC94D", tint: "#FFF2D2" },
   { key: "transit", name: "교통", color: "#FF9466", tint: "#FFECE3" },
-  { key: "car", name: "자동차", color: "#9A8D82", tint: "#F0ECE8" },
-  { key: "etc", name: "기타", color: "#A3ABB5", tint: "#EEF1F4" },
+  { key: "car", name: "자동차", color: "#8796AA", tint: "#EEF1F5" },
+  { key: "etc", name: "기타", color: "#9A8D82", tint: "#F0ECE8" },
 ];
 const CYCLES = ["매달", "매년"];
+
+/* 카테고리를 고르면 항목 이름 칸 안에 그 카테고리 예시가 보여요 */
+const NAME_HINTS = {
+  home: "월세, 관리비, 전기요금",
+  phone: "휴대폰 요금, 인터넷, IPTV",
+  sub: "넷플릭스, 유튜브 프리미엄, 쿠팡 와우",
+  rental: "정수기, 공기청정기, 안마의자",
+  insure: "실손보험, 자동차보험, 운전자보험",
+  saving: "적금, 주택청약, 대출 이자",
+  transit: "교통카드, 기후동행카드, 정기권",
+  car: "자동차 할부, 주유비, 주차비",
+  etc: "모임 회비, 학원비, 경조사비",
+};
 
 function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
   const [closing, setClosing] = useState(false);
@@ -219,7 +232,7 @@ function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
 
         <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <span style={label}>항목 이름</span>
-          <input id="gk-add-name" ref={nameRef} className="gk-input" style={input} placeholder="예) 넷플릭스, 월세, 휴대폰 요금" value={form.name} onChange={(e) => set("name", e.target.value)} maxLength={30} />
+          <input id="gk-add-name" ref={nameRef} className="gk-input" style={input} placeholder={`예) ${NAME_HINTS[form.category] || "넷플릭스, 월세, 휴대폰 요금"}`} value={form.name} onChange={(e) => set("name", e.target.value)} maxLength={30} />
         </label>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
