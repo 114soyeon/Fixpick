@@ -155,7 +155,6 @@ const ADD_CATEGORIES = [
   { key: "car", name: "자동차", color: "#8796AA", tint: "#EEF1F5" },
   { key: "etc", name: "기타", color: "#9A8D82", tint: "#F0ECE8" },
 ];
-const CYCLES = ["매달", "매년"];
 
 /* 카테고리를 고르면 항목 이름 칸 안에 그 카테고리 예시가 보여요 */
 const NAME_HINTS = {
@@ -290,6 +289,50 @@ function PayPicker({ value, onChange, recent = [], inputStyle }) {
     </div>
   );
 }
+
+/* ───────── 작은 선택 버튼 (매달/매년, 결제 월) ───────── */
+function MiniSelect({ id, value, options, onChange, inputStyle, width, label, listWidth = 150, grid = 0 }) {
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e) => { if (!boxRef.current?.contains(e.target)) setOpen(false); };
+    const onKey = (e) => { if (e.key === "Escape") { e.stopPropagation(); setOpen(false); } };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey, true);
+    return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey, true); };
+  }, [open]);
+  const cur = options.find((o) => o.value === value) || options[0];
+  return (
+    <div ref={boxRef} style={{ position: "relative", width, flexShrink: 0 }}>
+      <button id={id} type="button" className="gk-input gk-mini-btn" aria-haspopup="listbox" aria-expanded={open} aria-label={label}
+        style={{ ...inputStyle, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4, padding: "0 8px 0 12px", fontWeight: 700, fontSize: 15, cursor: "pointer" }}
+        onClick={() => setOpen((v) => !v)}>
+        <span style={{ whiteSpace: "nowrap" }}>{cur.label}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={COLORS.muted} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+          style={{ flexShrink: 0, transition: "transform .2s", transform: open ? "rotate(180deg)" : "none" }}><path d="m6 9 6 6 6-6" /></svg>
+      </button>
+      {open && (
+        <div className="gk-mini-list" role="listbox" aria-label={label} style={{ width: listWidth, ...(grid ? { display: "grid", gridTemplateColumns: `repeat(${grid}, 1fr)`, gap: 2 } : {}) }}>
+          {options.map((o) => {
+            const on = o.value === value;
+            return (
+              <button key={o.value} type="button" role="option" aria-selected={on} className={`gk-mini-opt ${grid ? "is-grid" : ""}`} onClick={() => { onChange(o.value); setOpen(false); }}>
+                <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 1 }}>
+                  <b style={{ fontSize: 14.5, fontWeight: on ? 700 : 600 }}>{o.label}</b>
+                  {o.sub && <span style={{ fontSize: 12, color: COLORS.muted, fontWeight: 500 }}>{o.sub}</span>}
+                </span>
+                {on && !grid && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5CB8F2" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+const CYCLE_OPTIONS = [{ value: "매달", label: "매달" }, { value: "매년", label: "매년" }];
+const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: `${i + 1}월` }));
 
 /* ───────── 만기일 고르기 (작은 달력) ───────── */
 const pad2 = (n) => String(n).padStart(2, "0");
@@ -431,7 +474,7 @@ function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
       <form className="gk-modal__box" role="dialog" aria-modal="true" aria-labelledby="gk-add-title" onSubmit={submit} style={{ fontFamily: FONT }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
           <div>
-            <h2 id="gk-add-title" style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-0.6px" }}>고정지출 항목 추가</h2>
+            <h2 id="gk-add-title" style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-0.6px" }}>항목 추가</h2>
             <p style={{ margin: "4px 0 0", fontSize: 14, color: COLORS.muted }}>매달 나가는 돈을 등록하면 결제일에 맞춰 알려드려요.</p>
           </div>
           <button type="button" className="gk-noti__close" aria-label="닫기" onClick={close}>
@@ -483,16 +526,12 @@ function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
 
         {/* 결제일 + 만기일 (한 줄) */}
         <div className="gk-add-dates" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <label style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
-            <span style={label}>결제일</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
+            <label htmlFor="gk-add-day" style={label}>결제일</label>
             <div style={{ display: "flex", gap: 6 }}>
-              <select id="gk-add-cycle" className="gk-input" style={{ ...input, width: 74, padding: "0 6px 0 10px", flexShrink: 0 }} value={form.cycle} onChange={(e) => set("cycle", e.target.value)}>
-                {CYCLES.map((c) => <option key={c}>{c}</option>)}
-              </select>
+              <MiniSelect id="gk-add-cycle" label="결제 주기" value={form.cycle} options={CYCLE_OPTIONS} onChange={(v) => set("cycle", v)} inputStyle={input} width={78} listWidth={110} />
               {form.cycle === "매년" && (
-                <select id="gk-add-month" className="gk-input" aria-label="결제 월" style={{ ...input, width: 66, padding: "0 4px 0 8px", flexShrink: 0 }} value={form.month} onChange={(e) => set("month", e.target.value)}>
-                  {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}월</option>)}
-                </select>
+                <MiniSelect id="gk-add-month" label="결제 월" value={Number(form.month)} options={MONTH_OPTIONS} onChange={(v) => set("month", v)} inputStyle={input} width={72} listWidth={204} grid={4} />
               )}
               <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
                 <input id="gk-add-day" className="gk-input" inputMode="numeric" style={{ ...input, padding: "0 30px 0 8px", textAlign: "right", fontWeight: 700 }} placeholder="10"
@@ -500,7 +539,7 @@ function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
                 <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: COLORS.muted }}>일</span>
               </div>
             </div>
-          </label>
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
             <label htmlFor="gk-add-end" style={label}>만기일 <span style={{ fontWeight: 400, color: COLORS.muted }}>(선택)</span></label>
             <DatePicker value={form.endDate} onChange={(v) => set("endDate", v)} inputStyle={input} />
@@ -514,7 +553,7 @@ function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
 
         <label className="gk-toggle-row">
           <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span style={label}>결제 알림 받기</span>
+            <span style={label}>결제 3일 전에 알림 받기</span>
             <span style={{ fontSize: 13, color: COLORS.muted }}>사이드바 알림으로 미리 알려드려요</span>
           </span>
           <input id="gk-add-remind" type="checkbox" checked={form.remind} onChange={(e) => set("remind", e.target.checked)} className="gk-switch" />
@@ -625,6 +664,14 @@ const css = `
 .gk-pay-opt[aria-selected="true"]{background:#EAF6FE}
 .gk-date-btn[aria-expanded="true"]{border-color:#5CB8F2 !important;background:#FFFFFF !important;box-shadow:0 0 0 4px rgba(92,184,242,.18)}
 .gk-dp{position:absolute;right:0;width:316px;z-index:6;background:#FFFFFF;border-radius:20px;padding:16px;box-sizing:border-box;box-shadow:0 18px 44px rgba(11,42,69,.18),0 0 0 1px rgba(11,42,69,.06);animation:gkPayIn .18s cubic-bezier(.22,1,.36,1) both}
+.gk-mini-btn:hover{border-color:#CFE4F4 !important}
+.gk-mini-btn[aria-expanded="true"]{border-color:#5CB8F2 !important;background:#FFFFFF !important;box-shadow:0 0 0 4px rgba(92,184,242,.18)}
+.gk-mini-list{position:absolute;left:0;top:calc(100% + 6px);z-index:6;background:#FFFFFF;border-radius:16px;padding:6px;box-sizing:border-box;max-height:260px;overflow-y:auto;box-shadow:0 18px 44px rgba(11,42,69,.18),0 0 0 1px rgba(11,42,69,.06);animation:gkPayIn .16s cubic-bezier(.22,1,.36,1) both}
+.gk-mini-opt{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:40px;padding:7px 10px;border:0;border-radius:11px;background:transparent;font:inherit;color:${COLORS.text};cursor:pointer;text-align:left;transition:background .12s}
+.gk-mini-opt:hover{background:#F3F8FC}
+.gk-mini-opt[aria-selected="true"]{background:#EAF6FE}
+.gk-mini-opt.is-grid{justify-content:center;min-height:38px;padding:0}
+.gk-mini-opt.is-grid[aria-selected="true"]{background:#0B2A45;color:#FFFFFF}
 .gk-dp-quick{flex:1;height:32px;border:0;border-radius:10px;background:#F3F5F7;font:inherit;font-size:13px;font-weight:600;color:${COLORS.text};cursor:pointer;transition:background .15s}
 .gk-dp-quick:hover{background:#E6EEF5}
 .gk-dp-quick[aria-pressed="true"]{background:#DCEFFD;color:#1D6FA8;box-shadow:inset 0 0 0 1.5px #5CB8F2}
