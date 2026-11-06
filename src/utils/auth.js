@@ -69,12 +69,29 @@ export function emailExists(email = "") {
   return Boolean(accounts[email.trim().toLowerCase()]);
 }
 
+/** 이메일 일부를 가려요: minji.kim@gmail.com → min*****@gmail.com */
+export function maskEmail(email = "") {
+  const [id, domain = ""] = email.split("@");
+  const show = id.length <= 3 ? id.slice(0, 1) : id.slice(0, 3);
+  return `${show}${"*".repeat(Math.max(3, id.length - show.length))}@${domain}`;
+}
+
+/** 아이디(이메일) 찾기: 가입할 때 넣은 이름 + 휴대폰 번호로 찾아요 */
+export function findEmail({ name = "", phone = "" }) {
+  const digits = (t) => String(t).replace(/[^0-9]/g, "");
+  const n = name.trim();
+  const ph = digits(phone);
+  const found = Object.values(read(ACCOUNTS_KEY, {})).filter((a) => a.name === n && a.phone && digits(a.phone) === ph);
+  if (!found.length) return { ok: false, message: "입력한 정보로 가입된 계정이 없어요." };
+  return { ok: true, accounts: found.map((a) => ({ email: a.email, masked: maskEmail(a.email), joined: a.joined || "" })) };
+}
+
 /** 회원가입: 계정을 저장하고 바로 로그인 */
 export function signup({ name, phone = "", email, password }) {
   const key = email.trim().toLowerCase();
   const accounts = read(ACCOUNTS_KEY, {});
   if (accounts[key]) return { ok: false, field: "email", message: "이미 가입된 이메일이에요." };
-  const account = { name: name.trim(), phone, email: email.trim(), pw: hash(password) };
+  const account = { name: name.trim(), phone, email: email.trim(), pw: hash(password), joined: new Date().toISOString().slice(0, 10) };
   accounts[key] = account;
   write(ACCOUNTS_KEY, accounts);
   moveGuestItems(account.email);

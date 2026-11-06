@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogoMark, Wordmark } from "../components/Sidebar";
-import { emailExists, login } from "../utils/auth";
+import { emailExists, findEmail, login } from "../utils/auth";
 
 const C = {
   bg: "#F7F9FA",
@@ -155,6 +155,94 @@ function ResetModal({ initialEmail, onClose }) {
   );
 }
 
+/* 아이디(이메일) 찾기 창 */
+const fmtPhone = (v) => {
+  const d = v.replace(/[^0-9]/g, "").slice(0, 11);
+  return d.length < 4 ? d : d.length < 8 ? `${d.slice(0, 3)}-${d.slice(3)}` : `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
+};
+const fmtJoined = (d) => (d ? d.replaceAll("-", ".") + " 가입" : "");
+
+function FindIdModal({ onClose, onFound, onReset }) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [error, setError] = useState({ field: "", message: "" });
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const find = (e) => {
+    e.preventDefault();
+    if (!name.trim()) return setError({ field: "name", message: "이름을 입력해 주세요." });
+    if (phone.replace(/[^0-9]/g, "").length < 10) return setError({ field: "phone", message: "휴대폰 번호를 다시 확인해 주세요." });
+    const r = findEmail({ name, phone });
+    if (!r.ok) return setError({ field: "all", message: r.message });
+    setError({ field: "", message: "" });
+    setResult(r.accounts);
+  };
+
+  return (
+    <div className="gk-modal" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <form className="gk-modal__box" role="dialog" aria-modal="true" aria-labelledby="gk-findid-title" onSubmit={find} noValidate>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <h3 id="gk-findid-title" style={{ margin: 0, fontSize: 22, fontWeight: 800, letterSpacing: "-0.6px" }}>아이디 찾기</h3>
+            <p style={{ margin: 0, fontSize: 15, color: C.muted, lineHeight: 1.55 }}>
+              {result ? "입력한 정보로 가입된 이메일이에요." : "가입할 때 쓴 이름과 휴대폰 번호를 넣으면 가입한 이메일을 알려드려요."}
+            </p>
+          </div>
+          <button type="button" className="gk-login-eye" style={{ position: "static", transform: "none" }} aria-label="닫기" onClick={onClose}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+
+        {result ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {result.map((a) => (
+              <div key={a.email} style={{ borderRadius: 16, background: C.skySoft, padding: "18px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 13, color: C.muted }}>가입한 이메일</span>
+                <b style={{ fontSize: 20, letterSpacing: "-0.3px", wordBreak: "break-all", textAlign: "center" }}>{a.masked}</b>
+                {a.joined && <span style={{ fontSize: 12.5, color: "#8A9099" }}>{fmtJoined(a.joined)}</span>}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>이름</span>
+              <input id="find-name" autoFocus className={`gk-login-input ${error.field === "name" || error.field === "all" ? "is-error" : ""}`} placeholder="홍길동" value={name}
+                onChange={(e) => { setName(e.target.value); setError({ field: "", message: "" }); }} />
+            </label>
+            <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>휴대폰 번호</span>
+              <input id="find-phone" inputMode="numeric" className={`gk-login-input ${error.field === "phone" || error.field === "all" ? "is-error" : ""}`} placeholder="010-0000-0000" value={phone}
+                onChange={(e) => { setPhone(fmtPhone(e.target.value)); setError({ field: "", message: "" }); }} />
+            </label>
+            {error.message && <span role="alert" style={{ fontSize: 13, color: C.danger, marginTop: -6 }}>{error.message}</span>}
+          </>
+        )}
+
+        <div style={{ display: "flex", gap: 10 }}>
+          {result ? (
+            <>
+              <button type="button" className="gk-login-btn" style={{ flex: "0 0 130px", background: "#F3F5F7" }} onClick={() => onReset(result[0].email)}>비밀번호 찾기</button>
+              <button type="button" className="gk-login-btn" style={{ flex: 1 }} onClick={() => onFound(result[0].email)}>로그인하기</button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="gk-login-btn" style={{ flex: "0 0 110px", background: "#F3F5F7" }} onClick={onClose}>취소</button>
+              <button type="submit" className="gk-login-btn" style={{ flex: 1 }}>아이디 찾기</button>
+            </>
+          )}
+        </div>
+      </form>
+    </div>
+  );
+}
+
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -163,6 +251,7 @@ export default function Login() {
   const [keep, setKeep] = useState(true);
   const [error, setError] = useState({ field: "", message: "" });
   const [resetOpen, setResetOpen] = useState(false);
+  const [findOpen, setFindOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
   const fail = (field, message) => setError({ field, message });
@@ -255,7 +344,11 @@ export default function Login() {
               <input id="login-keep" type="checkbox" className="gk-login-check" checked={keep} onChange={(e) => setKeep(e.target.checked)} />
               로그인 상태 유지
             </label>
-            <button type="button" className="gk-login-link" onClick={() => setResetOpen(true)}>비밀번호를 잊으셨나요?</button>
+            <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <button type="button" className="gk-login-link" onClick={() => setFindOpen(true)}>아이디 찾기</button>
+              <span aria-hidden="true" style={{ width: 1, height: 12, background: "#D5DCE3" }} />
+              <button type="button" className="gk-login-link" onClick={() => setResetOpen(true)}>비밀번호 찾기</button>
+            </span>
           </div>
 
           <button type="submit" className="gk-login-btn">로그인</button>
@@ -284,6 +377,11 @@ export default function Login() {
       </section>
 
       {resetOpen && <ResetModal initialEmail={email} onClose={() => setResetOpen(false)} />}
+      {findOpen && (
+        <FindIdModal onClose={() => setFindOpen(false)}
+          onFound={(found) => { setEmail(found); setFindOpen(false); setTimeout(() => document.getElementById("login-pw")?.focus(), 50); }}
+          onReset={(found) => { setEmail(found); setFindOpen(false); setResetOpen(true); }} />
+      )}
       {toast && <Toast key={toast.id} text={toast.text} onDone={() => setToast(null)} />}
     </div>
   );
