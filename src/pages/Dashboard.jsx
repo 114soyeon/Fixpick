@@ -131,6 +131,7 @@ const CATEGORIES = [
   { key: "insure", name: "보험", desc: "실손·자동차·운전자", color: "#9B8AFB", tint: "#EDEAFE", ink: "#685CA8", icon: "shield" },
   { key: "saving", name: "금융/저축", desc: "적금·청약·대출이자", color: "#FFC94D", tint: "#FFF2D2", ink: "#5E5300", icon: "piggy" },
   { key: "transit", name: "교통", desc: "교통카드·주차", color: "#FF9466", tint: "#FFECE3", ink: "#98583D", icon: "bus" },
+  { key: "car", name: "자동차", desc: "할부·주유·자동차보험", color: "#C4A27F", tint: "#F4EDE4", ink: "#76583A", icon: "car" },
   { key: "etc", name: "기타", desc: "경조사비·세금·관리", color: "#A3ABB5", tint: "#EEF1F4", ink: "#5B636D", icon: "shapes" },
 ];
 
@@ -200,6 +201,7 @@ const ICON_PATHS = {
   shield: (<><path d="M12 3l8 3v6c0 4.8-3.4 8-8 9-4.6-1-8-4.2-8-9V6z" /><path d="M9 12l2 2 4-4" /></>),
   piggy: (<><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z" /><path d="M2 9v1c0 1.1.9 2 2 2h1M16 11h.01" /></>),
   bus: (<><rect x="4" y="3" width="16" height="15" rx="3" /><path d="M4 11h16M7 18v3M17 18v3M9 7h6" /><circle cx="8" cy="14.5" r="1" /><circle cx="16" cy="14.5" r="1" /></>),
+  car: (<><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" /><circle cx="7" cy="17" r="2" /><path d="M9 17h6" /><circle cx="17" cy="17" r="2" /></>),
   shapes: (<><path d="M8.3 10a.7.7 0 0 1-.6-1.1L11.4 3a.7.7 0 0 1 1.2 0l3.7 5.9a.7.7 0 0 1-.6 1.1Z" /><rect x="3" y="14" width="7" height="7" rx="1" /><circle cx="17.5" cy="17.5" r="3.5" /></>),
 };
 const Icon = ({ name, size = 18, color = "currentColor" }) => (
@@ -545,7 +547,9 @@ function CalendarCard() {
             return (
               <span key={day} data-day={day} className={`gk-cal-day is-pay ${dir ? "" : "gk-fade"}`} style={{ ...(dir ? {} : at(500 + day * 12)), ...base, padding: "7px 6px", background: pay.warn ? C.yellowSoft : C.skySoft, boxShadow: pay.warn ? `inset 0 0 0 1.5px ${C.yellow}` : "none" }}>
                 <b style={{ fontSize: 14 }}>{day}</b>
-                <span style={{ fontSize: 12, fontWeight: 600, color: pay.warn ? C.yellowInk : C.text, whiteSpace: "nowrap", overflow: "hidden" }}>{pay.name}</span>
+                {/* 긴 이름은 글자를 조금 줄여 최대 두 줄까지 (넘치면 …) */}
+                <span title={pay.name} style={{ fontSize: 11, lineHeight: 1.2, fontWeight: 600, color: pay.warn ? C.yellowInk : C.text, minWidth: 0, wordBreak: "keep-all", overflowWrap: "anywhere",
+                  display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" }}>{pay.name}</span>
               </span>
             );
           }
