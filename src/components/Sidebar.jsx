@@ -514,7 +514,7 @@ function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
 
         <label className="gk-toggle-row">
           <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span style={label}>결제 3일 전에 알림 받기</span>
+            <span style={label}>결제 알림 받기</span>
             <span style={{ fontSize: 13, color: COLORS.muted }}>사이드바 알림으로 미리 알려드려요</span>
           </span>
           <input id="gk-add-remind" type="checkbox" checked={form.remind} onChange={(e) => set("remind", e.target.checked)} className="gk-switch" />
