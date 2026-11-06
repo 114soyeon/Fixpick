@@ -152,7 +152,7 @@ const ADD_CATEGORIES = [
   { key: "insure", name: "보험", color: "#9B8AFB", tint: "#EDEAFE" },
   { key: "saving", name: "금융/저축", color: "#FFC94D", tint: "#FFF2D2" },
   { key: "transit", name: "교통", color: "#FF9466", tint: "#FFECE3" },
-  { key: "car", name: "자동차", color: "#C4A27F", tint: "#F4EDE4" },
+  { key: "car", name: "자동차", color: "#9A8D82", tint: "#F0ECE8" },
   { key: "etc", name: "기타", color: "#A3ABB5", tint: "#EEF1F4" },
 ];
 const CYCLES = ["매달", "매년"];
