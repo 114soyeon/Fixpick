@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogoMark, Wordmark } from "../components/Sidebar";
 import { emailExists, findEmail, login } from "../utils/auth";
+import "../styles/login.css";
 
 const C = {
   bg: "#F7F9FA",
@@ -18,48 +19,6 @@ const C = {
 };
 const FONT = "'Pretendard', 'Noto Sans KR', system-ui, -apple-system, sans-serif";
 
-const CSS = `
-@keyframes gkLoginRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-@keyframes gkFloat { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(1deg); } }
-@keyframes gkFadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes gkPopIn { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
-@keyframes gkToast { 0% { opacity: 0; transform: translate(-50%, 16px); } 12% { opacity: 1; transform: translate(-50%, 0); } 85% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, 8px); } }
-.gk-login-rise { animation: gkLoginRise .7s cubic-bezier(.22,1,.36,1) both; animation-delay: var(--d, 0ms); }
-.gk-login-float { animation: gkFloat 6s ease-in-out infinite; }
-.gk-login-input { width: 100%; height: 54px; box-sizing: border-box; border-radius: 16px; border: 1.5px solid ${C.line}; background: #FFFFFF; padding: 0 18px; font: inherit; font-size: 16px; color: ${C.text}; outline: none; transition: border-color .15s, box-shadow .15s; }
-.gk-login-input:focus { border-color: ${C.sky}; box-shadow: 0 0 0 4px rgba(92,184,242,.18); }
-.gk-login-input::placeholder { color: #A9AFB6; }
-.gk-login-input.is-error { border-color: ${C.danger}; }
-.gk-login-btn { width: 100%; height: 56px; border: 0; border-radius: 16px; background: ${C.yellow}; color: ${C.text}; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; transition: filter .15s, transform .1s; }
-.gk-login-btn:hover { filter: brightness(.96); }
-.gk-login-btn:active { transform: scale(.99); }
-.gk-login-social { position: relative; width: 100%; flex: none; height: 52px; border-radius: 14px; border: 1.5px solid transparent; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; transition: filter .15s, transform .1s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.gk-login-social:hover { filter: brightness(.96); }
-.gk-login-social__logo { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
-.gk-login-social:active { transform: scale(.98); }
-.gk-login-link { border: 0; background: none; padding: 0; font: inherit; font-size: 14px; color: ${C.muted}; cursor: pointer; }
-.gk-login-link:hover { color: ${C.text}; text-decoration: underline; }
-.gk-login-check { width: 18px; height: 18px; accent-color: ${C.sky}; margin: 0; }
-.gk-login-eye { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border: 0; border-radius: 10px; background: none; color: ${C.muted}; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.gk-login-eye:hover { background: #F3F5F7; }
-.gk-login-page button:focus-visible, .gk-login-page input:focus-visible { outline: 2px solid ${C.sky}; outline-offset: 2px; }
-.gk-modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(11,42,69,.32); backdrop-filter: blur(3px); animation: gkFadeIn .2s ease both; }
-.gk-modal__box { width: 480px; max-width: 100%; background: #FFFFFF; border-radius: 28px; padding: 28px; box-sizing: border-box; box-shadow: 0 30px 80px rgba(11,42,69,.28); display: flex; flex-direction: column; gap: 18px; animation: gkPopIn .32s cubic-bezier(.22,1,.36,1) both; }
-.gk-toast { position: fixed; left: 50%; bottom: 36px; z-index: 110; display: flex; align-items: center; gap: 10px; padding: 14px 20px 14px 14px; border-radius: 999px; background: ${C.text}; color: #fff; font-size: 15px; font-weight: 600; box-shadow: 0 12px 30px rgba(11,42,69,.3); animation: gkToast 2.4s cubic-bezier(.22,1,.36,1) both; }
-.gk-login-mobile-logo { display: none; }
-/* 작은 화면 */
-@media (max-width: 1440px) {
-  .gk-login-brand { padding: 40px 48px !important; }
-  .gk-login-hero svg { width: 230px; height: 230px; }
-  .gk-login-brand h1 { font-size: 34px !important; }
-}
-@media (max-width: 1000px) {
-  .gk-login-brand { display: none !important; }
-  .gk-login-mobile-logo { display: flex; }
-  .gk-login-form-wrap { padding: 32px 24px !important; }
-}
-@media (prefers-reduced-motion: reduce) { .gk-login-rise, .gk-login-float, .gk-modal, .gk-modal__box, .gk-toast { animation: none; } }
-`;
 const at = (ms) => ({ "--d": `${ms}ms` });
 
 /* 간편 로그인 버튼 (공식 로고 이미지는 각 회사 개발자 사이트의 디자인 가이드에서 받아 넣어 주세요) */
@@ -268,7 +227,6 @@ export default function Login() {
 
   return (
     <div className="gk-login-page" style={{ minHeight: "100vh", display: "flex", background: C.bg, fontFamily: FONT, color: C.text, letterSpacing: "-0.2px" }}>
-      <style>{CSS}</style>
 
       {/* 왼쪽: 브랜드 */}
       <section className="gk-login-brand" style={{ flex: "1 1 50%", background: C.skySoft, display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "48px 64px", boxSizing: "border-box", position: "relative", overflow: "hidden" }}>
