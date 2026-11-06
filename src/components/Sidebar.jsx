@@ -171,8 +171,6 @@ const NAME_HINTS = {
 };
 
 /* ───────── 결제 수단 고르기 (화살표를 누르면 카드·계좌·간편결제 목록) ───────── */
-// 카드 목록 (카카오뱅크·토스뱅크·케이뱅크는 '○○ 카드' 대신 이름만)
-const PAY_CARDS = ["국민카드", "신한카드", "삼성카드", "현대카드", "롯데카드", "우리카드", "하나카드", "BC카드", "NH농협카드", "카카오뱅크", "토스뱅크", "케이뱅크"];
 // 카드마다 이름 첫 글자 배지 (실제 회사 로고 대신, 고정콕 색으로)
 const BADGE = {
   국민카드: ["국", 0], 신한카드: ["신", 1], 삼성카드: ["삼", 2], 현대카드: ["현", 3], 롯데카드: ["롯", 4], 우리카드: ["우", 5],
@@ -221,22 +219,18 @@ const CardIcon = ({ name = "" }) => {
 function PayPicker({ value, onChange, recent = [], inputStyle }) {
   const [open, setOpen] = useState(false);
   const [up, setUp] = useState(false); // 아래 공간이 모자라면 위로 펼쳐요
-  const [typed, setTyped] = useState(false); // 직접 쓰는 중이면 그 글자로 찾아요
   const boxRef = useRef(null);
   const inputRef = useRef(null);
 
-  const q = typed ? value.trim() : "";
-  const norm = (t) => t.replace(/\s/g, "").toLowerCase();
-  // 최근에 쓴 결제 수단을 맨 위로, 나머지는 카드 목록 (겹치는 건 한 번만)
-  const recentTop = recent.slice(0, 4);
-  const list = [...recentTop, ...PAY_CARDS.filter((m) => !recentTop.includes(m))].filter((m) => !q || norm(m).includes(norm(q)));
+  // 내가 고정지출에 썼던 카드만 보여줘요 (다른 카드 등록은 '내 고정지출' 페이지에서)
+  const list = recent;
 
   const show = () => {
     const r = boxRef.current?.getBoundingClientRect();
     setUp(r ? window.innerHeight - r.bottom < 310 && r.top > 310 : false);
     setOpen(true);
   };
-  const choose = (m) => { onChange(m); setTyped(false); setOpen(false); };
+  const choose = (m) => { onChange(m); setOpen(false); };
 
   useEffect(() => {
     if (!open) return;
@@ -250,13 +244,13 @@ function PayPicker({ value, onChange, recent = [], inputStyle }) {
 
   return (
     <div ref={boxRef} style={{ position: "relative" }}>
-      <input id="gk-add-pay" ref={inputRef} className="gk-input" autoComplete="off" maxLength={20} placeholder="예) 국민카드, 카카오뱅크"
-        role="combobox" aria-expanded={open} aria-controls="gk-pay-list" aria-autocomplete="list"
-        style={{ ...inputStyle, paddingRight: value ? 84 : 52, cursor: "text" }}
-        value={value} onFocus={show} onClick={show}
-        onChange={(e) => { onChange(e.target.value); setTyped(true); if (!open) show(); }} />
+      <input id="gk-add-pay" ref={inputRef} className="gk-input" readOnly placeholder={list.length ? "사용한 카드에서 선택" : "등록한 카드가 없어요"}
+        role="combobox" aria-expanded={open} aria-controls="gk-pay-list" aria-haspopup="listbox"
+        style={{ ...inputStyle, paddingRight: value ? 84 : 52, cursor: "pointer" }}
+        value={value} onClick={() => (open ? setOpen(false) : show())}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") { e.preventDefault(); show(); } }} />
       {value && (
-        <button type="button" className="gk-pay-clear" aria-label="결제 수단 지우기" onClick={() => { onChange(""); setTyped(false); inputRef.current?.focus(); }}>
+        <button type="button" className="gk-pay-clear" aria-label="결제 수단 지우기" onClick={() => { onChange(""); inputRef.current?.focus(); }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
         </button>
       )}
@@ -270,8 +264,12 @@ function PayPicker({ value, onChange, recent = [], inputStyle }) {
         <div id="gk-pay-list" className="gk-pay-panel" role="listbox" style={up ? { bottom: "calc(100% + 8px)" } : { top: "calc(100% + 8px)" }}>
           <div className="gk-pay-scroll">
             {list.length === 0 && (
-              <div style={{ padding: "22px 12px", textAlign: "center", fontSize: 13.5, color: COLORS.muted, lineHeight: 1.6 }}>
-                목록에 없어요.<br /><b style={{ color: COLORS.text }}>'{value.trim()}'</b> 그대로 저장할게요.
+              <div style={{ padding: "22px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center" }}>
+                <span style={{ width: 40, height: 40, borderRadius: 12, background: "#F3F5F7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={COLORS.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2.5" /><path d="M3 10h18M7 15h3" /></svg>
+                </span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: COLORS.text }}>아직 등록한 카드가 없어요</span>
+                <span style={{ fontSize: 13, color: COLORS.muted, lineHeight: 1.5 }}>카드는 '내 고정지출' 페이지에서 등록할 수 있어요</span>
               </div>
             )}
             {list.map((m) => {
@@ -280,7 +278,6 @@ function PayPicker({ value, onChange, recent = [], inputStyle }) {
                 <button key={m} type="button" role="option" aria-selected={on} className="gk-pay-opt" onMouseDown={(e) => e.preventDefault()} onClick={() => choose(m)}>
                   <CardIcon name={m} />
                   <span style={{ flex: 1, textAlign: "left", fontWeight: on ? 700 : 500 }}>{m}</span>
-                  {recentTop.includes(m) && <span style={{ fontSize: 11.5, color: COLORS.muted }}>최근</span>}
                   {on && (
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5CB8F2" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
                   )}
@@ -294,9 +291,113 @@ function PayPicker({ value, onChange, recent = [], inputStyle }) {
   );
 }
 
+/* ───────── 만기일 고르기 (작은 달력) ───────── */
+const pad2 = (n) => String(n).padStart(2, "0");
+const toKey = (y, m, d) => `${y}-${pad2(m)}-${pad2(d)}`; // m: 1~12
+const todayKey = () => { const t = new Date(); return toKey(t.getFullYear(), t.getMonth() + 1, t.getDate()); };
+const addYears = (n) => { const t = new Date(); const y = t.getFullYear() + n, m = t.getMonth() + 1; return toKey(y, m, Math.min(t.getDate(), new Date(y, m, 0).getDate())); };
+const prettyDate = (key) => { if (!key) return ""; const [y, m, d] = key.split("-").map(Number); return `${y}년 ${m}월 ${d}일`; };
+const leftText = (key) => {
+  if (!key) return "";
+  const [y, m, d] = key.split("-").map(Number);
+  const t = new Date(); const days = Math.round((new Date(y, m - 1, d) - new Date(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000);
+  if (days <= 0) return "오늘 만기";
+  if (days < 31) return `${days}일 남음`;
+  const months = (y - t.getFullYear()) * 12 + (m - 1 - t.getMonth()) - (d < t.getDate() ? 1 : 0);
+  return months >= 12 ? `${Math.floor(months / 12)}년${months % 12 ? ` ${months % 12}개월` : ""} 남음` : `${months}개월 남음`;
+};
+
+function DatePicker({ value, onChange, inputStyle }) {
+  const now = new Date();
+  const start = value ? value.split("-").map(Number) : [now.getFullYear(), now.getMonth() + 1];
+  const [open, setOpen] = useState(false);
+  const [up, setUp] = useState(false);
+  const [view, setView] = useState({ y: start[0], m: start[1] }); // 보고 있는 달
+  const boxRef = useRef(null);
+  const today = todayKey();
+
+  const show = () => {
+    const sel = value ? value.split("-").map(Number) : [now.getFullYear(), now.getMonth() + 1];
+    setView({ y: sel[0], m: sel[1] });
+    const r = boxRef.current?.getBoundingClientRect();
+    setUp(r ? window.innerHeight - r.bottom < 400 && r.top > 400 : false);
+    setOpen(true);
+  };
+  const move = (n) => setView(({ y, m }) => { const t = new Date(y, m - 1 + n, 1); return { y: t.getFullYear(), m: t.getMonth() + 1 }; });
+  const pick = (key) => { onChange(key); setOpen(false); };
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e) => { if (!boxRef.current?.contains(e.target)) setOpen(false); };
+    const onKey = (e) => { if (e.key === "Escape") { e.stopPropagation(); setOpen(false); } };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey, true);
+    return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey, true); };
+  }, [open]);
+
+  const first = new Date(view.y, view.m - 1, 1).getDay();
+  const days = new Date(view.y, view.m, 0).getDate();
+  const cells = [...Array(first).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
+  const isPastMonth = view.y < now.getFullYear() || (view.y === now.getFullYear() && view.m <= now.getMonth() + 1);
+  const quick = [["1년 뒤", 1], ["2년 뒤", 2], ["3년 뒤", 3]];
+
+  return (
+    <div ref={boxRef} style={{ position: "relative" }}>
+      <button id="gk-add-end" type="button" className="gk-input gk-date-btn" aria-haspopup="dialog" aria-expanded={open}
+        style={{ ...inputStyle, display: "flex", alignItems: "center", gap: 8, padding: "0 12px", textAlign: "left", cursor: "pointer" }}
+        onClick={() => (open ? setOpen(false) : show())}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={value ? COLORS.text : COLORS.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+          <rect x="3.5" y="5" width="17" height="15.5" rx="3" /><path d="M3.5 10h17M8 3v4M16 3v4" />
+        </svg>
+        <span style={{ flex: 1, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontSize: 15, fontWeight: value ? 700 : 400, color: value ? COLORS.text : "#A3ABB5" }}>
+          {value ? prettyDate(value) : "날짜 선택"}
+        </span>
+      </button>
+
+      {open && (
+        <div className="gk-dp" role="dialog" aria-label="만기일 선택" style={up ? { bottom: "calc(100% + 8px)" } : { top: "calc(100% + 8px)" }}>
+          <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+            {quick.map(([t, n]) => {
+              const k = addYears(n);
+              return <button key={t} type="button" className="gk-dp-quick" aria-pressed={value === k} onClick={() => pick(k)}>{t}</button>;
+            })}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            <button type="button" className="gk-dp-nav" aria-label="이전 달" disabled={isPastMonth} onClick={() => move(-1)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+            </button>
+            <b style={{ fontSize: 15.5, letterSpacing: "-0.3px" }}>{view.y}년 {view.m}월</b>
+            <button type="button" className="gk-dp-nav" aria-label="다음 달" onClick={() => move(1)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+            </button>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
+            {["일", "월", "화", "수", "목", "금", "토"].map((w, i) => (
+              <span key={w} style={{ height: 26, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, color: i === 0 ? "#E4685D" : COLORS.muted }}>{w}</span>
+            ))}
+            {cells.map((d, i) => {
+              if (!d) return <span key={`e${i}`} />;
+              const key = toKey(view.y, view.m, d);
+              const past = key < today;
+              return (
+                <button key={key} type="button" className="gk-dp-day" disabled={past} aria-pressed={value === key} data-today={key === today || undefined}
+                  style={{ color: past ? "#C9CFD6" : i % 7 === 0 && value !== key ? "#E4685D" : undefined }} onClick={() => pick(key)}>{d}</button>
+              );
+            })}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, paddingTop: 10, borderTop: `1px solid ${COLORS.border}`, minHeight: 32 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: value ? "#2F7FC0" : COLORS.muted }}>{value ? `${prettyDate(value)} · ${leftText(value)}` : "약정·계약이 끝나는 날을 골라 주세요"}</span>
+            {value && <button type="button" className="gk-dp-clear" onClick={() => pick("")}>지우기</button>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
   const [closing, setClosing] = useState(false);
-  const [form, setForm] = useState({ category: "sub", name: "", amount: "", amountType: "fixed", day: "", cycle: "매달", month: new Date().getMonth() + 1, payMethod: "", remind: true });
+  const [form, setForm] = useState({ category: "sub", name: "", amount: "", amountType: "fixed", day: "", cycle: "매달", month: new Date().getMonth() + 1, payMethod: "", endDate: "", remind: true });
   const nameRef = useRef(null);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -359,46 +460,52 @@ function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
           <input id="gk-add-name" ref={nameRef} className="gk-input" style={input} placeholder={`예) ${NAME_HINTS[form.category] || "넷플릭스, 월세, 휴대폰 요금"}`} value={form.name} onChange={(e) => set("name", e.target.value)} maxLength={30} />
         </label>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 28 }}>
-              <label htmlFor="gk-add-amount" style={label}>{form.amountType === "variable" ? "예상 금액" : "금액"}</label>
-              <div className="gk-amt-seg" role="group" aria-label="금액 종류">
-                {[["fixed", "고정"], ["variable", "변동"]].map(([v, t]) => (
-                  <button key={v} type="button" aria-pressed={form.amountType === v} onClick={() => set("amountType", v)}>{t}</button>
-                ))}
-              </div>
-            </div>
-            <div style={{ position: "relative" }}>
-              <input id="gk-add-amount" className="gk-input" inputMode="numeric" style={{ ...input, paddingRight: 44, textAlign: "right", fontWeight: 700 }} placeholder={form.amountType === "variable" ? "예상 금액" : "0"}
-                value={amountNum ? amountNum.toLocaleString("ko-KR") : ""} onChange={(e) => set("amount", e.target.value)} />
-              <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: COLORS.muted }}>원</span>
+        {/* 금액 (한 줄 전체) */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 28 }}>
+            <label htmlFor="gk-add-amount" style={label}>{form.amountType === "variable" ? "예상 금액" : "금액"}</label>
+            <div className="gk-amt-seg" role="group" aria-label="금액 종류">
+              {[["fixed", "고정"], ["variable", "변동"]].map(([v, t]) => (
+                <button key={v} type="button" aria-pressed={form.amountType === v} onClick={() => set("amountType", v)}>{t}</button>
+              ))}
             </div>
           </div>
-          <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <span style={{ ...label, minHeight: 28, display: "flex", alignItems: "center" }}>결제일</span>
-            <div style={{ display: "flex", gap: 8 }}>
-              <select id="gk-add-cycle" className="gk-input" style={{ ...input, width: 78, padding: "0 8px", flexShrink: 0 }} value={form.cycle} onChange={(e) => set("cycle", e.target.value)}>
+          <div style={{ position: "relative" }}>
+            <input id="gk-add-amount" className="gk-input" inputMode="numeric" style={{ ...input, paddingRight: 44, textAlign: "right", fontWeight: 700 }} placeholder={form.amountType === "variable" ? "예상 금액" : "0"}
+              value={amountNum ? amountNum.toLocaleString("ko-KR") : ""} onChange={(e) => set("amount", e.target.value)} />
+            <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: COLORS.muted }}>원</span>
+          </div>
+          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.5, color: form.amountType === "variable" ? "#2F7FC0" : COLORS.muted, display: "flex", gap: 6 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }} aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
+            매달 금액이 달라지면 예상 금액으로 넣고, 결제 후에 실제 금액으로 고칠 수 있어요
+          </p>
+        </div>
+
+        {/* 결제일 + 만기일 (한 줄) */}
+        <div className="gk-add-dates" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
+            <span style={label}>결제일</span>
+            <div style={{ display: "flex", gap: 6 }}>
+              <select id="gk-add-cycle" className="gk-input" style={{ ...input, width: 74, padding: "0 6px 0 10px", flexShrink: 0 }} value={form.cycle} onChange={(e) => set("cycle", e.target.value)}>
                 {CYCLES.map((c) => <option key={c}>{c}</option>)}
               </select>
               {form.cycle === "매년" && (
-                <select id="gk-add-month" className="gk-input" aria-label="결제 월" style={{ ...input, width: 70, padding: "0 6px", flexShrink: 0 }} value={form.month} onChange={(e) => set("month", e.target.value)}>
+                <select id="gk-add-month" className="gk-input" aria-label="결제 월" style={{ ...input, width: 66, padding: "0 4px 0 8px", flexShrink: 0 }} value={form.month} onChange={(e) => set("month", e.target.value)}>
                   {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}월</option>)}
                 </select>
               )}
-              <div style={{ position: "relative", flex: 1 }}>
-                <input id="gk-add-day" className="gk-input" inputMode="numeric" style={{ ...input, paddingRight: 34, textAlign: "right", fontWeight: 700 }} placeholder="10"
+              <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
+                <input id="gk-add-day" className="gk-input" inputMode="numeric" style={{ ...input, padding: "0 30px 0 8px", textAlign: "right", fontWeight: 700 }} placeholder="10"
                   value={form.day} onChange={(e) => set("day", e.target.value.replace(/[^0-9]/g, "").slice(0, 2))} />
-                <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: COLORS.muted }}>일</span>
+                <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: COLORS.muted }}>일</span>
               </div>
             </div>
           </label>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
+            <label htmlFor="gk-add-end" style={label}>만기일 <span style={{ fontWeight: 400, color: COLORS.muted }}>(선택)</span></label>
+            <DatePicker value={form.endDate} onChange={(v) => set("endDate", v)} inputStyle={input} />
+          </div>
         </div>
-
-        <p style={{ margin: "-8px 0 0", fontSize: 13, lineHeight: 1.5, color: form.amountType === "variable" ? "#2F7FC0" : COLORS.muted, display: "flex", gap: 6 }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }} aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
-          매달 금액이 달라지면 예상 금액으로 넣고, 결제 후에 실제 금액으로 고칠 수 있어요
-        </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <label htmlFor="gk-add-pay" style={label}>결제 수단 <span style={{ fontWeight: 400, color: COLORS.muted }}>(선택)</span></label>
@@ -516,6 +623,22 @@ const css = `
 .gk-pay-opt{display:flex;align-items:center;gap:12px;width:100%;height:46px;padding:0 10px;border:0;border-radius:12px;background:transparent;font:inherit;font-size:14.5px;color:${COLORS.text};cursor:pointer;transition:background .12s}
 .gk-pay-opt:hover{background:#F3F8FC}
 .gk-pay-opt[aria-selected="true"]{background:#EAF6FE}
+.gk-date-btn[aria-expanded="true"]{border-color:#5CB8F2 !important;background:#FFFFFF !important;box-shadow:0 0 0 4px rgba(92,184,242,.18)}
+.gk-dp{position:absolute;right:0;width:316px;z-index:6;background:#FFFFFF;border-radius:20px;padding:16px;box-sizing:border-box;box-shadow:0 18px 44px rgba(11,42,69,.18),0 0 0 1px rgba(11,42,69,.06);animation:gkPayIn .18s cubic-bezier(.22,1,.36,1) both}
+.gk-dp-quick{flex:1;height:32px;border:0;border-radius:10px;background:#F3F5F7;font:inherit;font-size:13px;font-weight:600;color:${COLORS.text};cursor:pointer;transition:background .15s}
+.gk-dp-quick:hover{background:#E6EEF5}
+.gk-dp-quick[aria-pressed="true"]{background:#DCEFFD;color:#1D6FA8;box-shadow:inset 0 0 0 1.5px #5CB8F2}
+.gk-dp-nav{width:32px;height:32px;border:0;border-radius:10px;background:#F3F5F7;color:${COLORS.text};display:flex;align-items:center;justify-content:center;cursor:pointer}
+.gk-dp-nav:hover:not(:disabled){background:#E6EEF5}
+.gk-dp-nav:disabled{opacity:.35;cursor:default}
+.gk-dp-day{height:36px;border:0;border-radius:11px;background:transparent;font:inherit;font-size:14px;font-weight:600;color:${COLORS.text};cursor:pointer;transition:background .12s,color .12s}
+.gk-dp-day:hover:not(:disabled){background:#EAF6FE}
+.gk-dp-day:disabled{cursor:default}
+.gk-dp-day[data-today]{box-shadow:inset 0 0 0 1.5px #5CB8F2}
+.gk-dp-day[aria-pressed="true"]{background:#0B2A45 !important;color:#FFFFFF !important;box-shadow:none}
+.gk-dp-clear{border:0;background:none;font:inherit;font-size:13px;font-weight:600;color:${COLORS.muted};cursor:pointer;padding:4px 6px;border-radius:8px}
+.gk-dp-clear:hover{background:#F3F5F7;color:${COLORS.text}}
+@media (max-width: 480px){.gk-add-dates{grid-template-columns:1fr !important}}
 .gk-amt-seg{display:flex;padding:3px;gap:2px;background:#F1F4F7;border-radius:10px}
 .gk-amt-seg button{height:24px;padding:0 10px;border:0;border-radius:7px;background:transparent;font:inherit;font-size:12.5px;font-weight:600;color:${COLORS.muted};cursor:pointer;transition:background .15s,color .15s}
 .gk-amt-seg button[aria-pressed="true"]{background:#FFFFFF;color:${COLORS.text};box-shadow:0 1px 3px rgba(11,42,69,.12)}

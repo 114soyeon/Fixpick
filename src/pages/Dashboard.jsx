@@ -189,6 +189,7 @@ const toCard = (p) => ({
   title: `${p.name} ${p.amountType === "variable" ? "약 " : ""}${won(p.amount)}원`,
   sub: `${p.amountType === "variable" ? "예상 금액 · " : ""}${p.payMethod || "결제 수단 미등록"} · ${p.cycle === "매년" ? `매년 ${p.month}월 ${p.day}일` : `매달 ${p.day}일`}`,
   warn: p.amount >= BIG,
+  cat: CATEGORIES.find((c) => c.key === p.category) || CATEGORIES[CATEGORIES.length - 1], // 카드 색 = 카테고리 색
 });
 
 /* ───────── 아이콘 ───────── */
@@ -281,21 +282,16 @@ function CategoryCard({ c, total, delay, onOpen }) {
   const pct = total ? Math.round((c.amount / total) * 100) : 0;
   const shown = c.list.slice(0, MAX_LINES);
   const rest = c.list.length - shown.length;
-  const hl = c.highlight;
   return (
     <div className="gk-rise gk-cat-card" role="button" tabIndex={0} onClick={onOpen} onKeyDown={(e) => e.key === "Enter" && onOpen()}
       style={{ ...at(delay), borderRadius: 20, padding: "18px 18px 16px", display: "flex", flexDirection: "column", gap: 14, minWidth: 0,
-        background: hl ? "#EEF7FE" : C.bg, border: hl ? `1.5px solid ${C.sky}` : `1px solid ${C.line}`, boxSizing: "border-box" }}>
+        background: C.bg, border: `1px solid ${C.line}`, boxSizing: "border-box" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <span style={{ width: 36, height: 36, borderRadius: 11, background: c.tint, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <Icon name={c.icon} color={c.ink} />
         </span>
         <b style={{ fontSize: 16, flex: 1, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</b>
-        {hl ? (
-          <span style={{ fontSize: 11, fontWeight: 700, background: C.sky, color: "#FFFFFF", padding: "3px 7px", borderRadius: 999, flexShrink: 0 }}>구독 관리</span>
-        ) : (
-          <span style={{ fontSize: 13, fontWeight: 600, color: C.muted, flexShrink: 0 }}>{c.count}건</span>
-        )}
+        <span style={{ fontSize: 13, fontWeight: 600, color: C.muted, flexShrink: 0 }}>{c.count}건</span>
       </div>
 
       <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-1px", lineHeight: 1, whiteSpace: "nowrap" }}>
@@ -303,7 +299,7 @@ function CategoryCard({ c, total, delay, onOpen }) {
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{ flex: 1, height: 6, borderRadius: 3, background: hl ? "#D3E9F9" : "#E6EBF0", overflow: "hidden" }}>
+        <div style={{ flex: 1, height: 6, borderRadius: 3, background: "#E6EBF0", overflow: "hidden" }}>
           <div className="gk-grow-x" style={{ ...at(delay + 200), width: `${Math.max(pct, 3)}%`, height: "100%", borderRadius: 3, background: c.color }} />
         </div>
         <span style={{ fontSize: 13, fontWeight: 700, color: C.sub, width: 38, textAlign: "right" }}>{pct}%</span>
@@ -545,10 +541,10 @@ function CalendarCard() {
           }
           if (pay) {
             return (
-              <span key={day} data-day={day} className={`gk-cal-day is-pay ${dir ? "" : "gk-fade"}`} style={{ ...(dir ? {} : at(500 + day * 12)), ...base, padding: "7px 6px", background: pay.warn ? C.yellowSoft : C.skySoft, boxShadow: pay.warn ? `inset 0 0 0 1.5px ${C.yellow}` : "none" }}>
+              <span key={day} data-day={day} className={`gk-cal-day is-pay ${dir ? "" : "gk-fade"}`} style={{ ...(dir ? {} : at(500 + day * 12)), ...base, padding: "7px 6px", background: C.skySoft }}>
                 <b style={{ fontSize: 14 }}>{day}</b>
                 {/* 긴 이름은 글자를 조금 줄여 최대 두 줄까지 (넘치면 …) */}
-                <span title={pay.name} style={{ fontSize: 11, lineHeight: 1.2, fontWeight: 600, color: pay.warn ? C.yellowInk : C.text, minWidth: 0, wordBreak: "keep-all", overflowWrap: "anywhere",
+                <span title={pay.name} style={{ fontSize: 11, lineHeight: 1.2, fontWeight: 600, color: C.text, minWidth: 0, wordBreak: "keep-all", overflowWrap: "anywhere",
                   display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" }}>{pay.name}</span>
               </span>
             );
@@ -569,14 +565,14 @@ function CalendarCard() {
         )}
         {upcoming.map((u, i) => (
           <a key={u.key ?? u.day} href="/calendar" onClick={(e) => { e.preventDefault(); navigate("/calendar", { state: { year: TODAY.year, month: u.month, day: u.payDay } }); }} className="gk-rise gk-cal-up" style={{ ...at(520 + i * 90), flex: 1, maxHeight: 104, display: "flex", alignItems: "center", gap: 14, borderRadius: 20, padding: "14px 16px 14px 14px", textDecoration: "none", color: C.text,
-            background: u.warn ? C.yellowSoft : C.skySoft }}>
-            <span style={{ flexShrink: 0, width: 60, height: 60, borderRadius: 16, background: u.warn ? C.yellow : C.sky, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", lineHeight: 1.1 }}>
+            background: u.cat.tint }}>
+            <span style={{ flexShrink: 0, width: 60, height: 60, borderRadius: 16, background: "#FFFFFF", color: u.cat.ink, boxShadow: "0 1px 3px rgba(11,42,69,.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", lineHeight: 1.1 }}>
               <span style={{ fontSize: 12, fontWeight: 600 }}>{u.month}월</span>
               <b style={{ fontSize: 22, fontWeight: 700 }}>{u.payDay}</b>
             </span>
             <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
               <b style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.title}</b>
-              <span style={{ fontSize: 13, color: u.warn ? C.yellowInk : C.sub, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.sub}</span>
+              <span style={{ fontSize: 13, color: u.cat.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{u.sub}</span>
             </span>
             <span style={{ flexShrink: 0, height: 40, padding: "0 14px", borderRadius: 999, background: C.text, color: "#FFFFFF", fontSize: 17, fontWeight: 700, display: "flex", alignItems: "center" }}>{ddayText(u.dday)}</span>
           </a>
