@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogoMark, Wordmark } from "../components/Sidebar";
+import { LogoMark, Wordmark } from "../components/common/Logo";
 import { emailExists, findEmail, login } from "../utils/auth";
 import "../styles/login.css";
 
