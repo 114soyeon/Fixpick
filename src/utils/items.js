@@ -90,8 +90,8 @@ export function nextPayments(items, today, count = 3) {
   return list.sort((a, b) => a.date - b.date).slice(0, count);
 }
 
-/** 만기일(endDate)이 지난 결제인지 */
-const isEnded = (item, date) => {
+/** 만기일(endDate)이 지난 결제인지 (리포트에서도 써요) */
+export const isEnded = (item, date) => {
   if (!item.endDate) return false;
   const [y, m, d] = item.endDate.split("-").map(Number);
   return date > new Date(y, m - 1, d);

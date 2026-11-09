@@ -219,13 +219,15 @@ const Calendar = () => {
             <p className="paycal-summary-label">{viewDate.getMonth() + 1}월에 남은 결제</p>
             <p className="paycal-summary-amount">{formatWon(totalAmount - paidAmount)}</p>
 
-            {/* 결제 진행률 (결제된 건수 / 이번 달 전체 건수) */}
-            <div className="paycal-progress">
-              <div className="paycal-progress-bar" style={{ width: `${progress}%` }} />
+            {/* 결제 진행률: [진행 바] 결제된 건수/이번 달 전체 건수 (시안: 같은 줄) */}
+            <div className="paycal-progress-row">
+              <div className="paycal-progress">
+                <div className="paycal-progress-bar" style={{ width: `${progress}%` }} />
+              </div>
+              <p className="paycal-progress-text">
+                {paidList.length}/{monthPayments.length}건
+              </p>
             </div>
-            <p className="paycal-progress-text">
-              {paidList.length}/{monthPayments.length}건
-            </p>
 
             <hr className="paycal-divider" />
 
@@ -240,7 +242,7 @@ const Calendar = () => {
           </div>
 
           {/* 선택한 날짜의 결제 목록 (5개가 넘으면 스크롤) */}
-          <div className="paycal-card paycal-detail">
+          <div className="paycal-card paycal-detail paycal-day-card">
             <div className="paycal-detail-head">
               <h3 className="paycal-detail-title">{formatDay(selectedDate)}</h3>
               <span className="paycal-detail-total">
@@ -252,6 +254,7 @@ const Calendar = () => {
                 {dayPayments.map((item) => (
                   <PayItem key={item.id} item={item} />
                 ))}
+                
               </ul>
             ) : (
               <p className="paycal-empty">이 날은 결제 일정이 없어요</p>
@@ -259,7 +262,7 @@ const Calendar = () => {
           </div>
 
           {/* 큰 지출 미리 보기 (오늘부터 3개월 안, 금액 큰 순서) */}
-          <div className="paycal-card paycal-detail">
+          <div className="paycal-card paycal-detail paycal-big-card">
             <div className="paycal-detail-head paycal-detail-head-col">
               <h3 className="paycal-detail-title">큰 지출 미리 보기</h3>
               <p className="paycal-detail-desc">자주 안 나가서 놓치기 쉬운 돈이에요</p>

@@ -1,0 +1,584 @@
+/* =========================================================
+   지출 리포트 페이지 (pages/Report.jsx)
+   - 다른 컴포넌트와 겹치지 않게 class는 모두 "rpt-" 로 시작
+   - 색·간격은 시안(04_지출 리포트 _ 월간 / 연간, 1920px) 기준
+   ========================================================= */
+
+/* ───── 색상 변수 (이 페이지 안에서만 사용) ───── */
+.rpt-page {
+  --rpt-navy: #0b2a45;       /* 기본 글자 */
+  --rpt-navy-soft: #3b4d63;  /* 파란 요약 카드 보조 글자 */
+  --rpt-gray: #52637a;       /* 보조 글자 */
+  --rpt-border: #e3eaf0;     /* 카드 테두리, 표 줄 */
+  --rpt-blue: #5bb8f5;       /* 강조(선택 버튼, 차트 선) */
+  --rpt-blue-light: #dceffd; /* 연한 파랑(첫 번째 요약 카드) */
+  --rpt-green: #067647;      /* 줄어든 금액 */
+  --rpt-box: #f3f5f7;        /* "올해 달라진 점" 안쪽 카드 */
+  --rpt-bg: #f7f9fa;         /* 페이지 배경 */
+
+  padding: 40px;
+  color: var(--rpt-navy);
+  background: var(--rpt-bg);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* ───── 페이지 제목 + 월간/연간 버튼 ───── */
+.rpt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.rpt-header-title {
+  font-size: 28px;
+  font-weight: 700;
+}
+.rpt-header-desc {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--rpt-gray);
+}
+
+/* 월간 | 연간 버튼 (흰 상자 안에 파란 알약) */
+.rpt-toggle {
+  display: flex;
+  flex-shrink: 0;
+  padding: 3px;
+  background: #fff;
+  border: 1px solid var(--rpt-border);
+  border-radius: 12px;
+}
+.rpt-toggle-btn {
+  width: 70px;
+  height: 36px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--rpt-gray);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.rpt-toggle-btn:hover {
+  color: var(--rpt-navy);
+}
+.rpt-toggle-btn.is-active {
+  background: var(--rpt-blue);
+  color: var(--rpt-navy);
+}
+
+/* ───── 공통 카드 ───── */
+.rpt-card {
+  background: #fff;
+  border: 1px solid var(--rpt-border);
+  border-radius: 18px;
+  padding: 22px;
+  box-sizing: border-box;
+  min-width: 0;
+}
+.rpt-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.rpt-card-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+.rpt-card-desc {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--rpt-gray);
+}
+.rpt-empty {
+  padding: 40px 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--rpt-gray);
+}
+.rpt-empty-small {
+  padding: 24px 0;
+  font-size: 13px;
+}
+
+/* 카테고리 아이콘 박스 (크기는 JSX에서) */
+.rpt-cat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+
+/* 금액 색 */
+.rpt-down { color: var(--rpt-green); font-weight: 600; }
+.rpt-strong { font-weight: 600; }
+.rpt-muted { color: var(--rpt-gray); }
+
+/* ───── 요약 카드 3개 ───── */
+.rpt-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.rpt-stat {
+  min-height: 110px;
+  padding: 20px 22px;
+}
+/* 첫 번째 카드: 연한 파랑, 테두리 없음 */
+.rpt-stat.is-highlight {
+  background: var(--rpt-blue-light);
+  border-color: var(--rpt-blue-light);
+}
+.rpt-stat-label {
+  font-size: 13px;
+  color: var(--rpt-gray);
+}
+.rpt-stat.is-highlight .rpt-stat-label,
+.rpt-stat.is-highlight .rpt-stat-sub {
+  color: var(--rpt-navy-soft);
+}
+.rpt-stat-value {
+  margin-top: 4px;
+  font-size: 26px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rpt-stat-value.is-down {
+  color: var(--rpt-green);
+}
+.rpt-arrow {
+  margin-right: 6px;
+}
+.rpt-stat-sub {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--rpt-gray);
+}
+
+/* ───── 차트 카드 2개 ───── */
+.rpt-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.rpt-chart-card {
+  min-height: 359px;
+}
+
+/* 카테고리 비율: 도넛 + 목록 */
+.rpt-category {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-top: 8px;
+}
+.rpt-donut {
+  position: relative; /* 가운데 글자를 차트 위에 겹치려고 */
+  width: 256px;
+  height: 256px;
+  flex-shrink: 0;
+}
+.rpt-donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.rpt-donut-label {
+  font-size: 13px;
+  color: var(--rpt-gray);
+}
+.rpt-donut-value {
+  margin-top: 2px;
+  font-size: 30px;
+  font-weight: 700;
+}
+.rpt-legend {
+  flex: 1;
+  min-width: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rpt-legend-row {
+  display: grid;
+  grid-template-columns: 9px 24px minmax(0, 1fr) auto 90px;
+  align-items: center;
+  column-gap: 10px;
+  height: 29px;
+  font-size: 13px;
+}
+.rpt-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+}
+.rpt-legend-row .rpt-cat-icon {
+  border-radius: 7px;
+}
+.rpt-legend-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.rpt-legend-pct {
+  font-weight: 600;
+  text-align: right;
+}
+.rpt-legend-amount {
+  text-align: right;
+  color: var(--rpt-gray);
+}
+
+/* 꺾은선 차트 카드 */
+.rpt-trend-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+.rpt-trend-side-label {
+  font-size: 12px;
+  color: var(--rpt-gray);
+}
+.rpt-trend-side-value {
+  margin-top: 2px;
+  font-size: 20px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.rpt-line {
+  position: relative; /* chart.js가 이 상자 크기에 맞춰 그려요 */
+  margin-top: 14px;
+  width: 100%;
+  height: 240px; /* 시안 차트 높이 */
+}
+
+/* ───── 월간: 지난달과 비교 표 ───── */
+.rpt-table {
+  width: 100%;
+  margin-top: 18px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.rpt-table th {
+  padding: 0 0 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--rpt-gray);
+  border-bottom: 1px solid var(--rpt-border);
+}
+.rpt-table td {
+  height: 31px;
+  padding: 0;
+  border-bottom: 1px solid var(--rpt-border);
+}
+.rpt-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.rpt-col-cat {
+  width: 20.5%;
+  text-align: left;
+}
+.rpt-col-num {
+  width: 15.5%;
+  text-align: right;
+  white-space: nowrap;
+}
+.rpt-table .rpt-col-note {
+  padding-left: 16px;
+  text-align: left;
+}
+.rpt-table-wrap {
+  overflow-x: auto; /* 표가 카드보다 넓으면 표 안에서만 옆으로 스크롤 */
+}
+.rpt-table-cat {
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ───── 연간: 올해 달라진 점 ───── */
+.rpt-changes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 13px; /* 시안: 카드 위 ~ 회색 카드 위 56px → 1080px 화면에 스크롤 없이 딱 맞음 */
+}
+.rpt-change {
+  min-height: 318px;
+  padding: 22px;
+  background: var(--rpt-box);
+  border-radius: 14px;
+  box-sizing: border-box;
+  min-width: 0;
+}
+.rpt-change-value {
+  margin-top: 6px;
+  font-size: 24px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rpt-change-value.is-down {
+  color: var(--rpt-green);
+}
+.rpt-change-list {
+  list-style: none;
+  margin: 33px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 41px;
+}
+.rpt-change-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rpt-change-row .rpt-cat-icon {
+  border-radius: 9px;
+}
+.rpt-change-info {
+  flex: 1;
+  min-width: 0;
+}
+.rpt-change-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+.rpt-change-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--rpt-gray);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.rpt-change-amount {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.rpt-change-amount.is-down {
+  color: var(--rpt-green);
+}
+
+/* =========================================================
+   반응형 (프로젝트 공통 기준: 1439 / 1279 / 1023 / 767px)
+   ========================================================= */
+
+/* Desktop 1280~1439: 차트 2개를 위아래로, 달라진 점 카드 2열 */
+@media (max-width: 1439px) {
+  .rpt-charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rpt-changes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rpt-change {
+    min-height: 0;
+  }
+}
+
+/* Laptop 1024~1279: 여백 줄이기 */
+@media (max-width: 1279px) {
+  .rpt-page {
+    padding: 24px;
+  }
+  .rpt-stat-value {
+    font-size: 22px;
+  }
+}
+
+/* Tablet 768~1023: 요약 카드 1열 */
+@media (max-width: 1023px) {
+  .rpt-stats {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .rpt-stat {
+    min-height: 0;
+  }
+}
+
+/* Mobile ~767: 전부 1열, 도넛은 목록 위로, 표는 "내용" 칸 숨김 */
+@media (max-width: 767px) {
+  .rpt-page {
+    padding: 16px;
+  }
+  .rpt-header {
+    flex-direction: column;
+  }
+  .rpt-header-title {
+    font-size: 24px;
+  }
+  .rpt-charts,
+  .rpt-changes {
+    gap: 16px;
+  }
+  .rpt-changes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rpt-category {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .rpt-donut {
+    width: 220px;
+    height: 220px;
+  }
+  .rpt-legend {
+    width: 100%;
+  }
+  .rpt-legend-row {
+    grid-template-columns: 9px 24px minmax(0, 1fr) auto auto;
+    column-gap: 8px;
+  }
+  .rpt-table {
+    min-width: 400px; /* 이보다 좁으면 글자가 세로로 꺾여서 */
+  }
+  .rpt-table .rpt-col-note {
+    display: none;
+  }
+  .rpt-col-cat {
+    width: auto;
+  }
+  .rpt-col-num {
+    width: auto;
+    padding-left: 8px;
+  }
+  .rpt-trend-side-value {
+    font-size: 17px;
+  }
+}
+
+/* =========================================================
+   브라우저 창 높이에 딱 맞추기 (넓은 화면 1440px 이상 + 창 높이 900px 이상)
+   - 창 높이 1080px일 때 시안 크기 그대로
+   - 창이 낮아지면: 간격 조금씩 줄이기 + 차트 카드·아래 카드가 남은 높이를 나눠 가짐
+     (시안 비율 359 : 397)
+   - 900px보다 낮으면 글자가 겹쳐서, 이 규칙을 안 쓰고 원래처럼 스크롤해요
+   ========================================================= */
+@media (min-width: 1440px) and (min-height: 900px) {
+  .rpt-page {
+    /* 창 높이 1080 → 시안 값, 900 → 최소값. 그 사이는 비례해서 줄어요 */
+    --rpt-pad-y: clamp(24px, calc(40px - (1080px - 100vh) * 0.089), 40px);
+    --rpt-gap-y: clamp(16px, calc(24px - (1080px - 100vh) * 0.044), 24px);
+    --rpt-card-pad-y: clamp(16px, calc(22px - (1080px - 100vh) * 0.033), 22px);
+
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--rpt-pad-y);
+    padding-bottom: var(--rpt-pad-y);
+  }
+  .rpt-header {
+    flex-shrink: 0;
+    margin-bottom: clamp(16px, calc(28px - (1080px - 100vh) * 0.067), 28px);
+  }
+  .rpt-stats {
+    flex-shrink: 0;
+    margin-bottom: var(--rpt-gap-y);
+  }
+
+  /* 남은 높이를 차트 줄 : 아래 카드 = 359 : 397 로 나눠요 */
+  .rpt-charts {
+    flex: 359 1 0;
+    min-height: 0;
+    margin-bottom: var(--rpt-gap-y);
+  }
+  .rpt-compare,
+  .rpt-changes-card {
+    flex: 397 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .rpt-chart-card,
+  .rpt-compare,
+  .rpt-changes-card {
+    padding-top: var(--rpt-card-pad-y);
+    padding-bottom: var(--rpt-card-pad-y);
+  }
+
+  /* ── 차트 카드: 안쪽이 카드 높이에 맞춰 줄어요 ── */
+  .rpt-chart-card {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .rpt-category {
+    flex: 1;
+    min-height: 0;
+  }
+  .rpt-donut {
+    width: auto;
+    height: 100%;
+    max-height: 256px; /* 시안 크기보다 커지지는 않게 */
+    aspect-ratio: 1 / 1;
+  }
+  .rpt-legend {
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .rpt-legend-row {
+    height: auto;
+    flex: 0 1 29px; /* 기본 29px, 자리가 모자라면 줄어요 */
+    min-height: 0;
+  }
+  .rpt-line {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+  }
+  /* 차트 그림이 상자 크기를 밀어내지 않게 (그래야 줄어들 수 있어요) */
+  .rpt-donut canvas,
+  .rpt-line canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  /* ── 월간 표: 줄 높이 = 남은 높이 ÷ 줄 수 (26 ~ 31px) ── */
+  .rpt-table-wrap {
+    flex: 1;
+    min-height: 0;
+    container-type: size; /* 아래 100cqh = 이 상자 높이 */
+  }
+  .rpt-table td {
+    /* 52px = 표 위 여백 18 + 머리줄 + 줄마다 테두리 (실제로 재서 맞춘 값) */
+    height: clamp(26px, calc((100cqh - 52px) / var(--rpt-rows, 9)), 31px);
+  }
+
+  /* ── 연간 "올해 달라진 점": 회색 카드 안 간격이 줄어요 ── */
+  .rpt-changes {
+    flex: 1;
+    min-height: 0;
+  }
+  .rpt-change {
+    min-height: 0;
+    container-type: size; /* 아래 100cqh = 회색 카드 높이 (시안 318px) */
+  }
+  .rpt-change-list {
+    /* 회색 카드가 시안보다 줄어든 만큼, 위 여백 30% + 줄 사이 35%씩 줄여요 */
+    margin-top: clamp(12px, calc(33px - (318px - 100cqh) * 0.3), 33px);
+    gap: clamp(10px, calc(41px - (318px - 100cqh) * 0.35), 41px);
+  }
+}
