@@ -23,6 +23,3 @@ dist-ssr
 *.sln
 *.sw?
 .env
-
-table_after.sql
-table_before.sql
