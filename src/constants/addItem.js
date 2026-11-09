@@ -34,7 +34,11 @@ export const BADGE = {
 /** 배지 색 개수 (sidebar.css의 .gk-card-badge.is-c0 ~ is-c9) */
 export const BADGE_COLOR_COUNT = 10;
 
-export const CYCLE_OPTIONS = [{ value: "매달", label: "매달" }, { value: "매년", label: "매년" }];
+export const CYCLE_OPTIONS = ["매일", "매주", "매달", "매년", "사용자화"].map((v) => ({ value: v, label: v }));
+/** 사용자화: N + 단위 + "마다" */
+export const UNIT_OPTIONS = [{ value: "day", label: "일" }, { value: "week", label: "주" }, { value: "month", label: "개월" }, { value: "year", label: "년" }];
+/** 매주: 월요일부터 (값은 Date.getDay() 번호, 일요일 = 0) */
+export const WEEKDAY_OPTIONS = [1, 2, 3, 4, 5, 6, 0].map((v) => ({ value: v, label: `${"일월화수목금토"[v]}요일` }));
 export const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: `${i + 1}월` }));
 export const AMOUNT_TYPES = [["fixed", "고정"], ["variable", "변동"]];
 export const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ADD_CATEGORIES, AMOUNT_TYPES, CYCLE_OPTIONS, MONTH_OPTIONS, NAME_HINTS } from "../../constants/addItem";
+import { ADD_CATEGORIES, AMOUNT_TYPES, CYCLE_OPTIONS, MONTH_OPTIONS, NAME_HINTS, UNIT_OPTIONS, WEEKDAY_OPTIONS } from "../../constants/addItem";
+import { todayKey } from "../../utils/date";
+import { ruleOf } from "../../utils/items";
 import DatePicker from "./DatePicker";
 import MiniSelect from "./MiniSelect";
 import PayPicker from "./PayPicker";
@@ -8,14 +10,18 @@ import PayPicker from "./PayPicker";
 /** 고정지출 항목 추가 창 */
 export default function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
   const [closing, setClosing] = useState(false);
-  const [form, setForm] = useState({ category: "sub", name: "", amount: "", amountType: "fixed", day: "", cycle: "매달", month: new Date().getMonth() + 1, payMethod: "", endDate: "", remind: true });
+  const [form, setForm] = useState({ category: "sub", name: "", amount: "", amountType: "fixed", day: "", cycle: "매달", month: new Date().getMonth() + 1, weekday: new Date().getDay(), every: "2", unit: "month", payMethod: "", endDate: "", remind: true });
   const nameRef = useRef(null);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const close = () => { setClosing(true); setTimeout(onClose, 180); };
   const amountNum = Number(form.amount.replace(/[^0-9]/g, ""));
   const dayNum = Number(form.day);
-  const valid = form.name.trim() && amountNum > 0 && dayNum >= 1 && dayNum <= 31;
+  const everyNum = Number(form.every);
+  const { unit } = ruleOf(form); // 매일=day, 매주=week, 매달=month, 매년=year, 사용자화=고른 단위
+  const custom = form.cycle === "사용자화";
+  const needDay = unit === "month" || unit === "year";
+  const valid = form.name.trim() && amountNum > 0 && (!needDay || (dayNum >= 1 && dayNum <= 31)) && (!custom || (everyNum >= 1 && everyNum <= 99));
   const variable = form.amountType === "variable";
 
   useEffect(() => {
@@ -31,7 +37,13 @@ export default function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
   const submit = (e) => {
     e.preventDefault();
     if (!valid) return;
-    onSubmit({ ...form, name: form.name.trim(), payMethod: form.payMethod.trim(), amount: amountNum, day: dayNum, month: Number(form.month) });
+    onSubmit({
+      ...form,
+      name: form.name.trim(), payMethod: form.payMethod.trim(), amount: amountNum,
+      day: needDay ? dayNum : undefined, month: Number(form.month), weekday: Number(form.weekday),
+      every: custom ? everyNum : undefined, unit: custom ? unit : undefined, // 사용자화일 때만 저장
+      start: todayKey(),
+    });
     close();
   };
 
@@ -88,18 +100,34 @@ export default function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
 
         {/* 결제일 + 만기일 (한 줄) */}
         <div className="gk-add-dates">
-          <div className="gk-field gk-field--shrink">
-            <label htmlFor="gk-add-day" className="gk-field-label">결제일</label>
+          {/* 매년·사용자화는 칸이 많아서 결제일이 한 줄을 다 써요 (만기일은 아래 줄로) */}
+          <div className={`gk-field gk-field--shrink ${unit === "year" || custom ? "gk-field--wide" : ""}`}>
+            <label htmlFor="gk-add-cycle" className="gk-field-label">결제일</label>
             <div className="gk-add-day-row">
               <MiniSelect id="gk-add-cycle" label="결제 주기" value={form.cycle} options={CYCLE_OPTIONS} onChange={(v) => set("cycle", v)} className="gk-mini--cycle" />
-              {form.cycle === "매년" && (
+              {/* 사용자화: [2] [주] 마다 [수요일] 처럼 */}
+              {custom && (
+                <>
+                  <input id="gk-add-every" className="gk-input gk-input--every" inputMode="numeric" aria-label="반복 간격" placeholder="2"
+                    value={form.every} onChange={(e) => set("every", e.target.value.replace(/[^0-9]/g, "").slice(0, 2))} />
+                  <MiniSelect id="gk-add-unit" label="반복 단위" value={form.unit} options={UNIT_OPTIONS} onChange={(v) => set("unit", v)} className="gk-mini--unit" />
+                  <span className="gk-add-day-note">마다</span>
+                </>
+              )}
+              {form.cycle === "매일" && <span className="gk-add-day-note">매일 나가요</span>}
+              {unit === "week" && (
+                <MiniSelect id="gk-add-weekday" label="결제 요일" value={Number(form.weekday)} options={WEEKDAY_OPTIONS} onChange={(v) => set("weekday", v)} className="gk-mini--weekday" />
+              )}
+              {unit === "year" && (
                 <MiniSelect id="gk-add-month" label="결제 월" value={Number(form.month)} options={MONTH_OPTIONS} onChange={(v) => set("month", v)} className="gk-mini--month" grid />
               )}
-              <div className="gk-unit-wrap gk-unit-wrap--day">
-                <input id="gk-add-day" className="gk-input gk-input--day" inputMode="numeric" placeholder="10"
-                  value={form.day} onChange={(e) => set("day", e.target.value.replace(/[^0-9]/g, "").slice(0, 2))} />
-                <span className="gk-unit gk-unit--day">일</span>
-              </div>
+              {needDay && (
+                <div className="gk-unit-wrap gk-unit-wrap--day">
+                  <input id="gk-add-day" className="gk-input gk-input--day" inputMode="numeric" placeholder="10" aria-label="결제일"
+                    value={form.day} onChange={(e) => set("day", e.target.value.replace(/[^0-9]/g, "").slice(0, 2))} />
+                  <span className="gk-unit gk-unit--day">일</span>
+                </div>
+              )}
             </div>
           </div>
           <div className="gk-field gk-field--shrink">
