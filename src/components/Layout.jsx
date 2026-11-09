@@ -1,8 +1,8 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { logout, useUser } from "../utils/auth";
+import "../styles/common.css";
 
-// 사이드바 메뉴 key ↔ 주소
 const PATHS = {
   home: "/",
   expenses: "/fix",
@@ -10,6 +10,7 @@ const PATHS = {
   report: "/report",
   settings: "/setting",
   login: "/login",
+  signup: "/signup"
 };
 
 export default function Layout() {
@@ -23,15 +24,7 @@ export default function Layout() {
     ) ?? "home";
 
   return (
-    <div
-      style={{
-        display: "flex",
-        minHeight: "100vh",
-        background: "#F7F9FA",
-        fontFamily: "'Pretendard', 'Noto Sans KR', system-ui, sans-serif",
-        color: "#0B2A45",
-      }}
-    >
+    <div className ="body_content">
       <Sidebar
         active={active}
         onNavigate={(key) => navigate(PATHS[key])}
@@ -39,6 +32,7 @@ export default function Layout() {
         user={user}
         onLogout={() => { logout(); navigate("/"); }}
       />
+
       <div style={{ flex: 1, minWidth: 0 }}>
         <Outlet />
       </div>

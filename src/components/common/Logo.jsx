@@ -1,11 +1,12 @@
 import { useId } from "react";
-import "../../styles/logo.css";
+import "../../styles/common.css";
 
 /** 캘린더 + 메모지 + 압정 로고 그림 */
 export function LogoMark({ size = 36 }) {
   const uid = useId().replace(/:/g, "");
   const clipId = `gk-clip-${uid}`;
   const shadowId = `gk-shadow-${uid}`;
+  
   return (
     <svg width={size} height={size} viewBox="270 110 450 450" aria-hidden="true">
       <defs><clipPath id={clipId}><rect x="350" y="200" width="330" height="320" rx="44" /></clipPath><filter id={shadowId} x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="14" stdDeviation="16" floodColor="#1C2A3A" floodOpacity="0.14" /></filter></defs><g transform="rotate(-9 470 340)" filter={`url(#${shadowId})`}><rect x="300" y="170" width="320" height="320" rx="40" fill="#FFE57A" /></g><g transform="rotate(6 515 360)" filter={`url(#${shadowId})`}><rect x="350" y="200" width="330" height="320" rx="44" fill="#FFFFFF" /><g clipPath={`url(#${clipId})`}><rect x="350" y="200" width="330" height="78" fill="#5CB8F2" /></g><rect x="412" y="180" width="18" height="44" rx="9" fill="#2A2F38" /><rect x="600" y="180" width="18" height="44" rx="9" fill="#2A2F38" /><g fill="#DCEFFD"><rect x="384" y="306" width="44" height="40" rx="11" /><rect x="440" y="306" width="44" height="40" rx="11" /><rect x="552" y="306" width="44" height="40" rx="11" /><rect x="608" y="306" width="44" height="40" rx="11" /><rect x="384" y="358" width="44" height="40" rx="11" /><rect x="440" y="358" width="44" height="40" rx="11" /><rect x="496" y="358" width="44" height="40" rx="11" /><rect x="552" y="358" width="44" height="40" rx="11" /><rect x="608" y="358" width="44" height="40" rx="11" /><rect x="384" y="410" width="44" height="40" rx="11" /><rect x="440" y="410" width="44" height="40" rx="11" /><rect x="496" y="410" width="44" height="40" rx="11" /><rect x="552" y="410" width="44" height="40" rx="11" /><rect x="384" y="462" width="44" height="34" rx="11" /><rect x="440" y="462" width="44" height="34" rx="11" /></g><rect x="496" y="306" width="44" height="40" rx="11" fill="#FFD43B" /></g><ellipse cx="530" cy="338" rx="16" ry="6" fill="#1C2A3A" opacity="0.18" /><g transform="rotate(38 600 220)"><rect x="596" y="232" width="8" height="120" rx="4" fill="#9AA6B2" /><path d="M572 170 L628 170 L622 222 L578 222 Z" fill="#2A2F38" /><rect x="556" y="216" width="88" height="24" rx="12" fill="#2A2F38" /><rect x="566" y="128" width="68" height="50" rx="25" fill="#2A2F38" /><rect x="580" y="138" width="22" height="10" rx="5" fill="#FFFFFF" opacity="0.35" /></g>
