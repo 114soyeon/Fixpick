@@ -12,7 +12,8 @@ body {
 
 .body_content {
     display: flex;
-    min-height: 100vh;
+    height: 100vh; /* 레이아웃 높이 고정 → 스크롤은 안에서만 */
+    overflow: hidden; /* 페이지 전체 스크롤 차단 */
     background: #F7F9FA;
 }
 

@@ -33,7 +33,7 @@ export default function Layout() {
         onLogout={() => { logout(); navigate("/"); }}
       />
 
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ flex: 1, minWidth: 0, height: "100vh", overflowY: "auto" }}>
         <Outlet />
       </div>
     </div>
