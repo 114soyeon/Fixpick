@@ -30,7 +30,7 @@ export const Icons = {
     <Settings size={20} strokeWidth={2} />
   ),
   plus: (
-    <Plus size={20} strokeWidth={2} />
+    <Plus size={19} strokeWidth={2.4} />
   ),
   bell: (
     <Bell size={20} strokeWidth={2} />

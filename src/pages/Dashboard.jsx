@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../utils/auth";
 import { nextPayments, openAddItem, payDayIn, paysIn, useItems } from "../utils/items";
+import { Plus, ChevronRight, ChevronLeft } from "lucide-react";
 import "../styles/dashboard.css";
 
 // 사이드바는 components/Layout.jsx에서 그려요.
@@ -236,9 +237,7 @@ function CategoryCard({ c, total, onOpen }) {
 function AddCard() {
   return (
     <button type="button" className="gk-rise gk-cat-add" onClick={openAddItem}>
-      <span className="gk-cat-plus">
-        <svg width="22" height="22" viewBox="0 0 24 24" {...line} strokeWidth="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-      </span>
+        <Plus size={22} strokeWidth={2.4} />
       <span>
         <b className="gk-cat-add__title">카테고리 추가하기</b>
         <span className="gk-cat-add__desc">매달 나가는 돈을 더 등록해 보세요</span>
@@ -269,7 +268,7 @@ function ExpenseList({ data }) {
           <span className="gk-dash-expense__count">총 {count}건</span>
           <button type="button" className="gk-all-btn" onClick={goAll}>
             전체보기
-            <svg width="14" height="14" viewBox="0 0 24 24" {...line} strokeWidth="2.4" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+            <ChevronRight size={14} strokeWidth={2.4} />
           </button>
         </div>
       </div>
@@ -414,10 +413,10 @@ function CalendarCard() {
         <h2 className="gk-dash-h2" aria-live="polite">{title}</h2>
         <div className="gk-cal-head__arrows">
           <button type="button" aria-label="이전 달" className="gk-arrow" onClick={() => move(-1)}>
-            <svg width="14" height="14" viewBox="0 0 24 24" {...line} strokeWidth="2.4" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+            <ChevronLeft size={14} strokeWidth={2.4} />
           </button>
           <button type="button" aria-label="다음 달" className="gk-arrow" onClick={() => move(1)}>
-            <svg width="14" height="14" viewBox="0 0 24 24" {...line} strokeWidth="2.4" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+            <ChevronRight size={14} strokeWidth={2.4} />
           </button>
         </div>
       </div>
