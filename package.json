@@ -13,11 +13,12 @@
     "@fullcalendar/react": "^7.1.4",
     "@supabase/supabase-js": "^2.118.0",
     "axios": "^1.21.0",
+    "lucide-react": "^1.70.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router": "^8.5.1",
-    "temporal-polyfill": "^1.0.7",
-    "react-router-dom": "^7.18.5"
+    "react-router-dom": "^7.18.5",
+    "temporal-polyfill": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
