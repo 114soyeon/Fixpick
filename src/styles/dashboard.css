@@ -823,6 +823,7 @@
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
 }
 /* 결제일 칸이 날짜 순서대로 나타나게 (500ms + 날짜 × 12ms) */
