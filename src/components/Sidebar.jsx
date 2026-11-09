@@ -646,9 +646,9 @@ const css = `
 .gk-logo{transition:transform .15s}
 .gk-logo:hover{transform:scale(1.03)}
 .gk-logo:active{transform:scale(.97)}
-.gk-modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(11,42,69,.32);backdrop-filter:blur(3px);animation:gkFadeIn .22s ease both}
+.gk-modal{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto;background:rgba(11,42,69,.32);backdrop-filter:blur(3px);animation:gkFadeIn .22s ease both}
 .gk-modal.is-closing{animation:gkFadeOut .18s ease both}
-.gk-modal__box{width:520px;max-width:100%;background:#FFFFFF;border-radius:28px;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px;box-shadow:0 30px 80px rgba(11,42,69,.28);color:${COLORS.text};animation:gkModalIn .34s cubic-bezier(.22,1,.36,1) both}
+.gk-modal__box{margin:auto;width:520px;max-width:100%;background:#FFFFFF;border-radius:28px;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px;box-shadow:0 30px 80px rgba(11,42,69,.28);color:${COLORS.text};animation:gkModalIn .34s cubic-bezier(.22,1,.36,1) both}
 .gk-modal.is-closing .gk-modal__box{animation:gkModalOut .18s ease both}
 .gk-chip{display:flex;align-items:center;gap:7px;height:38px;padding:0 14px;border:0;border-radius:999px;font:inherit;font-size:14px;color:${COLORS.text};cursor:pointer;transition:background .15s,box-shadow .15s,transform .1s}
 .gk-chip:active{transform:scale(.96)}
@@ -770,7 +770,11 @@ export default function Sidebar({
       style={{
         flex: "0 0 248px",
         width: 248,
-        minHeight: "100vh",
+        height: "100vh", // 화면 높이에 맞추고
+        position: "sticky", // 스크롤을 내려도 사이드바는 그 자리에 고정
+        top: 0,
+        alignSelf: "flex-start",
+        zIndex: 90, // 알림 창·항목 추가 창이 본문 위로 뜨게
         background: "#FFFFFF",
         borderRight: `1px solid ${COLORS.border}`,
         boxSizing: "border-box",
