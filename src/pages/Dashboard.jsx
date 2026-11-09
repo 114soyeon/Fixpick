@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../utils/auth";
-import { nextPayments, openAddItem, payDayIn, paysIn, useItems } from "../utils/items";
+import { amountIn, cycleText, nextPayments, openAddItem, payDaysIn, paysIn, useItems } from "../utils/items";
 import { Plus, ChevronRight, ChevronLeft } from "lucide-react";
 import "../styles/dashboard.css";
 
@@ -66,12 +66,12 @@ const monthlyRows = (values) => values.map((value, i) => ({
  */
 function useDashData() {
   const items = useItems();
-  const thisMonth = items.filter((it) => paysIn(it, MONTH)); // 매년 항목은 그 달에만 들어가요
+  const thisMonth = items.filter((it) => paysIn(it, TODAY.year, MONTH)); // 매년·몇 달마다 항목은 결제하는 달에만 들어가요
   const cats = CATEGORIES.map((c) => {
     const mine = thisMonth.filter((it) => it.category === c.key);
     return {
       ...c,
-      amount: mine.reduce((sum, it) => sum + it.amount, 0),
+      amount: mine.reduce((sum, it) => sum + amountIn(it, TODAY.year, MONTH), 0), // 매일·매주는 이번 달 횟수만큼
       count: mine.length,
       desc: mine.length ? mine.map((it) => it.name).join("·") : c.desc,
       empty: mine.length === 0,
@@ -105,7 +105,7 @@ const toCard = (p) => ({
   payDay: p.payDay,
   dday: p.dday,
   title: `${p.name} ${p.amountType === "variable" ? "약 " : ""}${won(p.amount)}원`,
-  sub: `${p.amountType === "variable" ? "예상 금액 · " : ""}${p.payMethod || "결제 수단 미등록"} · ${p.cycle === "매년" ? `매년 ${p.month}월 ${p.day}일` : `매달 ${p.day}일`}`,
+  sub: `${p.amountType === "variable" ? "예상 금액 · " : ""}${p.payMethod || "결제 수단 미등록"} · ${cycleText(p)}`,
   warn: p.amount >= BIG,
   cat: CATEGORIES.find((c) => c.key === p.category) || CATEGORIES[CATEGORIES.length - 1], // 카드 색 = 카테고리 색
 });
@@ -188,8 +188,6 @@ function TotalCard({ data }) {
 const MAX_CARDS = 3; // 메인에는 카테고리를 최대 3개까지 (금액 큰 순)
 const MAX_LINES = 3; // 카드 한 장에 보여줄 항목 수
 
-const dayText = (it) => (it.cycle === "매년" ? `매년 ${it.month}월 ${it.day}일` : `매달 ${it.day}일`);
-
 function CategoryCard({ c, total, onOpen }) {
   const pct = total ? Math.round((c.amount / total) * 100) : 0;
   const shown = c.list.slice(0, MAX_LINES);
@@ -220,7 +218,7 @@ function CategoryCard({ c, total, onOpen }) {
         {shown.map((it, i) => (
           <div key={it.id} className={`gk-cat-card__row ${i < shown.length - 1 || rest > 0 ? "has-line" : ""}`}>
             <span className="gk-cat-card__item-name">{it.name}</span>
-            <span className="gk-cat-card__item-day">{dayText(it)}</span>
+            <span className="gk-cat-card__item-day">{cycleText(it)}</span>
             <span className="gk-cat-card__item-amount">
               {it.amountType === "variable" ? "약 " : ""}{won(it.amount)}원
             </span>
@@ -397,13 +395,12 @@ function CalendarCard() {
 
   // 내가 등록한 항목으로 달력·다가오는 결제를 채워요
   const PAY = {};
-  items.filter((it) => paysIn(it, view.month)).forEach((it) => {
-    const d = payDayIn(it, view.year, view.month);
+  items.forEach((it) => payDaysIn(it, view.year, view.month).forEach((d) => {
     const prev = PAY[d];
     PAY[d] = prev
       ? { name: `${prev.first} 외 ${prev.count}`, first: prev.first, count: prev.count + 1, warn: prev.warn || it.amount >= BIG }
       : { name: it.name, first: it.name, count: 1, warn: it.amount >= BIG };
-  });
+  }));
   const upcoming = nextPayments(items, TODAY).map(toCard);
 
   return (
