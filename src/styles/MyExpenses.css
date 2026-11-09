@@ -1,0 +1,282 @@
+/* 메인 페이지 */
+.expenses-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 60px 44px;
+  box-sizing: border-box;
+  background-color: #f6f8fa;
+  color: #102f4b;
+  font-family: inherit;
+}
+
+/* 상단 설명 */
+.page-description {
+  font-size: 13px;
+  color: #647991;
+  margin: 26px 0 22px;
+}
+
+/* 요약 카드 */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  min-height: 75px;
+  padding: 14px 18px;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  border: 1px solid #e1e9f0;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.summary-card p {
+  font-size: 16px;
+  color: #536b84;
+  margin: 0 0 7px;
+}
+
+.summary-card h2 {
+  font-size: 30px;
+  font-weight: 700;
+  margin: 0;
+  color: #102f4b;
+}
+
+.summary-card.primary {
+  background-color: #DCEFFD;
+  border: none;
+}
+
+.upcoming-card {
+  align-items: center;
+}
+
+.month-badge {
+  background-color: #102f4b;
+  color: white;
+  border-radius: 20px;
+  padding: 7px 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* 카테고리 및 정렬 */
+.filter-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin: 20px 0 17px;
+}
+
+.category-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.category-button {
+  height: 41px;
+  padding: 0 22px;
+  border: 1px solid #e1e9f0;
+  border-radius: 24px;
+  background-color: white;
+  color: #52677e;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.category-button.active {
+  background-color: #54b7ed;
+  border-color: #54b7ed;
+  color: #102f4b;
+  font-weight: 600;
+}
+
+.sort-select {
+  height: 41px;
+  min-width: 140px;
+  padding: 0 16px;
+  border: 1px solid #e1e9f0;
+  border-radius: 10px;
+  background-color: #ffffff;
+  color: #52677e;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* 테이블 */
+.expense-table {
+  background-color: white;
+  border: 1px solid #e1e9f0;
+  border-radius: 23px;
+  padding: 8px 32px 12px;
+  overflow-x: auto;
+}
+
+.table-header,
+.table-row {
+  min-width: 850px;
+  display: grid;
+  grid-template-columns: 2.1fr 1.05fr 1fr 1.35fr 1.4fr 1fr;
+  align-items: center;
+  column-gap: 15px;
+}
+
+.table-header {
+  height: 48px;
+  border-bottom: 1px solid #e2eaf1;
+  color: #6c8097;
+  font-size: 14px;
+}
+
+.table-row {
+  min-height: 60px;
+  border-bottom: 1px solid #e2eaf1;
+  color: #52677e;
+  font-size: 14px;
+}
+
+.table-row:last-of-type {
+  border-bottom: none;
+}
+
+/* 항목 이름 */
+.expense-name {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  white-space: nowrap;
+}
+
+.expense-name strong {
+  font-size: 14px;
+  color: #102f4b;
+}
+
+.expense-icon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 19px;
+}
+
+/* 상태 뱃지 */
+.expected-badge {
+  background-color: #e6edf2;
+  color: #52677e;
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-size: 11px;
+  margin-left: 12px;
+}
+
+.big-badge {
+  background-color: #102f4b;
+  color: white;
+  padding: 8px 17px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-left: 12px;
+}
+
+/* 금액 */
+.amount {
+  text-align: left;
+  color: #102f4b;
+  font-size: 13px;
+}
+
+.monthly-amount {
+  text-align: left;
+  color: #52677e;
+}
+
+/* 전체 보기 버튼 */
+.show-all-button {
+  display: block;
+  margin: 8px auto 0;
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  color: #24699d;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.empty-message {
+  padding: 40px;
+  text-align: center;
+  color: #8a9aaa;
+}
+
+/* 작은 화면 */
+@media (max-width: 1100px) {
+  .expenses-page {
+    padding: 35px 24px;
+  }
+
+  .summary-cards {
+    gap: 12px;
+  }
+
+  .summary-card {
+    min-height: 75px;
+    padding: 14px 18px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    border: 1px solid #e1e9f0;
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .summary-card h2 {
+    font-size: 22px;
+  }
+
+  .filter-area {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-area {
+    flex-direction: column;
+  }
+
+  .sort-button {
+    align-self: flex-end;
+  }
+}
+.expense-icon img {
+  width: 36px;
+  height: 36px;
+}
+
+.upcoming-card {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}

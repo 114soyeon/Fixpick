@@ -1,5 +1,10 @@
+
+import MyExpenses from "./MyExpenses.jsx";
+
 const Fix = () => {
-    return <></>
-}
+  return (
+    <MyExpenses />
+  );
+};
 
 export default Fix;
