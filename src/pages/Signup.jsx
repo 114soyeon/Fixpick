@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogoMark, Wordmark } from "../components/Sidebar";
+import { LogoMark, Wordmark } from "../components/common/Logo";
 import { emailExists, signup } from "../utils/auth";
 import { formatPhone, isValidEmail, isValidPhone, strengthOf } from "../utils/validate";
 import { DEMO_CODE, STEPS, STRENGTH, TERMS } from "../constants/signup";
