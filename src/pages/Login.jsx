@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogoMark, Wordmark } from "../components/common/Logo";
 import { emailExists, findEmail, login } from "../utils/auth";
+import { Eye, EyeOff } from "lucide-react";
 import "../styles/login.css";
 
 const C = {
@@ -280,10 +281,7 @@ export default function Login() {
             <span style={{ position: "relative" }}>
               <input id="login-pw" type={showPw ? "text" : "password"} autoComplete="current-password" className={`gk-login-input ${error.field === "pw" ? "is-error" : ""}`} style={{ paddingRight: 54 }} placeholder="비밀번호 입력" value={pw} onChange={(e) => { setPw(e.target.value); setError({ field: "", message: "" }); }} />
               <button type="button" className="gk-login-eye" aria-label={showPw ? "비밀번호 숨기기" : "비밀번호 보기"} onClick={() => setShowPw((v) => !v)}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" /><circle cx="12" cy="12" r="3" />
-                  {showPw && <path d="M4 4l16 16" />}
-                </svg>
+               {showPw ? <EyeOff size={20} strokeWidth={2} /> : <Eye size={20} strokeWidth={2} />}
               </button>
             </span>
           </label>

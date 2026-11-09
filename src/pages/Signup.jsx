@@ -4,10 +4,18 @@ import { LogoMark, Wordmark } from "../components/common/Logo";
 import { emailExists, signup } from "../utils/auth";
 import { formatPhone, isValidEmail, isValidPhone, strengthOf } from "../utils/validate";
 import { DEMO_CODE, STEPS, STRENGTH, TERMS } from "../constants/signup";
-import EyeButton from "../components/signup/EyeButton";
+import { Eye, EyeOff, ChevronRight } from "lucide-react";
 import SignupComplete from "../components/signup/SignupComplete";
 import TermsModal from "../components/signup/TermsModal";
 import "../styles/signup.css";
+
+function EyeButton({ show, onClick }) {
+  return (
+    <button type="button" className="gk-sign-eye" aria-label={show ? "비밀번호 숨기기" : "비밀번호 보기"} onClick={onClick}>
+      {show ? <EyeOff size={16} strokeWidth={1.25} /> : <Eye size={16} strokeWidth={1.25} />}
+    </button>
+  );
+}
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -173,7 +181,9 @@ export default function Signup() {
             <span className="gk-sign-label">비밀번호</span>
             <span className="gk-sign-pw">
               <input id="signup-pw" type={showPw ? "text" : "password"} autoComplete="new-password" className={`gk-sign-input gk-sign-input--pw ${errors.pw ? "is-error" : ""}`} placeholder="8자 이상, 영문·숫자 섞어서" value={form.pw} onChange={(e) => set("pw", e.target.value)} />
-              <EyeButton show={showPw} onClick={() => setShowPw((v) => !v)} />
+              <button type="button" className="gk-sign-eye" aria-label={showPw ? "비밀번호 숨기기" : "비밀번호 보기"} onClick={() => setShowPw((v) => !v)}>
+              {showPw ? <EyeOff size={20} strokeWidth={2} /> : <Eye size={20} strokeWidth={2} />}
+              </button>
             </span>
             {form.pw && (
               <span className={`gk-sign-strength is-level-${strength}`}>
@@ -212,7 +222,7 @@ export default function Signup() {
                 </label>
                 <button type="button" className="gk-sign-view" onClick={() => setViewing(t)} aria-label={`${t.title} 보기`}>
                   보기
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+                 <ChevronRight size={14} strokeWidth={2.4} />                
                 </button>
               </div>
             ))}
