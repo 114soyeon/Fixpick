@@ -698,9 +698,32 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
+.gk-field--wide {
+  grid-column: 1 / -1;
+}
 .gk-add-day-row {
   display: flex;
   gap: 6px;
+}
+.gk-field--wide .gk-unit-wrap--day,
+.gk-field--wide .gk-mini--weekday {
+  flex: 0 1 120px;
+}
+/* 사용자화: [2] [주] 마다 */
+.gk-input--every {
+  width: 56px;
+  flex-shrink: 0;
+  padding: 0 8px;
+  text-align: center;
+  font-weight: 700;
+}
+.gk-add-day-note {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #5B5F66;
+  white-space: nowrap;
 }
 
 /* 알림 받기 스위치 */
@@ -965,13 +988,20 @@
 .gk-card-badge.is-c8 { background: #FFF2D2; color: #5E5300; }
 .gk-card-badge.is-c9 { background: #FFF8D6; color: #5C5214; }
 
-/* 작은 선택 버튼 (매달/매년, 결제 월) */
+/* 작은 선택 버튼 (결제 주기, 요일, 결제 월, 반복 단위) */
 .gk-mini {
   position: relative;
   flex-shrink: 0;
 }
 .gk-mini--cycle {
-  width: 78px;
+  width: 104px;
+}
+.gk-mini--weekday {
+  flex: 1;
+  min-width: 0;
+}
+.gk-mini--unit {
+  width: 86px;
 }
 .gk-mini--month {
   width: 72px;
@@ -1016,7 +1046,13 @@
   animation: gkPayIn .16s cubic-bezier(.22,1,.36,1) both;
 }
 .gk-mini--cycle .gk-mini-list {
-  width: 110px;
+  width: 120px;
+}
+.gk-mini--weekday .gk-mini-list {
+  width: 120px;
+}
+.gk-mini--unit .gk-mini-list {
+  width: 100px;
 }
 .gk-mini--month .gk-mini-list {
   width: 204px;

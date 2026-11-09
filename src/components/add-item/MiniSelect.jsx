@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * 작은 선택 버튼 (매달/매년, 결제 월)
- * 너비·목록 모양은 className으로 정해요 (sidebar.css의 .gk-mini--cycle, .gk-mini--month)
+ * 작은 선택 버튼 (결제 주기, 요일, 결제 월, 반복 단위)
+ * 너비·목록 모양은 className으로 정해요 (sidebar.css의 .gk-mini--cycle, --weekday, --month, --unit)
  * grid: 목록을 바둑판으로 보여줄 때 true
  */
 export default function MiniSelect({ id, value, options, onChange, label, className = "", grid = false }) {
