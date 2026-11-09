@@ -7,6 +7,7 @@ import { Icons } from "./sidebar/icons";
 import NotificationPanel from "./sidebar/NotificationPanel";
 import SidebarToast from "./sidebar/SidebarToast";
 import AddItemModal from "./add-item/AddItemModal";
+import { UserRound } from "lucide-react";
 import "../styles/sidebar.css";
 
 export default function Sidebar({
@@ -91,9 +92,10 @@ export default function Sidebar({
           </button>
         ) : (
           <button type="button" className="gk-profile" aria-label="로그인 페이지로 가기" onClick={() => onNavigate?.("login")}>
-            <span aria-hidden="true" className="gk-avatar gk-avatar--guest">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></svg>
+             <span aria-hidden="true" className="gk-avatar gk-avatar--guest">
+             <UserRound size={20} strokeWidth={2} />
             </span>
+             
             <span className="gk-sb-label gk-profile__text">
               <b className="gk-profile__name">로그인하기</b>
               <span className="gk-profile__sub">내 고정지출 관리하기</span>
