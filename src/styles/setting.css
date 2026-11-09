@@ -1,0 +1,556 @@
+/* =========================================================
+   설정 페이지 (pages/Setting.jsx)
+   - 다른 컴포넌트와 겹치지 않게 class는 모두 "set-" 로 시작
+   - 색상·크기는 시안(05_설정) 기준
+   ========================================================= */
+
+/* ───── 색상 변수 (이 페이지 안에서만 사용) ───── */
+.set-page {
+  --set-navy: #0b2a45;   /* 기본 글자 */
+  --set-gray: #5b5f66;   /* 보조 글자 */
+  --set-line: #eef0f2;   /* 구분선 */
+  --set-blue: #5cb8f2;   /* 강조(스위치, 프로필) */
+  --set-blue-light: #dceffd;
+  --set-yellow: #ffe57a; /* 저장·선택 버튼 */
+  --set-fill: #f1f4f7;   /* 회색 버튼·칩 배경 */
+
+  padding: 40px;
+  color: var(--set-navy);
+  background: #f7f9fa;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+.set-page button {
+  font-family: inherit;
+  color: inherit;
+  border: none;
+  cursor: pointer;
+}
+
+/* ───── 페이지 제목 ───── */
+.set-header {
+  margin-bottom: 26px;
+}
+.set-header-title {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+}
+.set-header-desc {
+  margin-top: 12px;
+  line-height: 20px;
+  font-size: 16px;
+  color: var(--set-gray);
+}
+
+/* ───── 프로필 (연한 파란 띠) ───── */
+.set-profile {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  height: 137px;
+  padding: 0 32px;
+  border-radius: 28px;
+  background: var(--set-blue-light);
+  box-sizing: border-box;
+}
+.set-avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: var(--set-blue);
+  color: #fff;
+  font-size: 40px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.set-profile-info {
+  flex: 1;
+  min-width: 0;
+}
+.set-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.set-name {
+  font-size: 26px;
+  font-weight: 700;
+}
+.set-name-input {
+  width: 200px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #bce1f8;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--set-navy);
+  outline: none;
+}
+.set-edit {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.set-email {
+  margin-top: 12px;
+  font-size: 16px;
+  color: #3e4247;
+}
+.set-stats {
+  display: flex;
+  gap: 10px;
+}
+.set-stat {
+  width: 160px;
+  height: 81px;
+  padding: 16px 20px;
+  border-radius: 18px;
+  background: #fff;
+  box-sizing: border-box;
+}
+.set-stat-label {
+  font-size: 13px;
+  color: var(--set-gray);
+}
+.set-stat-value {
+  margin-top: 6px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* ───── 레이아웃: 왼쪽 알림 + 오른쪽 예산·결제 수단 ───── */
+.set-body {
+  display: grid;
+  grid-template-columns: 839fr 730fr; /* 시안 카드 너비 비율 */
+  gap: 24px;
+  margin: 24px 0;
+}
+.set-side {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 공통 카드 */
+.set-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 28px 26px 24px;
+  box-sizing: border-box;
+}
+
+/* 카드 머리: [아이콘] 제목 + 설명 */
+.set-head {
+  display: flex;
+  gap: 12px;
+}
+.set-head-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.set-head-title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.set-head-desc {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--set-gray);
+}
+
+/* ───── 알림 목록 ───── */
+.set-rows {
+  list-style: none;
+  margin-top: 40px;
+}
+.set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 82px;
+  padding: 18px 8px 18px 0;
+  border-bottom: 1px solid var(--set-line);
+  box-sizing: border-box;
+}
+.set-row-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+.set-row-desc {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--set-gray);
+}
+
+/* 스위치 */
+.set-switch {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 48px;
+  height: 28px;
+  margin: 0;
+  border-radius: 999px;
+  background: #d5dce3;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.set-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+.set-switch:checked {
+  background: var(--set-blue);
+}
+.set-switch:checked::after {
+  transform: translateX(20px);
+}
+
+/* 알림 시간 (오전 9시 / 낮 12시 / 저녁 8시) */
+.set-seg {
+  display: flex;
+  gap: 1px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--set-fill);
+}
+.set-page .set-seg button {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 9px;
+  background: transparent;
+  font-size: 14px;
+  color: var(--set-gray);
+}
+.set-page .set-seg button.is-on {
+  background: #fff;
+  color: var(--set-navy);
+  font-weight: 700;
+}
+
+/* ───── 예산 ───── */
+.set-budget {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+.set-budget-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 14px;
+  border: 1px solid #e3e8ed;
+  border-radius: 12px;
+  box-sizing: border-box;
+  cursor: text;
+}
+.set-budget-box:focus-within {
+  border-color: var(--set-blue);
+}
+.set-budget-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  text-align: right;
+  font: inherit;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--set-navy);
+}
+.set-budget-unit {
+  margin-left: 10px;
+  font-size: 14px;
+  color: var(--set-gray);
+}
+.set-page .set-btn-save {
+  width: 64px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--set-yellow);
+  font-size: 15px;
+  font-weight: 700;
+}
+.set-chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.set-page .set-chip {
+  height: 32px;
+  padding: 0 20px;
+  border-radius: 16px;
+  background: var(--set-fill);
+  font-size: 14px;
+  font-weight: 700;
+}
+.set-page .set-chip.is-on {
+  background: var(--set-yellow);
+}
+
+/* ───── 결제 수단 ───── */
+.set-pay {
+  flex: 1; /* 남은 높이 채우기 → 왼쪽 알림 카드와 아래 줄이 맞아요 */
+  display: flex;
+  flex-direction: column;
+}
+.set-methods {
+  list-style: none;
+  margin-top: 14px;
+  max-height: 201px; /* 3개까지 보이고, 더 많으면 스크롤 */
+  overflow-y: auto;
+}
+.set-method {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 4px;
+  border-bottom: 1px solid var(--set-line);
+}
+.set-method:last-child {
+  border-bottom: none;
+}
+.set-empty {
+  margin: auto 0; /* 머리와 추가 버튼 사이 가운데 */
+  padding: 28px 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--set-gray);
+}
+.set-method-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+.set-method-sub {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--set-gray);
+}
+.set-page .set-btn-addpay {
+  margin-top: auto; /* 카드 맨 아래에 붙이기 */
+  height: 42px;
+  border: 1.5px dashed #bce1f8;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+.set-page .set-btn-addpay:hover {
+  background: #f2f9ff;
+}
+
+/* ───── 계정 ───── */
+.set-account {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 26px;
+}
+.set-account-desc {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--set-gray);
+}
+.set-account-btns {
+  display: flex;
+  gap: 8px;
+}
+.set-page .set-btn-gray,
+.set-page .set-btn-red {
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.set-page .set-btn-gray {
+  background: var(--set-fill);
+}
+.set-page .set-btn-red {
+  background: #fdecec;
+  color: #d9534f;
+}
+
+/* ───── 결제 수단 추가 창 (모달) ───── */
+.set-dim {
+  position: fixed;
+  inset: 0;
+  z-index: 100; /* 사이드바(90) 위로 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(11, 42, 69, 0.32);
+}
+.set-modal {
+  position: relative;
+  width: 520px;
+  padding: 28px 28px 24px;
+  border-radius: 24px;
+  background: #fff;
+  color: #12263a;
+  box-sizing: border-box;
+}
+.set-page .set-modal-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.set-page .set-modal-close:hover {
+  background: var(--set-fill);
+}
+.set-modal-title {
+  font-size: 22px;
+  font-weight: 700;
+}
+.set-modal-desc {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #4b5563;
+}
+.set-label {
+  display: block;
+  margin: 26px 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* 카드 / 계좌 탭 */
+.set-tab {
+  display: flex;
+  gap: 4px;
+  height: 52px;
+  padding: 4px;
+  border-radius: 14px;
+  background: #f1f3f6;
+  box-sizing: border-box;
+}
+.set-page .set-tab button {
+  flex: 1;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 15px;
+  color: #4b5563;
+}
+.set-page .set-tab button.is-on {
+  background: #fff;
+  color: #12263a;
+  font-weight: 700;
+}
+
+/* 입력칸 (선택 상자, 카드번호, 계좌번호) */
+.set-field {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid #eef0f3;
+  border-radius: 13px;
+  background: #f6f8fa;
+  font: inherit;
+  font-size: 15px;
+  color: #12263a;
+  outline: none;
+  box-sizing: border-box;
+}
+.set-field::placeholder {
+  color: #a8afb8;
+}
+.set-field:focus {
+  border-color: var(--set-blue);
+  background: #fff;
+}
+.set-select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  /* 오른쪽 아래 화살표 */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2312263A' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+}
+.set-select-box {
+  position: relative;
+}
+/* 선택 상자 안 카드사 로고 (sidebar.css의 .gk-card-logo / .gk-card-badge) */
+.set-select-box > span {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%) scale(0.8);
+  pointer-events: none;
+}
+.set-select.has-icon {
+  padding-left: 48px;
+}
+.set-select.is-empty {
+  color: #a8afb8;
+}
+.set-select option {
+  color: #12263a;
+}
+.set-card-num {
+  display: flex;
+  gap: 9px;
+}
+.set-card-num .set-field {
+  text-align: center;
+  padding: 0;
+}
+
+.set-modal-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 32px;
+}
+.set-page .set-btn-cancel,
+.set-page .set-btn-add {
+  height: 52px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #12263a;
+}
+.set-page .set-btn-cancel {
+  width: 120px;
+  background: #f1f3f6;
+}
+.set-page .set-btn-add {
+  flex: 1;
+  background: #ffe27a;
+}
+.set-page .set-btn-add:disabled {
+  cursor: not-allowed; /* 다 입력하기 전에는 눌러도 안 돼요 */
+}
