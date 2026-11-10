@@ -2,6 +2,34 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Fix.css";
 import { useFixItems } from "../utils/fixItems";
+import { categoryStyle } from "../constants/categories";
+
+// 목록의 한글 카테고리 이름 → categories.js의 key
+const CATEGORY_KEY = {
+  "주거·공과": "home",
+  통신: "phone",
+  구독: "sub",
+  가전: "rental",
+  보험: "insure",
+  "금융·저축": "saving",
+  교통: "transit",
+  자동차: "car",
+  "생활·기타": "etc",
+};
+
+// 카테고리 아이콘 (Lucide). 큰 지출은 진한 남색 박스로 강조해요
+function ExpenseIcon({ item }) {
+  const { icon: Icon, bg, color } = categoryStyle(CATEGORY_KEY[item.category]);
+  const style = item.big
+    ? { background: "#102f4b", color: "#ffffff" }
+    : { background: bg, color };
+
+  return (
+    <div className="expense-icon" style={style}>
+      <Icon size={20} strokeWidth={2} aria-hidden="true" />
+    </div>
+  );
+}
 
 function MyExpenses() {
   const navigate = useNavigate();
@@ -76,10 +104,13 @@ function MyExpenses() {
 
   return (
     <div className="expenses-page">
-      {/* 상단 설명 */}
-      <p className="page-description">
-        매달, 매년 빠져나가는 돈을 한곳에서 봐요
-      </p>
+      {/* 페이지 제목 + 설명 */}
+      <header className="page-header">
+        <h1 className="page-title">내 고정지출</h1>
+        <p className="page-description">
+          매달, 매년 빠져나가는 돈을 한곳에서 봐요
+        </p>
+      </header>
 
       {/* 요약 카드 */}
       <section className="summary-cards">
@@ -154,9 +185,7 @@ function MyExpenses() {
           >
             {/* 항목 */}
             <div className="expense-name">
-              <div className={`expense-icon ${item.color}`}>
-                <img src={item.icon} alt={item.name} />
-              </div>
+              <ExpenseIcon item={item} />
 
               <strong>{item.name}</strong>
 
