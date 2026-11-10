@@ -1,17 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Fix.css";
-import { expenses } from "../utils/expenses";
+import { useFixItems } from "../utils/fixItems";
 
 function MyExpenses() {
   const navigate = useNavigate();
 
-  // 페이지가 그려질 때마다 localStorage의 최신 수정본을 읽어와요
-  const saved = JSON.parse(localStorage.getItem("expense-edits") || "{}");
-  const deleted = JSON.parse(localStorage.getItem("expense-deleted") || "[]");
-  const allItems = expenses
-    .map((e) => ({ ...e, ...saved[e.id] })) // 수정본이 있으면 덮어쓰기
-    .filter((e) => !deleted.includes(e.id)); // 삭제된 건 빼기
+  // 기본 데이터 + 사이드바에서 추가한 항목 + 상세에서 수정한 내용
+  const allItems = useFixItems();
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [showAll, setShowAll] = useState(false);
   const [sortOrder, setSortOrder] = useState("high");
