@@ -2,18 +2,29 @@
 .expenses-page {
   width: 100%;
   min-height: 100vh;
-  padding: 60px 44px;
+  padding: 40px;
   box-sizing: border-box;
   background-color: #f6f8fa;
   color: #102f4b;
   font-family: inherit;
 }
 
-/* 상단 설명 */
+/* 페이지 제목 + 설명 (결제 캘린더·지출 리포트와 같은 크기·간격) */
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0b2a45;
+}
+
 .page-description {
-  font-size: 13px;
-  color: #647991;
-  margin: 26px 0 22px;
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #52637a;
 }
 
 /* 요약 카드 */
@@ -145,7 +156,7 @@
   min-height: 60px;
   border-bottom: 1px solid #e2eaf1;
   color: #52677e;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .table-row:last-of-type {
@@ -161,7 +172,7 @@
 }
 
 .expense-name strong {
-  font-size: 15px;
+  font-size: 16px;
   color: #102f4b;
 }
 
@@ -199,7 +210,7 @@
 .amount {
   text-align: left;
   color: #102f4b;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .monthly-amount {
@@ -227,11 +238,31 @@
 }
 
 /* 작은 화면 */
-@media (max-width: 1100px) {
+/* 제목 위치를 다른 페이지(결제 캘린더·지출 리포트·설정)와 똑같이 맞추는 여백 */
+/* 넓은 화면: 창 높이 1080 → 40px, 900 → 24px, 그 사이는 비례해서 줄어요 */
+@media (min-width: 1440px) and (min-height: 900px) {
   .expenses-page {
-    padding: 35px 24px;
+    padding-top: clamp(24px, calc(40px - (1080px - 100vh) * 0.089), 40px);
+  }
+}
+
+@media (max-width: 1279px) {
+  .expenses-page {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  .expenses-page {
+    padding: 16px;
   }
 
+  .page-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 1100px) {
   .summary-cards {
     gap: 12px;
   }
@@ -269,10 +300,6 @@
   .sort-button {
     align-self: flex-end;
   }
-}
-.expense-icon img {
-  width: 36px;
-  height: 36px;
 }
 
 .upcoming-card {

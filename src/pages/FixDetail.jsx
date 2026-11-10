@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { expenses } from "../utils/expenses";
+import { useFixItems } from "../utils/fixItems";
+import { removeItem } from "../utils/items";
 import "../styles/FixDetail.css";
 import PaymentEditModal from "../components/PaymentEditModal/PaymentEditModal.jsx";
 
@@ -58,12 +59,9 @@ function FixDetail() {
   const [payAlert, setPayAlert] = useState("1일 전");
   const [endAlert, setEndAlert] = useState("7일 전");
 
-  // 원본 데이터에서 항목 찾기
-  const saved = JSON.parse(localStorage.getItem("expense-edits") || "{}");
-  const originalItem = expenses.find((e) => e.id === Number(id));
-  const mergedItem = originalItem
-    ? { ...originalItem, ...saved[id] }
-    : originalItem;
+  // 전체 목록(기본 + 추가한 항목, 수정본 반영)에서 항목 찾기
+  const allItems = useFixItems();
+  const mergedItem = allItems.find((e) => e.id === Number(id));
 
   const [item, setItem] = useState(() => {
     if (!mergedItem) return mergedItem;
@@ -106,33 +104,43 @@ function FixDetail() {
       endDate: toKoreanDate(newInfo.endDate),
       date: toKoreanDate(newInfo.nextDate),
     };
-    function handleSave(newInfo) {
-  const amount = Number(newInfo.amount);
 
-  const updated = {
-    ...item,
-    period: newInfo.cycle,
-    amountType: newInfo.amountType,
-    amount: amount,
-    monthly: getMonthly(amount, newInfo.cycle),
-    method: newInfo.method,
-    startDate: toKoreanDate(newInfo.startDate),
-    endDate: toKoreanDate(newInfo.endDate),
-    date: toKoreanDate(newInfo.nextDate),
-  };
-
-  // ★ 보관함에 저장 (이 두 줄이 핵심!)
-  const edits = JSON.parse(localStorage.getItem("expense-edits") || "{}");
-  localStorage.setItem("expense-edits", JSON.stringify({ ...edits, [id]: updated }));
-
-  setItem(updated);
-  setIsModalOpen(false);
-}
-
-
+    // 수정한 내용을 localStorage에 저장 (목록 페이지에서 읽어가요)
+    const edits = JSON.parse(localStorage.getItem("expense-edits") || "{}");
+    localStorage.setItem(
+      "expense-edits",
+      JSON.stringify({ ...edits, [id]: updated })
+    );
 
     setItem(updated);
     setIsModalOpen(false);
+  }
+
+  // "삭제"를 눌렀을 때 실행돼요
+  function handleDelete() {
+    if (!window.confirm(`'${item.name}' 항목을 삭제할까요?`)) return;
+
+    const itemId = Number(id);
+
+    // 사이드바에서 추가한 항목이면 그 저장소에서도 지워요
+    removeItem(itemId);
+
+    // 기본 데이터 항목은 원본을 지울 수 없으니 "삭제 목록"에 넣어 목록에서 빼요
+    const deleted = JSON.parse(localStorage.getItem("expense-deleted") || "[]");
+    if (!deleted.includes(itemId)) {
+      localStorage.setItem(
+        "expense-deleted",
+        JSON.stringify([...deleted, itemId])
+      );
+    }
+
+    // 이 항목의 수정본과 메모도 정리해요
+    const edits = JSON.parse(localStorage.getItem("expense-edits") || "{}");
+    delete edits[id];
+    localStorage.setItem("expense-edits", JSON.stringify(edits));
+    localStorage.removeItem(`memo-${id}`);
+
+    navigate("/fix");
   }
 
   // 메모 칸에 글자를 칠 때마다 실행돼요
@@ -157,7 +165,7 @@ function FixDetail() {
         </div>
         <button
           className="outline-button"
-          onClick={() => console.log("삭제", item.id)}
+          onClick={handleDelete}
         >
           삭제
         </button>
