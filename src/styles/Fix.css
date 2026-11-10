@@ -280,3 +280,6 @@
   justify-content: space-between;
   align-items: center;
 }
+
+.table-row { cursor: pointer; }
+.table-row:hover { background: #f7f9fa; }
