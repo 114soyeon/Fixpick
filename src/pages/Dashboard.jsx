@@ -351,10 +351,11 @@ function ExpenseList({ data }) {
   const goAll = () => navigate("/fix");
   return (
     <section className="gk-rise" style={{ ...at(160), ...card, padding: "22px 24px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10, minWidth: 0 }}>
-          <h2 style={h2}>내 고정지출</h2>
-          <span style={{ fontSize: 14, color: C.muted, whiteSpace: "nowrap" }}>
+      {/* 창이 좁아지면: 제목은 한 줄 그대로, 설명은 … 으로 줄이고, 건수·전체보기는 다음 줄로 */}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", columnGap: 12, rowGap: 10 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10, minWidth: 0, flex: "1 1 auto" }}>
+          <h2 style={{ ...h2, whiteSpace: "nowrap", flexShrink: 0 }}>내 고정지출</h2>
+          <span style={{ fontSize: 14, color: C.muted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }}>
             {mode === "empty" ? "아직 등록한 항목이 없어요" : hidden > 0 ? `금액이 큰 카테고리 ${MAX_CARDS}개 · 외 ${hidden}개` : "카테고리별 이번 달 내 구독비"}
           </span>
         </div>
@@ -449,7 +450,7 @@ function BudgetCard({ data }) {
           <span style={{ color: C.yellowInk }}>{over ? `${won(BUDGET.used - BUDGET.limit)}원 초과` : `${won(BUDGET.limit - BUDGET.used)}원 남음`}</span>
         </div>
       </div>
-      <button type="button" onClick={() => navigate("/setting")} style={{ marginTop: "auto", flexShrink: 0, height: 48, borderRadius: 999, border: 0, background: C.yellow, color: C.text, fontFamily: "inherit", fontSize: 16, fontWeight: 600, cursor: "pointer" }}>
+      <button type="button" onClick={() => navigate("/report")} style={{ marginTop: "auto", flexShrink: 0, height: 48, borderRadius: 999, border: 0, background: C.yellow, color: C.text, fontFamily: "inherit", fontSize: 16, fontWeight: 600, cursor: "pointer" }}>
         예산 조정하기
       </button>
     </section>
