@@ -106,30 +106,13 @@ function FixDetail() {
       endDate: toKoreanDate(newInfo.endDate),
       date: toKoreanDate(newInfo.nextDate),
     };
-    function handleSave(newInfo) {
-  const amount = Number(newInfo.amount);
 
-  const updated = {
-    ...item,
-    period: newInfo.cycle,
-    amountType: newInfo.amountType,
-    amount: amount,
-    monthly: getMonthly(amount, newInfo.cycle),
-    method: newInfo.method,
-    startDate: toKoreanDate(newInfo.startDate),
-    endDate: toKoreanDate(newInfo.endDate),
-    date: toKoreanDate(newInfo.nextDate),
-  };
-
-  // ★ 보관함에 저장 (이 두 줄이 핵심!)
-  const edits = JSON.parse(localStorage.getItem("expense-edits") || "{}");
-  localStorage.setItem("expense-edits", JSON.stringify({ ...edits, [id]: updated }));
-
-  setItem(updated);
-  setIsModalOpen(false);
-}
-
-
+    // 수정한 내용을 localStorage에 저장 (목록 페이지에서 읽어가요)
+    const edits = JSON.parse(localStorage.getItem("expense-edits") || "{}");
+    localStorage.setItem(
+      "expense-edits",
+      JSON.stringify({ ...edits, [id]: updated })
+    );
 
     setItem(updated);
     setIsModalOpen(false);

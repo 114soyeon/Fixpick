@@ -3,14 +3,15 @@ import { useNavigate } from "react-router-dom";
 import "../styles/Fix.css";
 import { expenses } from "../utils/expenses";
 
-const saved = JSON.parse(localStorage.getItem("expense-edits") || "{}");
-const deleted = JSON.parse(localStorage.getItem("expense-deleted") || "[]");
-const allItems = expenses
-  .map((e) => ({ ...e, ...saved[e.id] })) // 수정본이 있으면 덮어쓰기
-  .filter((e) => !deleted.includes(e.id)); // 삭제된 건 빼기 (아래 3번 참고)
-
 function MyExpenses() {
   const navigate = useNavigate();
+
+  // 페이지가 그려질 때마다 localStorage의 최신 수정본을 읽어와요
+  const saved = JSON.parse(localStorage.getItem("expense-edits") || "{}");
+  const deleted = JSON.parse(localStorage.getItem("expense-deleted") || "[]");
+  const allItems = expenses
+    .map((e) => ({ ...e, ...saved[e.id] })) // 수정본이 있으면 덮어쓰기
+    .filter((e) => !deleted.includes(e.id)); // 삭제된 건 빼기
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [showAll, setShowAll] = useState(false);
   const [sortOrder, setSortOrder] = useState("high");
@@ -32,8 +33,8 @@ function MyExpenses() {
   // 카테고리 필터링
   let filteredExpenses =
     selectedCategory === "전체"
-      ? expenses
-      : expenses.filter((item) => item.category === selectedCategory);
+      ? allItems
+      : allItems.filter((item) => item.category === selectedCategory);
   // 정렬 기능
   const getDateValue = (date) => {
     const currentYear = new Date().getFullYear();
