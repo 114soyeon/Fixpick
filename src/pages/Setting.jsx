@@ -30,7 +30,11 @@ const Setting = () => {
       {/* ───── 페이지 제목 ───── */}
       <header className="set-header">
         <h1 className="set-header-title">설정</h1>
-        <p className="set-header-desc">알림, 예산, 결제 수단을 내 방식대로 바꿔 보세요. 바꾸면 바로 저장돼요.</p>
+        {/* 좁은 화면에서는 문장마다 줄바꿈 (setting.css 767px 이하) */}
+        <p className="set-header-desc">
+          <span>알림, 예산, 결제 수단을 내 방식대로 바꿔 보세요.</span>{" "}
+          <span>바꾸면 바로 저장돼요.</span>
+        </p>
       </header>
 
       {/* ───── 프로필 ───── */}
