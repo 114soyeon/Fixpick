@@ -3,13 +3,15 @@
  * - 로그인했으면 [로그아웃] [회원 탈퇴], 안 했으면 [로그인]
  */
 import { useNavigate } from "react-router-dom";
-import { deleteAccount, logout } from "../../utils/auth";
+import { deleteAccount } from "../../utils/auth";
+import { useAuthStore } from "../../store/authStore"; 
 
 const AccountCard = ({ user }) => {
   const navigate = useNavigate();
+  const signOut = useAuthStore((state) => state.signOut);
 
-  const signOut = () => {
-    logout();
+  const logout = () => {
+    signOut();
     navigate("/");
   };
 
@@ -29,7 +31,7 @@ const AccountCard = ({ user }) => {
       </div>
       {user ? (
         <div className="set-account-btns">
-          <button type="button" className="set-btn-gray" onClick={signOut}>
+          <button type="button" className="set-btn-gray" onClick={logout}>
             로그아웃
           </button>
           <button type="button" className="set-btn-red" onClick={quit}>

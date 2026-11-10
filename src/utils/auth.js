@@ -86,20 +86,6 @@ export function findEmail({ name = "", phone = "" }) {
   return { ok: true, accounts: found.map((a) => ({ email: a.email, masked: maskEmail(a.email), joined: a.joined || "" })) };
 }
 
-/** 회원가입: 계정을 저장하고 바로 로그인 */
-export function signup({ name, phone = "", email, password }) {
-  const key = email.trim().toLowerCase();
-  const accounts = read(ACCOUNTS_KEY, {});
-  if (accounts[key]) return { ok: false, field: "email", message: "이미 가입된 이메일이에요." };
-  const account = { name: name.trim(), phone, email: email.trim(), pw: hash(password), joined: new Date().toISOString().slice(0, 10) };
-  accounts[key] = account;
-  write(ACCOUNTS_KEY, accounts);
-  moveGuestItems(account.email);
-  saveUser(publicUser(account), true);
-  notify();
-  return { ok: true };
-}
-
 /** 로그인: 가입한 이메일인지, 비밀번호가 맞는지 확인 */
 export function login({ email, password, keep = true }) {
   const key = email.trim().toLowerCase();

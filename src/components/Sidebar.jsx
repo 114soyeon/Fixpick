@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { initialOf } from "../utils/auth";
 import { addItem, setLoginReason, useItems } from "../utils/items";
+import { useAuthStore } from "../store/authStore"; 
 
 const COLORS = {
   text: "#0B2A45",
@@ -771,6 +772,8 @@ export default function Sidebar({
   const readOne = (id) => setItems((list) => list.map((n) => (n.id === id ? { ...n, unread: false } : n)));
   const readAll = () => setItems((list) => list.map((n) => ({ ...n, unread: false })));
 
+  const signOut = useAuthStore((state) => state.signOut);
+
   return (
     <nav
       aria-label="주 메뉴"
@@ -909,7 +912,7 @@ export default function Sidebar({
             </div>
             <div style={{ padding: 8, display: "flex", flexDirection: "column" }}>
               <button type="button" role="menuitem" className="gk-menu__item" onClick={() => { setMenu(false); onNavigate?.("settings"); }}>내 정보 · 설정</button>
-              <button type="button" role="menuitem" className="gk-menu__item" style={{ color: "#D9534F" }} onClick={() => { setMenu(false); onLogout?.(); }}>로그아웃</button>
+              <button type="button" role="menuitem" className="gk-menu__item" style={{ color: "#D9534F" }} onClick={() => { signOut(); }}>로그아웃</button>
             </div>
           </div>
         )}

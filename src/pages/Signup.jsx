@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogoMark, Wordmark } from "../components/Sidebar";
-import { emailExists, signup } from "../utils/auth";
+import { signup } from "../api/auth";
 import { formatPhone, isValidEmail, isValidPhone, strengthOf } from "../utils/validate";
 import { DEMO_CODE, STEPS, STRENGTH, TERMS } from "../constants/signup";
 import { Eye, EyeOff, ChevronRight, Check } from "lucide-react";
@@ -103,7 +103,8 @@ export default function Signup() {
       const res = await signup({ name: form.name, phone: form.phone, email: form.email, password: form.pw });
       if (!res.ok) return setErrors({ [res.field]: res.message });
 
-      setDone(form.name.trim()); // 가입 완료 화면으로
+      navigate("/login")
+      //setDone(form.name.trim()); // 가입 완료 화면으로
     } finally {
       setBusy(false);
     }
@@ -259,7 +260,7 @@ export default function Signup() {
             ))}
           </div>
 
-          <button type="submit" className="gk-sign-btn" disabled={!requiredAgreed}>가입하고 시작하기</button>
+          <button type="submit" className="gk-sign-btn" disabled={!requiredAgreed}>동의하고 가입하기</button>
 
           <p className="gk-sign-foot">
             이미 계정이 있나요?{" "}

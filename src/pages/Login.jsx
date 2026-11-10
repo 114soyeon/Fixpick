@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogoMark, Wordmark } from "../components/Sidebar";
-import { emailExists, findEmail, login } from "../utils/auth";
+import { emailExists, findEmail } from "../utils/auth";
 import { openAddItem, takeLoginReason } from "../utils/items";
 import "../styles/login.css";
+import { useAuthStore } from "../store/authStore";
 
 const C = {
   bg: "#F7F9FA",
@@ -221,16 +222,19 @@ export default function Login() {
   const [lastLogin] = useState(readLast); // 페이지를 열 때 한 번만 읽어요
   const [reason] = useState(takeLoginReason); // "add": 항목 추가하려다 넘어왔어요
 
+  const login = useAuthStore((state) => state.signIn);
+
   const fail = (field, message) => setError({ field, message });
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("email", "이메일 주소를 다시 확인해 주세요.");
     if (!pw) return fail("pw", "비밀번호를 입력해 주세요.");
-    const res = login({ email, password: pw, keep });
-    if (!res.ok) return fail(res.field, res.message);
-    setError({ field: "", message: "" });
-    saveLast("email");
+    const res = await login(email, pw);
+    console.log(res)
+    //if (!res.ok) return fail(res.field, res.message);
+    //setError({ field: "", message: "" });
+    //saveLast("email");
     navigate("/"); // 로그인 후 홈으로
     if (reason === "add") setTimeout(openAddItem, 400); // 하려던 항목 추가 창을 바로 열어 줘요
   };
