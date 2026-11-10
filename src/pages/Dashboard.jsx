@@ -354,7 +354,7 @@ function BudgetCard({ data }) {
           <span className="gk-dash-budget__left">{over ? `${won(BUDGET.used - BUDGET.limit)}원 초과` : `${won(BUDGET.limit - BUDGET.used)}원 남음`}</span>
         </div>
       </div>
-      <button type="button" className="gk-dash-budget__btn" onClick={() => navigate("/report")}>
+      <button type="button" className="gk-dash-budget__btn" onClick={() => navigate("/setting")}>
         예산 조정하기
       </button>
     </section>
