@@ -1,0 +1,208 @@
+.detail-page {
+  padding: 24px 32px;
+  color: #0b2a45;
+}
+
+.breadcrumb {
+  font-size: 14px;
+  color: #5b5f66;
+  margin: 0 0 8px;
+}
+.breadcrumb span {
+  cursor: pointer;
+}
+
+.detail-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.detail-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.detail-title h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.tag {
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.tag.light {
+  background: #dcefFD;
+  color: #0b2a45;
+}
+.tag.dark {
+  background: #0b2a45;
+  color: #fff;
+}
+
+.outline-button {
+  padding: 10px 28px;
+  border: 1px solid #eef0f2;
+  border-radius: 999px;
+  background: #fff;
+  color: #0b2a45;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* 2칸 레이아웃 */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 20px;
+}
+.detail-left,
+.detail-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #eef0f2;
+  border-radius: 24px;
+  padding: 28px 32px;
+}
+.card h3 {
+  margin: 0 0 20px;
+  font-size: 16px;
+}
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 큰 금액 카드 */
+.hero-card {
+  position: relative;
+  background: #dcefFD;
+  border: none;
+  padding: 36px 32px;
+}
+.hero-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #3d4a57;
+}
+.hero-card h2 {
+  margin: 16px 0;
+  font-size: 56px;
+}
+.hero-card h2 small {
+  font-size: 22px;
+}
+.dday-badge {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: #0b2a45;
+  color: #fff;
+  padding: 10px 28px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+/* 결제 정보 */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 40px;
+}
+.info-grid span {
+  display: block;
+  font-size: 13px;
+  color: #5b5f66;
+  margin-bottom: 6px;
+}
+.info-grid strong {
+  font-size: 16px;
+}
+
+.memo-box {
+  background: #f7f9fa;
+  border-radius: 16px;
+  padding: 24px;
+  font-size: 14px;
+}
+
+/* 금액 변화 그래프 */
+.chart {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 230px;
+}
+.chart-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.chart-bar {
+  width: 48px;
+  border-radius: 8px;
+  background: #dcefFD;
+}
+.chart-bar.current {
+  background: #5cb8f2;
+}
+.chart-value,
+.chart-year {
+  font-size: 12px;
+  color: #5b5f66;
+}
+
+/* 알림 선택 버튼 */
+.alert-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+.segment {
+  display: flex;
+  background: #e3e5e8;
+  border-radius: 999px;
+  padding: 3px;
+}
+.segment button {
+  border: none;
+  background: transparent;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: #5b5f66;
+  cursor: pointer;
+}
+.segment button.active {
+  background: #ffe57a;
+  color: #0b2a45;
+  font-weight: 700;
+}
+
+.memo-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  border: 0;
+  outline: 0;
+  resize: none;          /* 오른쪽 아래 크기 조절 손잡이 제거 */
+  font: inherit;         /* 주변 글꼴 그대로 사용 */
+  color: inherit;
+  line-height: 1.5;
+}
+
+.memo-input::placeholder {
+  color: #a3abb5;
+}

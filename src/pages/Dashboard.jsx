@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../utils/auth";
 import { amountIn, cycleText, nextPayments, openAddItem, payDaysIn, paysIn, useItems } from "../utils/items";
+import { useAuthStore } from "../store/authStore";
 
 // 사이드바는 components/Layout.jsx에서 그려요.
 
@@ -587,7 +588,7 @@ function CalendarCard() {
 
 /* ───────── 페이지 ───────── */
 export default function Dashboard() {
-  const user = useUser(); // 로그인 안 했으면 null
+  const { user, loading, setAuth } = useAuthStore();
   const navigate = useNavigate();
   const data = useDashData();
   return (

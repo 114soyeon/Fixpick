@@ -7,6 +7,7 @@ import Report from "./pages/Report";
 import Setting from "./pages/Setting";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import FixDetail from "./pages/FixDetail";
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
@@ -20,6 +21,7 @@ const router = createBrowserRouter([
       { path: "calendar", element: <Calendar /> },
       { path: "report", element: <Report /> },
       { path: "setting", element: <Setting /> },
+{ path: "fix/:id", element: <FixDetail /> }
     ],
   },
 ]);
