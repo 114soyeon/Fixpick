@@ -23,7 +23,7 @@ function readItems(email) {
   if (!cache.has(key)) {
     try { cache.set(key, JSON.parse(localStorage.getItem(key) || "[]")); } catch { cache.set(key, []); }
   }
-  return cache.get(key);
+  return cache.get(key); 
 }
 
 function writeItems(email, list) {
@@ -171,7 +171,7 @@ export const isEnded = (item, date) => {
 /** 그 달(year, month: 1~12)에 나가는 결제 목록 → [{ ...항목, date }] */
 export function paymentsInMonth(items, year, month) {
   return items
-    .filter((it) => paysIn(it, month))
+    .filter((it) => paysIn(it, year, month))
     .map((it) => ({ ...it, date: new Date(year, month - 1, payDayIn(it, year, month)) }))
     .filter((it) => !isEnded(it, it.date));
 }
