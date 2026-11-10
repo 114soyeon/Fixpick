@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { initialOf } from "../utils/auth";
-import { addItem, useItems } from "../utils/items";
+import { addItem, setLoginReason, useItems } from "../utils/items";
 
 const COLORS = {
   text: "#0B2A45",
@@ -474,7 +474,7 @@ function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
       <form className="gk-modal__box" role="dialog" aria-modal="true" aria-labelledby="gk-add-title" onSubmit={submit} style={{ fontFamily: FONT }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
           <div>
-            <h2 id="gk-add-title" style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-0.6px" }}>항목 추가</h2>
+            <h2 id="gk-add-title" style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-0.6px" }}>고정지출 항목 추가</h2>
             <p style={{ margin: "4px 0 0", fontSize: 14, color: COLORS.muted }}>매달 나가는 돈을 등록하면 결제일에 맞춰 알려드려요.</p>
           </div>
           <button type="button" className="gk-noti__close" aria-label="닫기" onClick={close}>
@@ -646,9 +646,9 @@ const css = `
 .gk-logo{transition:transform .15s}
 .gk-logo:hover{transform:scale(1.03)}
 .gk-logo:active{transform:scale(.97)}
-.gk-modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(11,42,69,.32);backdrop-filter:blur(3px);animation:gkFadeIn .22s ease both}
+.gk-modal{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto;background:rgba(11,42,69,.32);backdrop-filter:blur(3px);animation:gkFadeIn .22s ease both}
 .gk-modal.is-closing{animation:gkFadeOut .18s ease both}
-.gk-modal__box{width:520px;max-width:100%;background:#FFFFFF;border-radius:28px;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px;box-shadow:0 30px 80px rgba(11,42,69,.28);color:${COLORS.text};animation:gkModalIn .34s cubic-bezier(.22,1,.36,1) both}
+.gk-modal__box{margin:auto;width:520px;max-width:100%;background:#FFFFFF;border-radius:28px;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px;box-shadow:0 30px 80px rgba(11,42,69,.28);color:${COLORS.text};animation:gkModalIn .34s cubic-bezier(.22,1,.36,1) both}
 .gk-modal.is-closing .gk-modal__box{animation:gkModalOut .18s ease both}
 .gk-chip{display:flex;align-items:center;gap:7px;height:38px;padding:0 14px;border:0;border-radius:999px;font:inherit;font-size:14px;color:${COLORS.text};cursor:pointer;transition:background .15s,box-shadow .15s,transform .1s}
 .gk-chip:active{transform:scale(.96)}
@@ -742,12 +742,20 @@ export default function Sidebar({
   const myItems = useItems(); // 내가 등록한 고정지출
   const usedPayMethods = [...new Set(myItems.map((it) => it.payMethod).filter(Boolean))];
 
+  // 항목 추가는 로그인해야 할 수 있어요 → 로그인 안 했으면 로그인 페이지로 보내요
+  const userRef = useRef(user);
+  userRef.current = user;
+  const openAddOrLogin = () => {
+    if (userRef.current) return setAdding(true);
+    setLoginReason("add"); // 로그인하고 나면 바로 항목 추가 창을 열어 줘요
+    onNavigate?.("login");
+  };
+
   // 메인페이지의 "첫 고정지출 등록하기" 버튼에서도 이 창을 열 수 있게
   useEffect(() => {
-    const openAdd = () => setAdding(true);
-    window.addEventListener("gk-open-add", openAdd);
-    return () => window.removeEventListener("gk-open-add", openAdd);
-  }, []);
+    window.addEventListener("gk-open-add", openAddOrLogin);
+    return () => window.removeEventListener("gk-open-add", openAddOrLogin);
+  });
   const notificationCount = items.filter((n) => n.unread).length;
 
   // 바깥을 누르거나 Esc를 누르면 닫기
@@ -770,7 +778,11 @@ export default function Sidebar({
       style={{
         flex: "0 0 248px",
         width: 248,
-        minHeight: "100vh",
+        height: "100vh", // 화면 높이에 맞추고
+        position: "sticky", // 스크롤을 내려도 사이드바는 그 자리에 고정
+        top: 0,
+        alignSelf: "flex-start",
+        zIndex: 90, // 알림 창·항목 추가 창이 본문 위로 뜨게
         background: "#FFFFFF",
         borderRight: `1px solid ${COLORS.border}`,
         boxSizing: "border-box",
@@ -829,7 +841,7 @@ export default function Sidebar({
       <button
         type="button"
         className="gk-sidebar__add"
-        onClick={() => { setAdding(true); onAddClick?.(); }}
+        onClick={() => { openAddOrLogin(); onAddClick?.(); }}
         style={{
           marginTop: "auto",
           height: 48,
@@ -964,7 +976,7 @@ export default function Sidebar({
           payMethods={usedPayMethods}
           onClose={() => setAdding(false)}
           onSubmit={(item) => {
-            addItem(item); // 로그인했으면 내 계정, 아니면 이 브라우저에 저장 (가입하면 계정으로 옮겨져요)
+            addItem(item); // 내 계정에 저장
             onAddItem?.(item);
             setToast(`'${item.name}' 항목을 추가했어요`);
           }}
