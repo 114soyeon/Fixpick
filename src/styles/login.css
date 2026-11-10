@@ -1,3 +1,6 @@
+/* 로그인 페이지 스타일 (Login.jsx에서 import "../styles/login.css"로 불러와요)
+ * 모달·토스트는 사이드바에도 같은 이름이 있어서 .gk-login-page 안에서만 적용되게 묶었어요 */
+
 @keyframes gkLoginRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 @keyframes gkLoginFloat { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(1deg); } }
 @keyframes gkLoginFadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -78,6 +81,36 @@
   height: 20px;
   object-fit: contain;
   flex-shrink: 0;
+}
+/* 최근 로그인 말풍선 (버튼 오른쪽 위) */
+@keyframes gkLoginLastIn { 0% { opacity: 0; transform: translateY(6px) scale(.9); } 100% { opacity: 1; transform: none; } }
+@keyframes gkLoginLastBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+.gk-login-last {
+  position: absolute;
+  top: -11px;
+  right: 14px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #1F1F1F;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.2px;
+  box-shadow: 0 6px 14px rgba(0,0,0,.18);
+  pointer-events: none;
+  animation: gkLoginLastIn .45s cubic-bezier(.22,1,.36,1) .5s both, gkLoginLastBob 2.4s ease-in-out 1s 2;
+}
+.gk-login-last::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 8px;
+  height: 8px;
+  background: #1F1F1F;
+  border-radius: 1px;
+  transform: translateX(-50%) rotate(45deg);
 }
 .gk-login-social:active {
   transform: scale(.98);
@@ -193,4 +226,4 @@
     padding: 32px 24px !important;
   }
 }
-@media (prefers-reduced-motion: reduce) { .gk-login-rise, .gk-login-float, .gk-login-page .gk-modal, .gk-login-page .gk-modal__box, .gk-login-page .gk-toast { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .gk-login-last, .gk-login-rise, .gk-login-float, .gk-login-page .gk-modal, .gk-login-page .gk-modal__box, .gk-login-page .gk-toast { animation: none; } }
