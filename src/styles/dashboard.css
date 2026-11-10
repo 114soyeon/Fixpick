@@ -289,22 +289,34 @@
   flex-direction: column;
   gap: 16px;
 }
+/* 창이 좁아지면 건수·전체보기는 다음 줄로 */
 .gk-dash-expense__head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  column-gap: 12px;
+  row-gap: 10px;
 }
 .gk-dash-expense__title {
   display: flex;
   align-items: baseline;
   gap: 10px;
   min-width: 0;
+  flex: 1 1 auto;
 }
+.gk-dash-expense__title .gk-dash-h2 {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+/* 설명은 … 으로 줄여요 */
 .gk-dash-expense__desc {
   font-size: 14px;
   color: #5B5F66;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 .gk-dash-expense__actions {
   display: flex;
