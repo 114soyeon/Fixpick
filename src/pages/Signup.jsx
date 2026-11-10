@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, ChevronRight, Eye, EyeOff, X } from "lucide-react";
 import { LogoMark, Wordmark } from "../components/Sidebar";
-import { emailExists, signup } from "../utils/auth";
+import { emailExists } from "../utils/auth";
+import { signup } from "../api/auth";
 import "../styles/signup.css"; // 이 페이지 스타일은 전부 여기 (class는 gk-sign- 로 시작)
 
 const STEPS = [
@@ -111,21 +112,32 @@ export default function Signup() {
   const strength = strengthOf(form.pw);
   const pwMatch = form.pw2 && form.pw === form.pw2;
 
-  const submit = (e) => {
+const submit = async (e) => {
     e.preventDefault();
+
     const next = {};
     if (!form.name.trim()) next.name = "이름을 입력해 주세요.";
-    if (!/^01[016789]-\d{3,4}-\d{4}$/.test(form.phone)) next.phone = "휴대폰 번호를 다시 확인해 주세요.";
-    if (!emailValid) next.email = "이메일 주소를 다시 확인해 주세요.";
-    else if (emailExists(form.email)) next.email = "이미 가입된 이메일이에요.";
-    else if (!verify.ok) next.email = "이메일 인증을 해 주세요.";
+    if (!phoneValid) next.phone = "휴대폰 번호를 다시 확인해 주세요.";
+    else if (!verify.ok) next.phone = "휴대폰 인증을 해 주세요.";
+    if (!isValidEmail(form.email)) next.email = "이메일 주소를 다시 확인해 주세요.";
+    else if (await emailExists(form.email)) next.email = "이미 가입된 이메일이에요.";
     if (form.pw.length < 8) next.pw = "비밀번호는 8자 이상으로 만들어 주세요.";
     if (form.pw !== form.pw2) next.pw2 = "비밀번호가 서로 달라요.";
     setErrors(next);
-    if (Object.keys(next).length || !requiredAgreed) return;
-    const res = signup({ name: form.name, phone: form.phone, email: form.email, password: form.pw });
-    if (!res.ok) return setErrors({ [res.field]: res.message });
-    setDone(form.name.trim()); // 가입 완료 화면으로
+
+    if (Object.keys(next).length || !requiredAgreed) return; // 오류가 하나라도 있거나, 필수동의를 하지 않은경우
+
+    setBusy(true); // 회원가입이 진행중
+
+    try {
+      const res = await signup({ name: form.name, phone: form.phone, email: form.email, password: form.pw });
+      if (!res.ok) return setErrors({ [res.field]: res.message });
+
+      navigate("/login")
+      //setDone(form.name.trim()); // 가입 완료 화면으로
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -280,7 +292,7 @@ export default function Signup() {
             ))}
           </div>
 
-          <button type="submit" className="gk-sign-btn" disabled={!requiredAgreed}>가입하고 시작하기</button>
+          <button type="submit" className="gk-sign-btn" disabled={!requiredAgreed}>동의하고 가입하기</button>
 
           <p className="gk-sign-foot">
             이미 계정이 있나요?{" "}
