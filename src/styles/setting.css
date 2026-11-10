@@ -554,3 +554,24 @@
 .set-page .set-btn-add:disabled {
   cursor: not-allowed; /* 다 입력하기 전에는 눌러도 안 돼요 */
 }
+
+/* =========================================================
+   제목 위 여백: 지출 리포트(report.css)와 같게
+   - 1440px 이상 + 창 높이 900px 이상: 창 높이 1080 → 40px, 900 → 24px (사이는 비례)
+   - 1279px 이하: 24px / 767px 이하: 16px
+   ========================================================= */
+@media (min-width: 1440px) and (min-height: 900px) {
+  .set-page {
+    padding-top: clamp(24px, calc(40px - (1080px - 100vh) * 0.089), 40px);
+  }
+}
+@media (max-width: 1279px) {
+  .set-page {
+    padding-top: 24px;
+  }
+}
+@media (max-width: 767px) {
+  .set-page {
+    padding-top: 16px;
+  }
+}
