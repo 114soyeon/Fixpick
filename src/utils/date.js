@@ -13,6 +13,22 @@ export const addYears = (n) => { const t = new Date(); const y = t.getFullYear()
 /** "2026년 11월 9일" */
 export const prettyDate = (key) => { if (!key) return ""; const [y, m, d] = key.split("-").map(Number); return `${y}년 ${m}월 ${d}일`; };
 
+/** Date → 키 "2026-11-25" */
+export const dateKey = (date) => toKey(date.getFullYear(), date.getMonth() + 1, date.getDate());
+
+/** 두 Date가 같은 날인지 (시간은 무시) */
+export const isSameDay = (a, b) =>
+  a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+/** 오늘부터 며칠 남았는지 → "D-3" (오늘이면 "D-day") */
+export const dDayText = (date) => {
+  const t = new Date();
+  const today = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const days = Math.round((target - today) / 86400000);
+  return days === 0 ? "D-day" : `D-${days}`;
+};
+
 /** 만기까지 남은 기간 ("3개월 남음", "1년 2개월 남음") */
 export const leftText = (key) => {
   if (!key) return "";

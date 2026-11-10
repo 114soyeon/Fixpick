@@ -79,3 +79,36 @@ export const endDateOf = (item) => {
   const [y, m, d] = item.endDate.split("-").map(Number);
   return new Date(y, m - 1, d);
 };
+
+/**
+ * 카테고리마다 (올해 − 작년 같은 기간) 금액 차이
+ * → [{ key, change, endedName }]
+ *   endedName: 작년보다 줄어든 항목 중 만기로 끝난 것의 이름 ("왓챠 해지로 줄었어요"에 써요). 없으면 null
+ */
+export function categoryChanges(thisYear, lastYear) {
+  const curByCat = Object.fromEntries(byCategory(thisYear).map((c) => [c.key, c.value]));
+  const lastByCat = Object.fromEntries(byCategory(lastYear).map((c) => [c.key, c.value]));
+  const thisItemMap = Object.fromEntries(byItem(thisYear).map((it) => [it.id, it.value]));
+  const lastItems = byItem(lastYear);
+
+  return [...new Set([...Object.keys(curByCat), ...Object.keys(lastByCat)])].map((key) => {
+    const ended = lastItems.find(
+      (it) => it.category === key && (thisItemMap[it.id] ?? 0) < it.value && endDateOf(it)
+    );
+    return {
+      key,
+      change: (curByCat[key] ?? 0) - (lastByCat[key] ?? 0),
+      endedName: ended ? ended.name : null,
+    };
+  });
+}
+
+/** 그 해에 해지한 항목 (만기일이 그 해이고 today까지 지난 것), 최근에 끝난 순서 */
+export function endedInYear(items, year, today) {
+  return items
+    .filter((it) => {
+      const end = endDateOf(it);
+      return end && end.getFullYear() === year && end <= today;
+    })
+    .sort((a, b) => endDateOf(b) - endDateOf(a));
+}
