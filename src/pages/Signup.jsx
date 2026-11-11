@@ -190,7 +190,7 @@ const submit = async (e) => {
           {/* 이름 */}
           <label className="gk-sign-field">
             <span className="gk-sign-label">이름</span>
-            <input id="signup-name" autoComplete="name" maxLength={12} className={`gk-sign-input ${errors.name ? "is-error" : ""}`} placeholder="예) 김민지" value={form.name} onChange={(e) => set("name", e.target.value)} />
+            <input id="signup-name" autoComplete="name" maxLength={12} className={`gk-sign-input ${errors.name ? "is-error" : ""}`} placeholder="이름을 입력해주세요" value={form.name} onChange={(e) => set("name", e.target.value)} />
             {errors.name && <p role="alert" className="gk-sign-error">{errors.name}</p>}
           </label>
 
