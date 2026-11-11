@@ -4,60 +4,18 @@ import { useFixItems } from "../utils/fixItems";
 import { removeItem } from "../utils/items";
 import "../styles/FixDetail.css";
 import PaymentEditModal from "../components/PaymentEditModal/PaymentEditModal.jsx";
+import AlertSettings from "../components/fix-detail/AlertSettings.jsx";
+import AmountChart from "../components/fix-detail/AmountChart.jsx";
+import PaymentInfoCard from "../components/fix-detail/PaymentInfoCard.jsx";
+import { toInputDate, toKoreanDate, getMonthly } from "../utils/fixDetail";
+import HeroCard from "../components/fix-detail/HeroCard.jsx";
+import MemoCard from "../components/fix-detail/MemoCard.jsx";
 
-// "11월 5일" 또는 "2027년 3월 4일" → 날짜(Date)로 바꾸기
-function toDate(text) {
-  const match = text.match(/(?:(\d{4})년 )?(\d{1,2})월 (\d{1,2})일/);
-  if (!match) return null;
-  const year = Number(match[1] || new Date().getFullYear());
-  return new Date(year, Number(match[2]) - 1, Number(match[3]));
-}
-
-// 오늘부터 결제일까지 남은 날짜
-function getDday(text) {
-  const target = toDate(text);
-  if (!target) return "";
-  const diff = Math.ceil((target - new Date()) / (1000 * 60 * 60 * 24));
-  return diff >= 0 ? `D-${diff}` : "지남";
-}
-
-// "2027년 3월 4일" → "2027-03-04" (팝업의 날짜 칸용)
-function toInputDate(text) {
-  if (!text) return "";
-  const date = toDate(text);
-  if (!date) return "";
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${date.getFullYear()}-${month}-${day}`;
-}
-
-function formatMoney(number) {
-  return number.toLocaleString("ko-KR");
-}
-
-// "2027-03-04" → "2027년 3월 4일" (모달의 날짜를 화면용 글자로 바꾸기)
-function toKoreanDate(text) {
-  if (!text) return "";
-  const [year, month, day] = text.split("-");
-  return `${year}년 ${Number(month)}월 ${Number(day)}일`;
-}
-
-// 주기에 따라 "월로 나눈 금액" 다시 계산하기
-function getMonthly(amount, cycle) {
-  if (cycle === "매년") return Math.round(amount / 12);
-  if (cycle === "매주") return Math.round((amount * 52) / 12);
-  return amount; // 매월
-}
-
-const ALERT_OPTIONS = ["30일 전", "7일 전", "3일 전", "1일 전"];
-
-function FixDetail() {
+const FixDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams(); // 주소 /fix/8 에서 8을 꺼내와요
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [payAlert, setPayAlert] = useState("1일 전");
-  const [endAlert, setEndAlert] = useState("7일 전");
 
   // 전체 목록(기본 + 추가한 항목, 수정본 반영)에서 항목 찾기
   const allItems = useFixItems();
@@ -87,10 +45,9 @@ function FixDetail() {
     { year: 2025, amount: Math.round(item.amount * 0.97) },
     { year: 2026, amount: item.amount },
   ];
-  const maxAmount = Math.max(...history.map((h) => h.amount));
 
   // 팝업에서 "저장"을 눌렀을 때 실행돼요
-  function handleSave(newInfo) {
+  const handleSave = (newInfo) => {
     const amount = Number(newInfo.amount);
 
     const updated = {
@@ -109,15 +66,15 @@ function FixDetail() {
     const edits = JSON.parse(localStorage.getItem("expense-edits") || "{}");
     localStorage.setItem(
       "expense-edits",
-      JSON.stringify({ ...edits, [id]: updated })
+      JSON.stringify({ ...edits, [id]: updated }),
     );
 
     setItem(updated);
     setIsModalOpen(false);
-  }
+  };
 
   // "삭제"를 눌렀을 때 실행돼요
-  function handleDelete() {
+  const handleDelete = () => {
     if (!window.confirm(`'${item.name}' 항목을 삭제할까요?`)) return;
 
     const itemId = Number(id);
@@ -130,7 +87,7 @@ function FixDetail() {
     if (!deleted.includes(itemId)) {
       localStorage.setItem(
         "expense-deleted",
-        JSON.stringify([...deleted, itemId])
+        JSON.stringify([...deleted, itemId]),
       );
     }
 
@@ -141,14 +98,14 @@ function FixDetail() {
     localStorage.removeItem(`memo-${id}`);
 
     navigate("/fix");
-  }
+  };
 
   // 메모 칸에 글자를 칠 때마다 실행돼요
-  function handleMemoChange(e) {
+  const handleMemoChange = (e) => {
     const newMemo = e.target.value;
     setItem({ ...item, memo: newMemo });
     localStorage.setItem(`memo-${id}`, newMemo);
-  }
+  };
 
   return (
     <div className="detail-page">
@@ -163,10 +120,7 @@ function FixDetail() {
           <span className="tag light">{item.category}</span>
           {item.big && <span className="tag dark">큰 지출</span>}
         </div>
-        <button
-          className="outline-button"
-          onClick={handleDelete}
-        >
+        <button className="outline-button" onClick={handleDelete}>
           삭제
         </button>
       </div>
@@ -174,122 +128,18 @@ function FixDetail() {
       <div className="detail-grid">
         {/* 왼쪽 */}
         <div className="detail-left">
-          <section className="card hero-card">
-            <span className="dday-badge">{getDday(item.date)}</span>
-            <p>다음 결제 · {item.date}</p>
-            <h2>
-              {formatMoney(item.amount)} <small>원</small>
-            </h2>
-            <p>
-              {item.period} 결제 · 월 {formatMoney(item.monthly)}원
-            </p>
-          </section>
-          <section className="card">
-            <div className="card-head">
-              <h3>결제 정보</h3>
-              <button
-                className="outline-button"
-                onClick={() => setIsModalOpen(true)}
-              >
-                수정
-              </button>
-            </div>
+          <HeroCard item={item} />
 
-            <div className="info-grid">
-              <div>
-                <span>주기</span>
-                <strong>{item.period}</strong>
-              </div>
-              <div>
-                <span>금액 유형</span>
-                <strong>{item.amountType || "고정"}</strong>
-              </div>
-              <div>
-                <span>결제 수단</span>
-                <strong>{item.method || "-"}</strong>
-              </div>
-              <div>
-                <span>시작일</span>
-                <strong>{item.startDate || "-"}</strong>
-              </div>
-              <div>
-                <span>다음 결제일</span>
-                <strong>{item.date}</strong>
-              </div>
-              <div>
-                <span>만기일</span>
-                <strong>{item.endDate || "-"}</strong>
-              </div>
-            </div>
-          </section>
+          <PaymentInfoCard item={item} onEdit={() => setIsModalOpen(true)} />
 
-          <section className="card">
-            <h3>메모</h3>
-            <textarea
-              className="memo-box memo-input"
-              rows={3}
-              placeholder="메모를 입력하세요"
-              value={item.memo || ""}
-              onChange={handleMemoChange}
-            />
-          </section>
+          <MemoCard memo={item.memo} onChange={handleMemoChange} />
         </div>
 
         {/* 오른쪽 */}
         <div className="detail-right">
-          <section className="card">
-            <h3>금액 변화</h3>
-            <div className="chart">
-              {history.map((h) => (
-                <div className="chart-col" key={h.year}>
-                  <span className="chart-value">
-                    {Math.round(h.amount / 10000)}만
-                  </span>
-                  <div
-                    className={
-                      h.year === 2026 ? "chart-bar current" : "chart-bar"
-                    }
-                    style={{ height: `${(h.amount / maxAmount) * 160}px` }}
-                  />
-                  <span className="chart-year">{h.year}</span>
-                </div>
-              ))}
-            </div>
-          </section>
+          <AmountChart history={history} />
 
-          <section className="card">
-            <h3>알림</h3>
-
-            <div className="alert-row">
-              <span>결제 알림</span>
-              <div className="segment">
-                {ALERT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt}
-                    className={payAlert === opt ? "active" : ""}
-                    onClick={() => setPayAlert(opt)}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="alert-row">
-              <span>만기 전 알림</span>
-              <div className="segment">
-                {ALERT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt}
-                    className={endAlert === opt ? "active" : ""}
-                    onClick={() => setEndAlert(opt)}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </section>
+          <AlertSettings />
         </div>
       </div>
 
@@ -310,5 +160,6 @@ function FixDetail() {
       )}
     </div>
   );
-}
+};
+
 export default FixDetail;

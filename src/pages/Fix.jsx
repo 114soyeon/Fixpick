@@ -2,36 +2,38 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Fix.css";
 import { useFixItems } from "../utils/fixItems";
-import { categoryStyle } from "../constants/categories";
+import SummaryCards from "../components/fix/SummaryCards";
+import ExpenseRow from "../components/fix/ExpenseRow";
 
-// 목록의 한글 카테고리 이름 → categories.js의 key
-const CATEGORY_KEY = {
-  "주거·공과": "home",
-  통신: "phone",
-  구독: "sub",
-  가전: "rental",
-  보험: "insure",
-  "금융·저축": "saving",
-  교통: "transit",
-  자동차: "car",
-  "생활·기타": "etc",
+// 카테고리 목록
+const categories = [
+  "전체",
+  "주거·공과",
+  "통신",
+  "구독",
+  "가전",
+  "보험",
+  "금융·저축",
+  "교통",
+  "기타",
+  "자동차",
+];
+
+// 정렬 기능
+const getDateValue = (date) => {
+  const currentYear = new Date().getFullYear();
+  const match = date.match(/(?:(\d{4})년 )?(\d{1,2})월 (\d{1,2})일/);
+
+  if (!match) return 0;
+
+  const year = Number(match[1] || currentYear);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+
+  return new Date(year, month - 1, day).getTime();
 };
 
-// 카테고리 아이콘 (Lucide). 큰 지출은 진한 남색 박스로 강조해요
-function ExpenseIcon({ item }) {
-  const { icon: Icon, bg, color } = categoryStyle(CATEGORY_KEY[item.category]);
-  const style = item.big
-    ? { background: "#102f4b", color: "#ffffff" }
-    : { background: bg, color };
-
-  return (
-    <div className="expense-icon" style={style}>
-      <Icon size={20} strokeWidth={2} aria-hidden="true" />
-    </div>
-  );
-}
-
-function MyExpenses() {
+const Fix = () => {
   const navigate = useNavigate();
 
   // 기본 데이터 + 사이드바에서 추가한 항목 + 상세에서 수정한 내용
@@ -40,38 +42,11 @@ function MyExpenses() {
   const [showAll, setShowAll] = useState(false);
   const [sortOrder, setSortOrder] = useState("high");
 
-  // 카테고리 목록
-  const categories = [
-    "전체",
-    "주거·공과",
-    "통신",
-    "구독",
-    "가전",
-    "보험",
-    "금융·저축",
-    "교통",
-    "생활·기타",
-    "자동차",
-  ];
-
   // 카테고리 필터링
   let filteredExpenses =
     selectedCategory === "전체"
       ? allItems
       : allItems.filter((item) => item.category === selectedCategory);
-  // 정렬 기능
-  const getDateValue = (date) => {
-    const currentYear = new Date().getFullYear();
-    const match = date.match(/(?:(\d{4})년 )?(\d{1,2})월 (\d{1,2})일/);
-
-    if (!match) return 0;
-
-    const year = Number(match[1] || currentYear);
-    const month = Number(match[2]);
-    const day = Number(match[3]);
-
-    return new Date(year, month - 1, day).getTime();
-  };
 
   filteredExpenses = [...filteredExpenses].sort((a, b) => {
     switch (sortOrder) {
@@ -97,11 +72,6 @@ function MyExpenses() {
     ? filteredExpenses
     : filteredExpenses.slice(0, 8);
 
-  // 금액 표시
-  const formatMoney = (number) => {
-    return number.toLocaleString("ko-KR") + "원";
-  };
-
   return (
     <div className="expenses-page">
       {/* 페이지 제목 + 설명 */}
@@ -113,25 +83,7 @@ function MyExpenses() {
       </header>
 
       {/* 요약 카드 */}
-      <section className="summary-cards">
-        <div className="summary-card primary">
-          <p>한 달 고정지출 (월 환산)</p>
-          <h2>1,125,857원</h2>
-        </div>
-
-        <div className="summary-card">
-          <p>자동 이체 되는 저축</p>
-          <h2>300,000원</h2>
-        </div>
-
-        <div className="summary-card upcoming-card">
-          <div>
-            <p>다가오는 큰 지출</p>
-            <h2>자동차세 130,000원</h2>
-          </div>
-          <span className="month-badge">12월</span>
-        </div>
-      </section>
+      <SummaryCards />
 
       {/* 카테고리 및 정렬 */}
       <section className="filter-area">
@@ -144,10 +96,7 @@ function MyExpenses() {
                   ? "category-button active"
                   : "category-button"
               }
-              onClick={() => {
-                setSelectedCategory(category);
-                setShowAll(false);
-              }}
+              onClick={() => setSelectedCategory(category)}
             >
               {category}
             </button>
@@ -178,32 +127,11 @@ function MyExpenses() {
         </div>
 
         {visibleExpenses.map((item) => (
-          <div
-            className="table-row"
+          <ExpenseRow
             key={item.id}
+            item={item}
             onClick={() => navigate(`/fix/${item.id}`)}
-          >
-            {/* 항목 */}
-            <div className="expense-name">
-              <ExpenseIcon item={item} />
-
-              <strong>{item.name}</strong>
-
-              {item.expected && <span className="expected-badge">예상</span>}
-
-              {item.big && <span className="big-badge">큰 지출</span>}
-            </div>
-
-            <span>{item.category}</span>
-
-            <span>{item.period}</span>
-
-            <span>{item.date}</span>
-
-            <strong className="amount">{formatMoney(item.amount)}</strong>
-
-            <span className="monthly-amount">{formatMoney(item.monthly)}</span>
-          </div>
+          />
         ))}
 
         {/* 전체 항목 보기 */}
@@ -222,6 +150,6 @@ function MyExpenses() {
       </section>
     </div>
   );
-}
+};
 
-export default MyExpenses;
+export default Fix;
