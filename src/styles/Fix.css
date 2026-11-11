@@ -310,3 +310,10 @@
 
 .table-row { cursor: pointer; }
 .table-row:hover { background: #f7f9fa; }
+
+.copyright {
+  padding: 24px 0;
+  text-align: center;
+  font-size: 12px;
+  color: #8a94a6;
+}

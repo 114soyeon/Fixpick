@@ -148,6 +148,10 @@ const Fix = () => {
           <p className="empty-message">등록된 고정지출이 없습니다.</p>
         )}
       </section>
+
+      <p className="copyright">
+        Copyright © 2026. Fixpick All rights reserved.
+      </p>
     </div>
   );
 };

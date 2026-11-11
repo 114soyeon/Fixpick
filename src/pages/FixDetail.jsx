@@ -158,6 +158,11 @@ const FixDetail = () => {
           onSave={handleSave}
         />
       )}
+
+      <p className="copyright">
+        Copyright © 2026. Fixpick All rights reserved.
+      </p>
+      
     </div>
   );
 };
