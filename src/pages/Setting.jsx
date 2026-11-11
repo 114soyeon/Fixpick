@@ -64,6 +64,7 @@ const Setting = () => {
           }}
         />
       )}
+      <span className="gk-set-copy">Copyright © 2026. Fixpick All rights reserved.</span>
     </div>
   );
 };

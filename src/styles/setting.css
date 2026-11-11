@@ -19,6 +19,7 @@
   background: #f7f9fa;
   min-height: 100vh;
   box-sizing: border-box;
+  position: relative; /* 저작권 문구가 이 상자 기준으로 자리 잡게 */
 }
 .set-page button {
   font-family: inherit;
@@ -733,4 +734,14 @@
   .set-page .set-btn-cancel {
     width: 96px;
   }
+}
+
+.gk-set-copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;         /* 바닥에서 띄우는 거리 */
+  text-align: center;
+  font-size: 13px;
+  color: #8A9098;
 }

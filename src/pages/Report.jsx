@@ -57,7 +57,8 @@ const Report = () => {
       ) : (
         <YearlyReport items={items} year={year} month={month} today={today} />
       )}
-    </div>
+      <span className="gk-rpt-copy">Copyright © 2026. Fixpick All rights reserved.</span>
+    </div>    
   );
 };
 

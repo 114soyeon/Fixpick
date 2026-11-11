@@ -378,6 +378,7 @@
   height: max(100vh, 720px);
   display: flex;
   flex-direction: column;
+  position: relative; /* 저작권 문구가 이 상자 기준으로 자리 잡게 */
 }
 .paycal-body {
   flex: 1;
@@ -560,4 +561,15 @@
   .paycal-event-title {
     display: none;
   }
+}
+
+/* 저작권: 페이지 아래 여백에 띄워 둬서 달력·카드는 안 움직여요 */
+.gk-paycal-copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  text-align: center;
+  font-size: 13px;
+  color: #8A9098;
 }

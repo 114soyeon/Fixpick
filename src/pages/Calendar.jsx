@@ -105,6 +105,7 @@ const Calendar = () => {
           <BigCard list={bigList} />
         </aside>
       </div>
+      <span className="gk-paycal-copy">Copyright © 2026. Fixpick All rights reserved.</span>
     </div>
   );
 };
