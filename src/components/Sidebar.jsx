@@ -21,7 +21,8 @@ function AddItemModal({ onClose, setToast, payMethods = [] }) {
   const { unit } = ruleOf(form); // 매일=day, 매주=week, 매달=month, 매년=year, 사용자화=고른 단위
   const custom = form.cycle === "사용자화";
   const needDay = unit === "month" || unit === "year";
-  const valid = form.name.trim() && amountNum > 0 && (!needDay || (dayNum >= 1 && dayNum <= 31)) && (!custom || (everyNum >= 1 && everyNum <= 99));
+  // category: 처음 값 "sub"는 DB id(숫자)가 아니라서, 카테고리를 골라야(숫자 id) 저장할 수 있어요
+  const valid = Number.isInteger(form.category) && form.name.trim() && amountNum > 0 && (!needDay || (dayNum >= 1 && dayNum <= 31)) && (!custom || (everyNum >= 1 && everyNum <= 99));
 
   const categoryList = async () => {  
     const data = await getCategories();
@@ -39,7 +40,7 @@ function AddItemModal({ onClose, setToast, payMethods = [] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     if (!valid) return;
     console.log(form); // amount, amountType, category, cycle, day, endDate, every, month, name, payMethod, remind, unit, weekday
@@ -51,17 +52,17 @@ function AddItemModal({ onClose, setToast, payMethods = [] }) {
     console.log(unit); // week -> 단위
     console.log(todayKey()); // 현재 오늘 날짜
 
-    addSubs({
-        user_id: user.id, 
-        category_id: form.category, 
+    const { error } = await addSubs({
+        user_id: user.id,
+        category_id: form.category,
         name: form.name.trim(),
         amount: amountNum,
         cycle: form.cycle,
-        amount_type: form.amountType,
-        payment_day: null, // 이거 아직 미구현
+        amount_type: form.amountType === "variable" ? "변동" : "고정", // DB는 '고정'/'변동'만 받아요
+        payment_day: needDay ? dayNum : 1, // DB에서 비워 둘 수 없는 칸이라 결제일이 없는 주기(매일·매주)는 1로 넣어요
         payment_method_id: null, // 이거 아직 미구현
         start_date: todayKey(),
-        expire_date: form.endDate,
+        expiry_date: form.endDate || null, // DB 컬럼 이름은 expiry_date. 만기일을 안 고르면 ""가 아니라 null
         memo: null,
         weekday: Number(form.weekday),
         every: custom ? everyNum : null,
@@ -71,6 +72,7 @@ function AddItemModal({ onClose, setToast, payMethods = [] }) {
         day: needDay ? dayNum : null,
         month: Number(form.month)
     })
+    if (error) return setToast("항목을 추가하지 못했어요. 다시 시도해 주세요");
     setToast(`'${form.name.trim()}' 항목을 추가했어요`);
     close();
   };
