@@ -46,7 +46,7 @@ const CATEGORIES = [
   { key: "sub", name: "구독 서비스", desc: "OTT·음악·멤버십", icon: "play", highlight: true },
   { key: "rental", name: "가전", desc: "정수기·안마의자·건조기", icon: "washer" },
   { key: "insure", name: "보험", desc: "실손·자동차·운전자", icon: "shield" },
-  { key: "saving", name: "금융/저축", desc: "적금·청약·대출이자", icon: "piggy" },
+  { key: "saving", name: "금융·저축", desc: "적금·청약·대출이자", icon: "piggy" },
   { key: "transit", name: "교통", desc: "교통카드·주차", icon: "bus" },
   { key: "car", name: "자동차", desc: "할부·주유·자동차보험", icon: "car" },
   { key: "etc", name: "기타", desc: "경조사비·세금·관리", icon: "shapes" },

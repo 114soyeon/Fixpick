@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { initialOf } from "../utils/auth";
-import { addItem, setLoginReason, useItems } from "../utils/items";
+import { addItem, amountIn, isEnded, payDaysIn, setLoginReason, useItems } from "../utils/items";
 import { useAuthStore } from "../store/authStore"; 
 
 const COLORS = {
@@ -72,16 +72,86 @@ const Icons = {
   ),
 };
 
-/* 알림 예시 데이터 (설정 페이지의 알림 종류와 맞춰져 있어요) */
-const THIS_MONTH = new Date().getMonth() + 1;
-const NEXT_MONTH = (THIS_MONTH % 12) + 1;
-const NOTIFICATIONS = [
-  { id: 1, type: "pay", title: "넷플릭스 결제 예정", body: `${THIS_MONTH}월 10일에 14,500원이 국민카드로 결제돼요.`, time: "방금", unread: true, action: "캘린더 보기", to: "calendar" },
-  { id: 2, type: "big", title: "큰 지출이 다가와요", body: `${THIS_MONTH}월 25일에 월세 486,400원이 빠져나가요.`, time: "1시간 전", unread: true, action: "캘린더 보기", to: "calendar" },
-  { id: 3, type: "contract", title: "휴대폰 약정이 곧 끝나요", body: `${NEXT_MONTH}월 18일에 24개월 약정이 끝나요. 요금제를 확인해 보세요.`, time: "어제", unread: false, action: "내 고정지출", to: "expenses" },
-  { id: 4, type: "budget", title: "예산의 90%를 넘었어요", body: `${THIS_MONTH}월 예산이 얼마 남지 않았어요. 리포트에서 확인해 보세요.`, time: "2일 전", unread: false, action: "리포트 보기", to: "report" },
-  { id: 5, type: "done", title: "결제 완료", body: `${THIS_MONTH}월 1일에 관리비 182,400원이 결제됐어요.`, time: "4일 전", unread: false },
-];
+/* ───────── 알림: 내가 등록한 고정지출로 만들어요 (등록한 게 없으면 알림도 없어요) ───────── */
+const BIG_AMOUNT = 100000; // 이 금액 이상이면 "큰 지출"
+const won = (n) => `${Number(n).toLocaleString("ko-KR")}원`;
+const md = (d) => `${d.getMonth() + 1}월 ${d.getDate()}일`;
+const keyOfDate = (d) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+const dayDiff = (a, b) => Math.round((a - b) / 86400000);
+const readBudget = () => { try { return JSON.parse(localStorage.getItem("gk-settings") || "{}").budget ?? 1300000; } catch { return 1300000; } };
+
+/** from ~ to 사이에 이 항목이 결제되는 날짜들 */
+function payDatesBetween(item, from, to) {
+  const out = [];
+  let y = from.getFullYear();
+  let m = from.getMonth() + 1;
+  for (let i = 0; i < 3; i++) { // 앞뒤로 길어야 한 달이라 3개월만 보면 돼요
+    payDaysIn(item, y, m).forEach((d) => {
+      const date = new Date(y, m - 1, d);
+      if (date >= from && date <= to && !isEnded(item, date)) out.push(date);
+    });
+    m += 1; if (m > 12) { m = 1; y += 1; }
+  }
+  return out;
+}
+
+/** 등록한 항목 → 알림 목록 (최근 7일 + 앞으로 다가오는 것) */
+function buildNotifications(items, readIds) {
+  if (!items.length) return [];
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const list = [];
+  // 결제 완료는 지난 일이라 처음부터 읽은 상태로 (새 알림 숫자에 안 세요)
+  const add = (n) => list.push({ ...n, unread: n.type !== "done" && !readIds.has(n.id) });
+
+  items.forEach((it) => {
+    // 다가오는 결제: 큰 지출은 7일 전부터, 나머지는 3일 전부터
+    const ahead = new Date(today); ahead.setDate(ahead.getDate() + (it.amount >= BIG_AMOUNT ? 7 : 3));
+    payDatesBetween(it, today, ahead).forEach((date) => {
+      const left = dayDiff(date, today);
+      const when = left === 0 ? "오늘" : left === 1 ? "내일" : `${left}일 뒤`;
+      const pay = it.payMethod ? `${it.payMethod}로 ` : "";
+      const amt = `${it.amountType === "variable" ? "약 " : ""}${won(it.amount)}`;
+      add(it.amount >= BIG_AMOUNT
+        ? { id: `big-${it.id}-${keyOfDate(date)}`, type: "big", title: "큰 지출이 다가와요", body: `${md(date)}에 ${it.name} ${amt}이 ${pay}빠져나가요.`, time: when, sort: left, action: "캘린더 보기", to: "calendar" }
+        : { id: `pay-${it.id}-${keyOfDate(date)}`, type: "pay", title: `${it.name} 결제 예정`, body: `${md(date)}에 ${amt}이 ${pay}결제돼요.`, time: when, sort: left, action: "캘린더 보기", to: "calendar" });
+    });
+
+    // 지난 7일 안에 결제된 것
+    const back = new Date(today); back.setDate(back.getDate() - 7);
+    const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+    payDatesBetween(it, back, yesterday).forEach((date) => {
+      const ago = dayDiff(today, date);
+      add({ id: `done-${it.id}-${keyOfDate(date)}`, type: "done", title: "결제 완료", body: `${md(date)}에 ${it.name} ${won(it.amount)}이 결제됐어요.`, time: ago === 1 ? "어제" : `${ago}일 전`, sort: 100 + ago });
+    });
+
+    // 만기일이 30일 안으로 다가온 것
+    if (it.endDate) {
+      const [y, m, d] = it.endDate.split("-").map(Number);
+      const end = new Date(y, m - 1, d);
+      const left = dayDiff(end, today);
+      if (left >= 0 && left <= 30) {
+        add({ id: `contract-${it.id}-${it.endDate}`, type: "contract", title: `${it.name} 만기가 다가와요`, body: `${md(end)}에 계약이 끝나요. 연장하거나 바꿀지 확인해 보세요.`, time: left === 0 ? "오늘" : `D-${left}`, sort: 50 + left, action: "내 고정지출", to: "expenses" });
+      }
+    }
+  });
+
+  // 이번 달 예산의 90%를 넘었을 때
+  const budget = readBudget();
+  const used = items.reduce((sum, it) => sum + amountIn(it, today.getFullYear(), today.getMonth() + 1), 0);
+  if (budget > 0 && used >= budget * 0.9) {
+    const over = used > budget;
+    add({ id: `budget-${today.getFullYear()}-${today.getMonth() + 1}-${over ? "over" : "90"}`, type: "budget", title: over ? "이번 달 예산을 넘었어요" : "예산의 90%를 넘었어요",
+      body: over ? `${today.getMonth() + 1}월 고정지출이 예산보다 ${won(used - budget)} 많아요.` : `${today.getMonth() + 1}월 예산이 ${won(budget - used)} 남았어요.`, time: "이번 달", sort: 40, action: "리포트 보기", to: "report" });
+  }
+
+  return list.sort((a, b) => Number(b.unread) - Number(a.unread) || a.sort - b.sort);
+}
+
+/* 읽은 알림은 사람마다 기억해 둬요 */
+const readKey = (email) => `gk-noti-read:${(email || "guest").toLowerCase()}`;
+const loadRead = (email) => { try { return new Set(JSON.parse(localStorage.getItem(readKey(email)) || "[]")); } catch { return new Set(); } };
+const saveRead = (email, set) => { try { localStorage.setItem(readKey(email), JSON.stringify([...set].slice(-300))); } catch { /* 무시 */ } };
 
 const NOTI_STYLE = {
   pay: { bg: "#DCEFFD", ink: "#2F7FC0", path: <><rect x="3" y="5" width="18" height="16" rx="2.5" /><path d="M16 3v4M8 3v4M3 10h18" /></> },
@@ -92,7 +162,7 @@ const NOTI_STYLE = {
 };
 
 /** 알림 패널 */
-function NotificationPanel({ items, onRead, onReadAll, onClose, onSettings, onGo }) {
+function NotificationPanel({ items, hasItems, onRead, onReadAll, onClose, onSettings, onGo }) {
   const unread = items.filter((n) => n.unread).length;
   return (
     <div className="gk-noti" role="dialog" aria-label="알림">
@@ -109,7 +179,16 @@ function NotificationPanel({ items, onRead, onReadAll, onClose, onSettings, onGo
         </div>
       </div>
 
-      <ul style={{ listStyle: "none", margin: 0, padding: "0 8px 8px", display: "flex", flexDirection: "column", gap: 2, maxHeight: 440, overflowY: "auto" }}>
+      {items.length === 0 && (
+        <div style={{ padding: "26px 24px 30px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center" }}>
+          <span style={{ width: 48, height: 48, borderRadius: 16, background: "#F3F5F7", color: "#8A9098", display: "flex", alignItems: "center", justifyContent: "center" }}>{Icons.bell}</span>
+          <b style={{ fontSize: 15 }}>{hasItems ? "새 알림이 없어요" : "아직 알림이 없어요"}</b>
+          <span style={{ fontSize: 13, color: COLORS.muted, lineHeight: 1.5 }}>
+            {hasItems ? "결제일이 다가오면 여기에서 알려드릴게요." : <>고정지출을 등록하면<br />결제일 전에 미리 알려드려요.</>}
+          </span>
+        </div>
+      )}
+      <ul style={{ listStyle: "none", margin: 0, padding: "0 8px 8px", display: items.length ? "flex" : "none", flexDirection: "column", gap: 2, maxHeight: 440, overflowY: "auto" }}>
         {items.map((n, i) => {
           const st = NOTI_STYLE[n.type];
           return (
@@ -146,12 +225,12 @@ function NotificationPanel({ items, onRead, onReadAll, onClose, onSettings, onGo
 
 /* ───────── 항목 추가 창 ───────── */
 const ADD_CATEGORIES = [
-  { key: "home", name: "주거", color: "#4C8DF6", tint: "#DFEAFD" },
+  { key: "home", name: "주거·공과", color: "#4C8DF6", tint: "#DFEAFD" },
   { key: "phone", name: "통신", color: "#36C2CE", tint: "#DBF4F6" },
-  { key: "sub", name: "구독 서비스", color: "#FF7EB3", tint: "#FFE8F1" },
+  { key: "sub", name: "구독", color: "#FF7EB3", tint: "#FFE8F1" },
   { key: "rental", name: "가전", color: "#5ED3A0", tint: "#E2F7EE" },
   { key: "insure", name: "보험", color: "#9B8AFB", tint: "#EDEAFE" },
-  { key: "saving", name: "금융/저축", color: "#FFC94D", tint: "#FFF2D2" },
+  { key: "saving", name: "금융·저축", color: "#FFC94D", tint: "#FFF2D2" },
   { key: "transit", name: "교통", color: "#FF9466", tint: "#FFECE3" },
   { key: "car", name: "자동차", color: "#8796AA", tint: "#EEF1F5" },
   { key: "etc", name: "기타", color: "#9A8D82", tint: "#F0ECE8" },
@@ -475,7 +554,7 @@ function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
       <form className="gk-modal__box" role="dialog" aria-modal="true" aria-labelledby="gk-add-title" onSubmit={submit} style={{ fontFamily: FONT }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
           <div>
-            <h2 id="gk-add-title" style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-0.6px" }}>고정지출 항목 추가</h2>
+            <h2 id="gk-add-title" style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-0.6px" }}>항목 추가</h2>
             <p style={{ margin: "4px 0 0", fontSize: 14, color: COLORS.muted }}>매달 나가는 돈을 등록하면 결제일에 맞춰 알려드려요.</p>
           </div>
           <button type="button" className="gk-noti__close" aria-label="닫기" onClick={close}>
@@ -735,13 +814,15 @@ export default function Sidebar({
   user = null, // 로그인 안 했으면 null
 }) {
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState(NOTIFICATIONS);
+  const [readIds, setReadIds] = useState(() => loadRead(user?.email)); // 읽은 알림
   const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState(null);
   const [menu, setMenu] = useState(false);
   const boxRef = useRef(null);
   const myItems = useItems(); // 내가 등록한 고정지출
   const usedPayMethods = [...new Set(myItems.map((it) => it.payMethod).filter(Boolean))];
+  useEffect(() => { setReadIds(loadRead(user?.email)); }, [user?.email]); // 로그인한 사람이 바뀌면 다시 읽어요
+  const items = buildNotifications(myItems, readIds); // 알림은 내가 등록한 고정지출로 만들어요
 
   // 항목 추가는 로그인해야 할 수 있어요 → 로그인 안 했으면 로그인 페이지로 보내요
   const userRef = useRef(user);
@@ -769,8 +850,9 @@ export default function Sidebar({
     return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
   }, [open, menu]);
 
-  const readOne = (id) => setItems((list) => list.map((n) => (n.id === id ? { ...n, unread: false } : n)));
-  const readAll = () => setItems((list) => list.map((n) => ({ ...n, unread: false })));
+  const markRead = (ids) => setReadIds((prev) => { const next = new Set(prev); ids.forEach((id) => next.add(id)); saveRead(user?.email, next); return next; });
+  const readOne = (id) => markRead([id]);
+  const readAll = () => markRead(items.map((n) => n.id));
 
   const signOut = useAuthStore((state) => state.signOut);
 
@@ -970,7 +1052,7 @@ export default function Sidebar({
         )}
 
         {open && (
-          <NotificationPanel items={items} onRead={readOne} onReadAll={readAll} onClose={() => setOpen(false)} onSettings={() => { setOpen(false); onNavigate?.("settings"); }} onGo={(key) => { setOpen(false); onNavigate?.(key); }} />
+          <NotificationPanel items={items} hasItems={myItems.length > 0} onRead={readOne} onReadAll={readAll} onClose={() => setOpen(false)} onSettings={() => { setOpen(false); onNavigate?.("settings"); }} onGo={(key) => { setOpen(false); onNavigate?.(key); }} />
         )}
       </div>
 
