@@ -52,9 +52,11 @@ function AddItemModal({ onClose, setToast, payMethods = [] }) {
     console.log(unit); // week -> 단위
     console.log(todayKey()); // 현재 오늘 날짜
 
+    if(form.category === "sub") return; 
+
     const { error } = await addSubs({
         user_id: user.id,
-        category_id: form.category,
+        category_id: form.category, // 카테고리 선택해야 추가할 수 있도록!!
         name: form.name.trim(),
         amount: amountNum,
         cycle: form.cycle,
@@ -69,7 +71,7 @@ function AddItemModal({ onClose, setToast, payMethods = [] }) {
         unit: custom ? form.unit : null,
         pay_method: form.payMethod,
         remind: form.remind,
-        day: needDay ? dayNum : null,
+        day: needDay ? dayNum : 1,
         month: Number(form.month)
     })
     if (error) return setToast("항목을 추가하지 못했어요. 다시 시도해 주세요");
