@@ -1,9 +1,11 @@
 import { useSyncExternalStore } from "react";
+import { useAuthStore } from "../store/authStore";
+import { supabase } from "../lib/supabase";
 
 /*
- * 로그인 정보를 브라우저에 저장하는 간단한 도구예요.
- * - 가입한 계정 목록: localStorage "gk-accounts"
- * - 지금 로그인한 사람: "로그인 상태 유지"를 켜면 localStorage, 끄면 sessionStorage(브라우저를 닫으면 로그아웃)
+ * 로그인 정보를 저장하는 도구예요.
+ * - 로그인 상태: Supabase (store/authStore.js) — 여기서 읽고 여기로 알려 줘요
+ * - 가입한 계정 목록·아이디 찾기: localStorage "gk-accounts" (연습용)
  * ⚠️ 포트폴리오용 연습 코드예요. 실제 서비스는 서버(예: Supabase)에서 비밀번호를 관리해야 해요.
  */
 const USER_KEY = "gk-user";
@@ -40,9 +42,7 @@ const hash = (text) => {
 };
 
 const readUser = () => read(USER_KEY, null, "session") || read(USER_KEY, null, "local");
-let cached = readUser();
 const notify = () => {
-  cached = readUser();
   window.dispatchEvent(new Event(EVENT));
 };
 const saveUser = (user, keep = true) => {
@@ -61,7 +61,8 @@ const moveGuestItems = (email) => {
   write("gk-items:guest", null);
 };
 
-export const getUser = () => cached;
+/** 지금 로그인한 사람 (Supabase 세션 기준 — 로그인 안 했으면 null) */
+export const getUser = () => useAuthStore.getState().user;
 
 /** 이미 가입한 이메일인지 */
 export function emailExists(email = "") {
@@ -103,10 +104,13 @@ export function login({ email, password, keep = true }) {
   return { ok: true };
 }
 
-export function logout() {
-  write(USER_KEY, null, "session");
-  write(USER_KEY, null, "local");
-  notify();
+/** 로그아웃 (Supabase 세션을 지워요) */
+export async function logout() {
+  try {
+    await supabase.auth.signOut();
+  } catch {
+    /* 네트워크가 안 돼도 로컬 세션은 정리돼요 */
+  }
 }
 
 /** 이름 바꾸기 (설정 페이지에서 사용) */
@@ -144,12 +148,7 @@ export function initialOf(name = "") {
 /** 컴포넌트에서 현재 로그인한 사람 정보를 쓰는 훅 (로그아웃 상태면 null) */
 export function useUser() {
   return useSyncExternalStore(
-    (cb) => {
-      window.addEventListener(EVENT, cb);
-      const onStorage = (e) => { if (e.key === USER_KEY) notify(); };
-      window.addEventListener("storage", onStorage);
-      return () => { window.removeEventListener(EVENT, cb); window.removeEventListener("storage", onStorage); };
-    },
+    (cb) => useAuthStore.subscribe(cb), // Supabase 로그인·로그아웃하면 알려 줘요
     getUser,
     () => null
   );

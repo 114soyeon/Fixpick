@@ -65,6 +65,7 @@ function formatPhone(v) {
 }
 const DEMO_CODE = "123456"; // 포트폴리오용 테스트 인증번호 (실제로는 이메일로 보내야 해요)
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^01[016789]-\d{3,4}-\d{4}$/; // 010-1234-5678 모양
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -75,6 +76,7 @@ export default function Signup() {
   const [viewing, setViewing] = useState(null); // 보고 있는 약관
   const [verify, setVerify] = useState({ sent: false, code: "", ok: false, left: 0 }); // 이메일 인증
   const [done, setDone] = useState(null); // 가입 완료한 사람 이름
+  const [busy, setBusy] = useState(false); // 가입 요청 진행 중
 
   // 인증번호 남은 시간 (3분)
   useEffect(() => {
@@ -87,9 +89,10 @@ export default function Signup() {
 
   // ── 이메일 인증 ──
   const emailValid = EMAIL_RE.test(form.email);
-  const sendCode = () => {
+  const phoneValid = PHONE_RE.test(form.phone);
+  const sendCode = async () => {
     if (!emailValid) return setErrors((e) => ({ ...e, email: "이메일 주소를 다시 확인해 주세요." }));
-    if (emailExists(form.email)) return setErrors((e) => ({ ...e, email: "이미 가입된 이메일이에요." }));
+    if (await emailExists(form.email)) return setErrors((e) => ({ ...e, email: "이미 가입된 이메일이에요." }));
     setErrors((e) => ({ ...e, email: "", code: "" }));
     setVerify({ sent: true, code: "", ok: false, left: 180 });
   };
@@ -112,14 +115,23 @@ export default function Signup() {
   const strength = strengthOf(form.pw);
   const pwMatch = form.pw2 && form.pw === form.pw2;
 
-const submit = async (e) => {
+  // 동의하고 가입하기 버튼 활성화
+  const formReady =
+  form.name.trim() !== "" &&
+  phoneValid &&
+  verify.ok &&
+  emailValid &&
+  form.pw.length >= 8 &&
+  pwMatch;
+
+  const submit = async (e) => {
     e.preventDefault();
 
     const next = {};
     if (!form.name.trim()) next.name = "이름을 입력해 주세요.";
     if (!phoneValid) next.phone = "휴대폰 번호를 다시 확인해 주세요.";
-    else if (!verify.ok) next.phone = "휴대폰 인증을 해 주세요.";
-    if (!isValidEmail(form.email)) next.email = "이메일 주소를 다시 확인해 주세요.";
+    if (!emailValid) next.email = "이메일 주소를 다시 확인해 주세요.";
+    else if (!verify.ok) next.email = "이메일 인증을 해 주세요.";
     else if (await emailExists(form.email)) next.email = "이미 가입된 이메일이에요.";
     if (form.pw.length < 8) next.pw = "비밀번호는 8자 이상으로 만들어 주세요.";
     if (form.pw !== form.pw2) next.pw2 = "비밀번호가 서로 달라요.";
@@ -190,14 +202,14 @@ const submit = async (e) => {
           {/* 이름 */}
           <label className="gk-sign-field">
             <span className="gk-sign-label">이름</span>
-            <input id="signup-name" autoComplete="name" maxLength={12} className={`gk-sign-input ${errors.name ? "is-error" : ""}`} placeholder="예) 김민지" value={form.name} onChange={(e) => set("name", e.target.value)} />
+            <input id="signup-name" autoComplete="name" maxLength={12} className={`gk-sign-input ${errors.name ? "is-error" : ""}`} placeholder="이름을 입력하세요" value={form.name} onChange={(e) => set("name", e.target.value)} />
             {errors.name && <p role="alert" className="gk-sign-error">{errors.name}</p>}
           </label>
 
           {/* 휴대폰 번호 (인증 없이 입력만 — 아이디 찾기에 써요) */}
           <label className="gk-sign-field">
             <span className="gk-sign-label">휴대폰 번호</span>
-            <input id="signup-phone" type="tel" inputMode="numeric" autoComplete="tel" className={`gk-sign-input ${errors.phone ? "is-error" : ""}`} placeholder="010-1234-5678" value={form.phone}
+            <input id="signup-phone" type="tel" inputMode="numeric" autoComplete="tel" className={`gk-sign-input ${errors.phone ? "is-error" : ""}`} placeholder="휴대폰 번호를 입력하세요" value={form.phone}
               onChange={(e) => set("phone", formatPhone(e.target.value))} />
             {errors.phone && <p role="alert" className="gk-sign-error">{errors.phone}</p>}
           </label>
@@ -206,7 +218,7 @@ const submit = async (e) => {
           <div className="gk-sign-field">
             <label htmlFor="signup-email" className="gk-sign-label">이메일</label>
             <div className="gk-sign-row">
-              <input id="signup-email" type="email" autoComplete="email" disabled={verify.ok} className={`gk-sign-input ${errors.email ? "is-error" : ""}`} placeholder="example@email.com" value={form.email}
+              <input id="signup-email" type="email" autoComplete="email" disabled={verify.ok} className={`gk-sign-input ${errors.email ? "is-error" : ""}`} placeholder="이메일을 입력하세요" value={form.email}
                 onChange={(e) => { set("email", e.target.value); setVerify({ sent: false, code: "", ok: false, left: 0 }); }} />
               {verify.ok ? (
                 <span className="gk-sign-verified"><Check size={16} strokeWidth={3} />인증 완료</span>
@@ -243,7 +255,7 @@ const submit = async (e) => {
           <label className="gk-sign-field">
             <span className="gk-sign-label">비밀번호</span>
             <span className="gk-sign-pw">
-              <input id="signup-pw" type={showPw ? "text" : "password"} autoComplete="new-password" className={`gk-sign-input gk-sign-input--pw ${errors.pw ? "is-error" : ""}`} placeholder="8자 이상, 영문·숫자 섞어서" value={form.pw} onChange={(e) => set("pw", e.target.value)} />
+              <input id="signup-pw" type={showPw ? "text" : "password"} autoComplete="new-password" className={`gk-sign-input gk-sign-input--pw ${errors.pw ? "is-error" : ""}`} placeholder="8자 이상, 영문·숫자 섞어서 입력하세요" value={form.pw} onChange={(e) => set("pw", e.target.value)} />
               <button type="button" className="gk-sign-eye" aria-label={showPw ? "비밀번호 숨기기" : "비밀번호 보기"} onClick={() => setShowPw((v) => !v)}>
                 {showPw ? <EyeOff size={20} strokeWidth={2} /> : <Eye size={20} strokeWidth={2} />}
               </button>
@@ -264,7 +276,7 @@ const submit = async (e) => {
           {/* 비밀번호 확인 */}
           <label className="gk-sign-field">
             <span className="gk-sign-label">비밀번호 확인</span>
-            <input id="signup-pw2" type={showPw ? "text" : "password"} autoComplete="new-password" className={`gk-sign-input ${errors.pw2 ? "is-error" : ""}`} placeholder="비밀번호를 한 번 더 입력" value={form.pw2} onChange={(e) => set("pw2", e.target.value)} />
+            <input id="signup-pw2" type={showPw ? "text" : "password"} autoComplete="new-password" className={`gk-sign-input ${errors.pw2 ? "is-error" : ""}`} placeholder="비밀번호를 한 번 더 입력하세요" value={form.pw2} onChange={(e) => set("pw2", e.target.value)} />
             {errors.pw2 ? (
               <p role="alert" className="gk-sign-error">{errors.pw2}</p>
             ) : form.pw2 && (
@@ -292,7 +304,7 @@ const submit = async (e) => {
             ))}
           </div>
 
-          <button type="submit" className="gk-sign-btn" disabled={!requiredAgreed}>동의하고 가입하기</button>
+          <button type="submit" className="gk-sign-btn" disabled={!requiredAgreed || !formReady || busy}>{busy ? "가입 중이에요" : "동의하고 가입하기"}</button>
 
           <p className="gk-sign-foot">
             이미 계정이 있나요?{" "}

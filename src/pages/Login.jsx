@@ -231,7 +231,6 @@ export default function Login() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail("email", "이메일 주소를 다시 확인해 주세요.");
     if (!pw) return fail("pw", "비밀번호를 입력해 주세요.");
     const res = await login(email, pw);
-    console.log(res)
     //if (!res.ok) return fail(res.field, res.message);
     //setError({ field: "", message: "" });
     //saveLast("email");
