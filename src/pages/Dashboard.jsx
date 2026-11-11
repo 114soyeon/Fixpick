@@ -40,9 +40,9 @@ const monthAgo = (n) => ((MONTH - n - 1 + 120) % 12) + 1; // n달 전이 몇 월
 /* ───────── 예시 데이터 ───────── */
 // 카테고리 색은 dashboard.css의 .gk-dash-cat--<key>에 있어요
 const CATEGORIES = [
-  { key: "home", name: "주거", desc: "월세·관리비·공과금", icon: "building" },
+  { key: "home", name: "주거·공과", desc: "월세·관리비·공과금", icon: "building" },
   { key: "phone", name: "통신", desc: "휴대폰·인터넷·IPTV", icon: "phone" },
-  { key: "sub", name: "구독 서비스", desc: "OTT·음악·멤버십", icon: "play", highlight: true },
+  { key: "sub", name: "구독", desc: "OTT·음악·멤버십", icon: "play", highlight: true },
   { key: "rental", name: "가전", desc: "정수기·안마의자·건조기", icon: "washer" },
   { key: "insure", name: "보험", desc: "실손·자동차·운전자", icon: "shield" },
   { key: "saving", name: "금융·저축", desc: "적금·청약·대출이자", icon: "piggy" },
