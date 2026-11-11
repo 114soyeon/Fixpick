@@ -17,9 +17,13 @@ export const CatIcon = ({ category, size = 26 }) => {
 };
 
 // 맨 위 요약 카드 3개 중 하나
-export const StatCard = ({ label, value, sub, highlight, tone }) => (
+// period: 소제목 오른쪽에 붙는 비교 기간 (예: "(2025년 1~11월)")
+export const StatCard = ({ label, period, value, sub, highlight, tone }) => (
   <div className={`rpt-card rpt-stat${highlight ? " is-highlight" : ""}`}>
-    <p className="rpt-stat-label">{label}</p>
+    <p className="rpt-stat-label">
+      {label}
+      {period && <span className="rpt-stat-period">{period}</span>}
+    </p>
     <p className={`rpt-stat-value${tone ? ` is-${tone}` : ""}`}>{value}</p>
     {sub && <p className="rpt-stat-sub">{sub}</p>}
   </div>

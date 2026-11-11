@@ -91,10 +91,10 @@ const YearlyReport = ({ items, year, month, today }) => {
       <div className="rpt-stats">
         <StatCard highlight label="올해 낸 고정지출" value={won(total)} sub={`1~${month}월에 실제로 나간 금액이에요`} />
         <StatCard
-          label="작년 같은 기간보다"
+          label="작년보다"
+          period={`(${year - 1}년 1~${month}월)`}
           value={<DiffValue diff={diff} />}
           tone={diff < 0 ? "down" : undefined}
-          sub={`${year - 1}년 1~${month}월과 비교했어요`}
         />
         <StatCard
           label="올해 가장 큰 고정지출"
