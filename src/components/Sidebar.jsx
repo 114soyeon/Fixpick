@@ -3,6 +3,197 @@ import { createPortal } from "react-dom";
 import { initialOf } from "../utils/auth";
 import { addItem, ruleOf, setLoginReason, useItems } from "../utils/items";
 import { useAuthStore } from "../store/authStore"; 
+import { addSubs, getCategories } from "../api/subs";
+
+// components/add-item으로 이 코드들 분리
+function AddItemModal({ onClose, setToast, payMethods = [] }) {
+  const {user} = useAuthStore();
+  const [closing, setClosing] = useState(false);
+  const [form, setForm] = useState({ category: "sub", name: "", amount: "", amountType: "fixed", day: "", cycle: "매달", month: new Date().getMonth() + 1, weekday: new Date().getDay(), every: "1", unit: "month", payMethod: "", endDate: "", remind: true });
+  const nameRef = useRef(null);
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const [categories, setCategories] = useState(null);
+
+  const close = () => { setClosing(true); setTimeout(onClose, 180); };
+  const amountNum = Number(form.amount.replace(/[^0-9]/g, ""));
+  const dayNum = Number(form.day);
+  const everyNum = Number(form.every);
+  const { unit } = ruleOf(form); // 매일=day, 매주=week, 매달=month, 매년=year, 사용자화=고른 단위
+  const custom = form.cycle === "사용자화";
+  const needDay = unit === "month" || unit === "year";
+  const valid = form.name.trim() && amountNum > 0 && (!needDay || (dayNum >= 1 && dayNum <= 31)) && (!custom || (everyNum >= 1 && everyNum <= 99));
+
+  const categoryList = async () => {  
+    const data = await getCategories();
+    setCategories(data);
+  }
+
+  useEffect(() => {
+    categoryList();
+    nameRef.current?.focus();
+    const onKey = (e) => { if (e.key === "Escape") close(); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (!valid) return;
+    console.log(form); // amount, amountType, category, cycle, day, endDate, every, month, name, payMethod, remind, unit, weekday
+    console.log(amountNum); // 금액
+    console.log(needDay); // false -> ???
+    console.log(dayNum); // 0 -> ????
+    console.log(custom); // false -> 사용자화
+    console.log(everyNum); // 1 -> 주마다.. 이걸 표현하는 것 같고
+    console.log(unit); // week -> 단위
+    console.log(todayKey()); // 현재 오늘 날짜
+
+    addSubs({
+        user_id: user.id, 
+        category_id: form.category, 
+        name: form.name.trim(),
+        amount: amountNum,
+        cycle: form.cycle,
+        amount_type: form.amountType,
+        payment_day: null, // 이거 아직 미구현
+        payment_method_id: null, // 이거 아직 미구현
+        start_date: todayKey(),
+        expire_date: form.endDate,
+        memo: null,
+        weekday: Number(form.weekday),
+        every: custom ? everyNum : null,
+        unit: custom ? form.unit : null,
+        pay_method: form.payMethod,
+        remind: form.remind,
+        day: needDay ? dayNum : null,
+        month: Number(form.month)
+    })
+    setToast(`'${form.name.trim()}' 항목을 추가했어요`);
+    close();
+  };
+
+  const label = { fontSize: 14, fontWeight: 600, color: COLORS.text };
+  const input = { height: 48, borderRadius: 14, border: `1.5px solid ${COLORS.border}`, background: "#F7F9FA", padding: "0 16px", fontSize: 16, fontFamily: "inherit", color: COLORS.text, outline: "none", width: "100%", boxSizing: "border-box" };
+
+  return createPortal(
+    <div className={`gk-modal ${closing ? "is-closing" : ""}`} onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
+      <form className="gk-modal__box" role="dialog" aria-modal="true" aria-labelledby="gk-add-title" onSubmit={submit} style={{ fontFamily: FONT }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+          <div>
+            <h2 id="gk-add-title" style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-0.6px" }}>고정지출 항목 추가</h2>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: COLORS.muted }}>매달 나가는 돈을 등록하면 결제일에 맞춰 알려드려요.</p>
+          </div>
+          <button type="button" className="gk-noti__close" aria-label="닫기" onClick={close}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+
+        <fieldset style={{ border: 0, margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+          <legend style={{ ...label, padding: 0, marginBottom: 10 }}>카테고리</legend>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {categories?.map((c) => {
+              const on = form.category === c.id;
+              return (
+                <button key={c.id} type="button" className="gk-chip" aria-pressed={on} onClick={() => set("category", c.id)}
+                  style={{ background: on ? c.tint : "#FFFFFF", boxShadow: on ? `inset 0 0 0 2px ${c.color}` : `inset 0 0 0 1.5px ${COLORS.border}`, fontWeight: on ? 700 : 500 }}>
+                  <span style={{ width: 9, height: 9, borderRadius: "50%", background: c.color }} />
+                  {c.name}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <span style={label}>항목 이름</span>
+          <input id="gk-add-name" ref={nameRef} className="gk-input" style={input} placeholder={`예) ${NAME_HINTS[form.category] || "넷플릭스, 월세, 휴대폰 요금"}`} value={form.name} onChange={(e) => set("name", e.target.value)} maxLength={30} />
+        </label>
+
+        {/* 금액 (한 줄 전체) */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 28 }}>
+            <label htmlFor="gk-add-amount" style={label}>{form.amountType === "variable" ? "예상 금액" : "금액"}</label>
+            <div className="gk-amt-seg" role="group" aria-label="금액 종류">
+              {[["fixed", "고정"], ["variable", "변동"]].map(([v, t]) => (
+                <button key={v} type="button" aria-pressed={form.amountType === v} onClick={() => set("amountType", v)}>{t}</button>
+              ))}
+            </div>
+          </div>
+          <div style={{ position: "relative" }}>
+            <input id="gk-add-amount" className="gk-input" inputMode="numeric" style={{ ...input, paddingRight: 44, textAlign: "right", fontWeight: 700 }} placeholder={form.amountType === "variable" ? "예상 금액" : "0"}
+              value={amountNum ? amountNum.toLocaleString("ko-KR") : ""} onChange={(e) => set("amount", e.target.value)} />
+            <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: COLORS.muted }}>원</span>
+          </div>
+          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.5, color: form.amountType === "variable" ? "#2F7FC0" : COLORS.muted, display: "flex", gap: 6 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }} aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
+            매달 금액이 달라지면 예상 금액으로 넣고, 결제 후에 실제 금액으로 고칠 수 있어요
+          </p>
+        </div>
+
+        {/* 결제일 + 만기일 (한 줄) */}
+        <div className="gk-add-dates" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          {/* 매년·사용자화는 컨트롤이 많아서 결제일이 한 줄을 다 써요 */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0, gridColumn: unit === "year" || custom ? "1 / -1" : undefined }}>
+            <label htmlFor="gk-add-cycle" style={label}>결제일</label>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <MiniSelect id="gk-add-cycle" label="결제 주기" value={form.cycle} options={CYCLE_OPTIONS} onChange={(v) => set("cycle", v)} inputStyle={input} width={104} listWidth={130} />
+              {/* 사용자화: [2] [주] 마다 */}
+              {custom && (
+                <>
+                  <input id="gk-add-every" className="gk-input" style={{ ...input, width: 56, padding: "0 8px", textAlign: "center", fontWeight: 700 }} inputMode="numeric" aria-label="반복 간격" placeholder="1"
+                    value={form.every} onChange={(e) => set("every", e.target.value.replace(/[^0-9]/g, "").slice(0, 2))} />
+                  <MiniSelect id="gk-add-unit" label="반복 단위" value={form.unit} options={UNIT_OPTIONS} onChange={(v) => set("unit", v)} inputStyle={input} width={86} listWidth={100} />
+                  <span className="gk-add-day-note">마다</span>
+                </>
+              )}
+              {form.cycle === "매일" && <span className="gk-add-day-note">매일 나가요</span>}
+              {unit === "week" && (
+                <MiniSelect id="gk-add-weekday" label="결제 요일" value={Number(form.weekday)} options={WEEKDAY_OPTIONS} onChange={(v) => set("weekday", v)} inputStyle={input} listWidth={120} className="gk-mini--weekday" />
+              )}
+              {unit === "year" && (
+                <MiniSelect id="gk-add-month" label="결제 월" value={Number(form.month)} options={MONTH_OPTIONS} onChange={(v) => set("month", v)} inputStyle={input} width={72} listWidth={204} grid={4} />
+              )}
+              {needDay && (
+                <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
+                  <input id="gk-add-day" className="gk-input" inputMode="numeric" style={{ ...input, padding: "0 30px 0 8px", textAlign: "right", fontWeight: 700 }} placeholder="10"
+                    value={form.day} onChange={(e) => set("day", e.target.value.replace(/[^0-9]/g, "").slice(0, 2))} />
+                  <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: COLORS.muted }}>일</span>
+                </div>
+              )}
+            </div>
+          </div>
+          {/* 매년·사용자화는 결제일이 줄 전체를 쓰므로 만기일도 같은 줄 100%로 */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0, gridColumn: unit === "year" || custom ? "1 / -1" : undefined }}>
+            <label htmlFor="gk-add-end" style={label}>만기일 <span style={{ fontWeight: 400, color: COLORS.muted }}>(선택)</span></label>
+            <DatePicker value={form.endDate} onChange={(v) => set("endDate", v)} inputStyle={input} />
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <label htmlFor="gk-add-pay" style={label}>결제 수단 <span style={{ fontWeight: 400, color: COLORS.muted }}>(선택)</span></label>
+          <PayPicker value={form.payMethod} onChange={(v) => set("payMethod", v)} recent={payMethods} inputStyle={input} />
+        </div>
+
+        <label className="gk-toggle-row">
+          <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <span style={label}>결제 알림 받기</span>
+            <span style={{ fontSize: 13, color: COLORS.muted }}>사이드바 알림으로 미리 알려드려요</span>
+          </span>
+          <input id="gk-add-remind" type="checkbox" checked={form.remind} onChange={(e) => set("remind", e.target.checked)} className="gk-switch" />
+        </label>
+
+        <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+          <button type="button" className="gk-btn gk-btn--ghost" onClick={close}>취소</button>
+          <button type="submit" className="gk-btn gk-btn--primary" disabled={!valid}>추가하기</button>
+        </div>
+      </form>
+    </div>,
+    document.body
+  );
+}
 
 const COLORS = {
   text: "#0B2A45",
@@ -142,20 +333,6 @@ function NotificationPanel({ items, onRead, onReadAll, onClose, onSettings, onGo
     </div>
   );
 }
-
-
-/* ───────── 항목 추가 창 ───────── */
-const ADD_CATEGORIES = [
-  { key: "home", name: "주거", color: "#4C8DF6", tint: "#DFEAFD" },
-  { key: "phone", name: "통신", color: "#36C2CE", tint: "#DBF4F6" },
-  { key: "sub", name: "구독 서비스", color: "#FF7EB3", tint: "#FFE8F1" },
-  { key: "rental", name: "가전", color: "#5ED3A0", tint: "#E2F7EE" },
-  { key: "insure", name: "보험", color: "#9B8AFB", tint: "#EDEAFE" },
-  { key: "saving", name: "금융/저축", color: "#FFC94D", tint: "#FFF2D2" },
-  { key: "transit", name: "교통", color: "#FF9466", tint: "#FFECE3" },
-  { key: "car", name: "자동차", color: "#8796AA", tint: "#EEF1F5" },
-  { key: "etc", name: "기타", color: "#9A8D82", tint: "#F0ECE8" },
-];
 
 /* 카테고리를 고르면 항목 이름 칸 안에 그 카테고리 예시가 보여요 */
 const NAME_HINTS = {
@@ -440,164 +617,6 @@ function DatePicker({ value, onChange, inputStyle }) {
         </div>
       )}
     </div>
-  );
-}
-
-function AddItemModal({ onClose, onSubmit, payMethods = [] }) {
-  const [closing, setClosing] = useState(false);
-  const [form, setForm] = useState({ category: "sub", name: "", amount: "", amountType: "fixed", day: "", cycle: "매달", month: new Date().getMonth() + 1, weekday: new Date().getDay(), every: "1", unit: "month", payMethod: "", endDate: "", remind: true });
-  const nameRef = useRef(null);
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-
-  const close = () => { setClosing(true); setTimeout(onClose, 180); };
-  const amountNum = Number(form.amount.replace(/[^0-9]/g, ""));
-  const dayNum = Number(form.day);
-  const everyNum = Number(form.every);
-  const { unit } = ruleOf(form); // 매일=day, 매주=week, 매달=month, 매년=year, 사용자화=고른 단위
-  const custom = form.cycle === "사용자화";
-  const needDay = unit === "month" || unit === "year";
-  const valid = form.name.trim() && amountNum > 0 && (!needDay || (dayNum >= 1 && dayNum <= 31)) && (!custom || (everyNum >= 1 && everyNum <= 99));
-
-  useEffect(() => {
-    nameRef.current?.focus();
-    const onKey = (e) => { if (e.key === "Escape") close(); };
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const submit = (e) => {
-    e.preventDefault();
-    if (!valid) return;
-    onSubmit({
-      ...form,
-      name: form.name.trim(), payMethod: form.payMethod.trim(), amount: amountNum,
-      day: needDay ? dayNum : undefined, month: Number(form.month), weekday: Number(form.weekday),
-      every: custom ? everyNum : undefined, unit: custom ? unit : undefined, // 사용자화일 때만 저장
-      start: todayKey(),
-    });
-    close();
-  };
-
-  const label = { fontSize: 14, fontWeight: 600, color: COLORS.text };
-  const input = { height: 48, borderRadius: 14, border: `1.5px solid ${COLORS.border}`, background: "#F7F9FA", padding: "0 16px", fontSize: 16, fontFamily: "inherit", color: COLORS.text, outline: "none", width: "100%", boxSizing: "border-box" };
-
-  return createPortal(
-    <div className={`gk-modal ${closing ? "is-closing" : ""}`} onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
-      <form className="gk-modal__box" role="dialog" aria-modal="true" aria-labelledby="gk-add-title" onSubmit={submit} style={{ fontFamily: FONT }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-          <div>
-            <h2 id="gk-add-title" style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: "-0.6px" }}>고정지출 항목 추가</h2>
-            <p style={{ margin: "4px 0 0", fontSize: 14, color: COLORS.muted }}>매달 나가는 돈을 등록하면 결제일에 맞춰 알려드려요.</p>
-          </div>
-          <button type="button" className="gk-noti__close" aria-label="닫기" onClick={close}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
-          </button>
-        </div>
-
-        <fieldset style={{ border: 0, margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-          <legend style={{ ...label, padding: 0, marginBottom: 10 }}>카테고리</legend>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {ADD_CATEGORIES.map((c) => {
-              const on = form.category === c.key;
-              return (
-                <button key={c.key} type="button" className="gk-chip" aria-pressed={on} onClick={() => set("category", c.key)}
-                  style={{ background: on ? c.tint : "#FFFFFF", boxShadow: on ? `inset 0 0 0 2px ${c.color}` : `inset 0 0 0 1.5px ${COLORS.border}`, fontWeight: on ? 700 : 500 }}>
-                  <span style={{ width: 9, height: 9, borderRadius: "50%", background: c.color }} />
-                  {c.name}
-                </button>
-              );
-            })}
-          </div>
-        </fieldset>
-
-        <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <span style={label}>항목 이름</span>
-          <input id="gk-add-name" ref={nameRef} className="gk-input" style={input} placeholder={`예) ${NAME_HINTS[form.category] || "넷플릭스, 월세, 휴대폰 요금"}`} value={form.name} onChange={(e) => set("name", e.target.value)} maxLength={30} />
-        </label>
-
-        {/* 금액 (한 줄 전체) */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 28 }}>
-            <label htmlFor="gk-add-amount" style={label}>{form.amountType === "variable" ? "예상 금액" : "금액"}</label>
-            <div className="gk-amt-seg" role="group" aria-label="금액 종류">
-              {[["fixed", "고정"], ["variable", "변동"]].map(([v, t]) => (
-                <button key={v} type="button" aria-pressed={form.amountType === v} onClick={() => set("amountType", v)}>{t}</button>
-              ))}
-            </div>
-          </div>
-          <div style={{ position: "relative" }}>
-            <input id="gk-add-amount" className="gk-input" inputMode="numeric" style={{ ...input, paddingRight: 44, textAlign: "right", fontWeight: 700 }} placeholder={form.amountType === "variable" ? "예상 금액" : "0"}
-              value={amountNum ? amountNum.toLocaleString("ko-KR") : ""} onChange={(e) => set("amount", e.target.value)} />
-            <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: COLORS.muted }}>원</span>
-          </div>
-          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.5, color: form.amountType === "variable" ? "#2F7FC0" : COLORS.muted, display: "flex", gap: 6 }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }} aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
-            매달 금액이 달라지면 예상 금액으로 넣고, 결제 후에 실제 금액으로 고칠 수 있어요
-          </p>
-        </div>
-
-        {/* 결제일 + 만기일 (한 줄) */}
-        <div className="gk-add-dates" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          {/* 매년·사용자화는 컨트롤이 많아서 결제일이 한 줄을 다 써요 */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0, gridColumn: unit === "year" || custom ? "1 / -1" : undefined }}>
-            <label htmlFor="gk-add-cycle" style={label}>결제일</label>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              <MiniSelect id="gk-add-cycle" label="결제 주기" value={form.cycle} options={CYCLE_OPTIONS} onChange={(v) => set("cycle", v)} inputStyle={input} width={104} listWidth={130} />
-              {/* 사용자화: [2] [주] 마다 */}
-              {custom && (
-                <>
-                  <input id="gk-add-every" className="gk-input" style={{ ...input, width: 56, padding: "0 8px", textAlign: "center", fontWeight: 700 }} inputMode="numeric" aria-label="반복 간격" placeholder="1"
-                    value={form.every} onChange={(e) => set("every", e.target.value.replace(/[^0-9]/g, "").slice(0, 2))} />
-                  <MiniSelect id="gk-add-unit" label="반복 단위" value={form.unit} options={UNIT_OPTIONS} onChange={(v) => set("unit", v)} inputStyle={input} width={86} listWidth={100} />
-                  <span className="gk-add-day-note">마다</span>
-                </>
-              )}
-              {form.cycle === "매일" && <span className="gk-add-day-note">매일 나가요</span>}
-              {unit === "week" && (
-                <MiniSelect id="gk-add-weekday" label="결제 요일" value={Number(form.weekday)} options={WEEKDAY_OPTIONS} onChange={(v) => set("weekday", v)} inputStyle={input} listWidth={120} className="gk-mini--weekday" />
-              )}
-              {unit === "year" && (
-                <MiniSelect id="gk-add-month" label="결제 월" value={Number(form.month)} options={MONTH_OPTIONS} onChange={(v) => set("month", v)} inputStyle={input} width={72} listWidth={204} grid={4} />
-              )}
-              {needDay && (
-                <div style={{ position: "relative", flex: 1, minWidth: 0 }}>
-                  <input id="gk-add-day" className="gk-input" inputMode="numeric" style={{ ...input, padding: "0 30px 0 8px", textAlign: "right", fontWeight: 700 }} placeholder="10"
-                    value={form.day} onChange={(e) => set("day", e.target.value.replace(/[^0-9]/g, "").slice(0, 2))} />
-                  <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", fontSize: 15, color: COLORS.muted }}>일</span>
-                </div>
-              )}
-            </div>
-          </div>
-          {/* 매년·사용자화는 결제일이 줄 전체를 쓰므로 만기일도 같은 줄 100%로 */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0, gridColumn: unit === "year" || custom ? "1 / -1" : undefined }}>
-            <label htmlFor="gk-add-end" style={label}>만기일 <span style={{ fontWeight: 400, color: COLORS.muted }}>(선택)</span></label>
-            <DatePicker value={form.endDate} onChange={(v) => set("endDate", v)} inputStyle={input} />
-          </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <label htmlFor="gk-add-pay" style={label}>결제 수단 <span style={{ fontWeight: 400, color: COLORS.muted }}>(선택)</span></label>
-          <PayPicker value={form.payMethod} onChange={(v) => set("payMethod", v)} recent={payMethods} inputStyle={input} />
-        </div>
-
-        <label className="gk-toggle-row">
-          <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span style={label}>결제 알림 받기</span>
-            <span style={{ fontSize: 13, color: COLORS.muted }}>사이드바 알림으로 미리 알려드려요</span>
-          </span>
-          <input id="gk-add-remind" type="checkbox" checked={form.remind} onChange={(e) => set("remind", e.target.checked)} className="gk-switch" />
-        </label>
-
-        <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-          <button type="button" className="gk-btn gk-btn--ghost" onClick={close}>취소</button>
-          <button type="submit" className="gk-btn gk-btn--primary" disabled={!valid}>추가하기</button>
-        </div>
-      </form>
-    </div>,
-    document.body
   );
 }
 
@@ -1011,11 +1030,7 @@ export default function Sidebar({
         <AddItemModal
           payMethods={usedPayMethods}
           onClose={() => setAdding(false)}
-          onSubmit={(item) => {
-            addItem(item); // 내 계정에 저장
-            onAddItem?.(item);
-            setToast(`'${item.name}' 항목을 추가했어요`);
-          }}
+          setToast={setToast}
         />
       )}
       {toast && <Toast key={toast} text={toast} onDone={() => setToast(null)} />}

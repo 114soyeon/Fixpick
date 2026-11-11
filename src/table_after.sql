@@ -177,8 +177,8 @@ create table subscriptions (
               references categories(id),
   name text not null,                                               -- 항목 이름(예: 넷플릭스, 월세, 적금). 대시보드 캘린더/다가오는 결제 카드, 리포트 비교표에 표시
   amount integer not null check (amount >= 0),                      -- 매달(결제 주기마다) 나가는 금액(원). 음수 금지(대시보드 총합 "1,217,690원", 카테고리 금액 "486,400원" 은 이 값의 합)
-  cycle text not null default '매월'                                 -- [상세 > 결제 정보 > 주기] "매년"/ "매월" 등
-        check (cycle in ('매월', '분기', '반기', '매년')),            -- ("1년에 한 번 결제 · 월로 나누면 60,000원" 안내문은 cycle 값으로 문구를 만든다)
+  cycle text not null default '매월'                                 -- [상세 > 결제 정보 > 주기] "매일/매주/매달/매년/사용자화" 등
+        check (cycle in ('매일', '매주', '매달', '매년', '사용자화 ')), -- ("1년에 한 번 결제 · 월로 나누면 60,000원" 안내문은 cycle 값으로 문구를 만든다)
   amount_type text not null default '고정'                           -- [상세 > 결제 정보 > 금액 유형] "고정"
         check (amount_type in ('고정', '변동')),                      -- "변동"(변동 금액(전기요금처럼 매달 다른 금액)은 payments.amount 에 실제액을 남긴다)
   payment_day integer not null default 1                             -- 결제일: 매월 몇일에 나가는지 (대시보드 캘린더 날짜 배치, D-day 계산에 사용)
@@ -283,9 +283,9 @@ insert into categories (name, example, icon, color) values
   ('가전 구독', '정수기·안마의자·건조기','WashingMachine','#0C6B5E'),
   ('보험', '실손·자동차·운전자', 'ShieldCheck', '#5B3FC4'),
   ('금융·저축', '적금·청약·대출이자', 'PiggyBank', '#5E5300'),
-  ('교통', '교통카드·주차', 'BusFront', ' #A04508');
-  ('자동차', '교통카드·주차', 'CarFront', '#536579');
-  ('기타', '교통카드·주차', 'Shapes', '#4E433C');
+  ('교통', '교통카드·주차', 'BusFront', ' #A04508'),
+  ('자동차', '교통카드·주차', 'CarFront', '#536579'),
+  ('기타', '교통카드·주차', 'Shapes', '#4E433C'),
 
 insert into payment_categories (type, icon, name) values
   ('계좌', '기업은행icon/image', '기업은행'),
