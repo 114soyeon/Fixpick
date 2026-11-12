@@ -5,7 +5,11 @@
 import { byCategory, byItem, monthShare, monthsAgo, prevMonthOf, sumValue } from "../../utils/report";
 import { scheduleText, signedWon, won } from "../../utils/format";
 import { categoryStyle } from "../../constants/categories";
-import { CatIcon, CategoryCard, DiffValue, StatCard, TrendCard } from "./ReportCards";
+import StatCard from "../common/StatCard";
+import DiffValue from "./DiffValue";
+import CategoryCard from "./CategoryCard";
+import TrendCard from "./TrendCard";
+import CatIcon from "./CatIcon";
 
 const MonthlyReport = ({ items, year, month }) => {
   const [py, pm] = prevMonthOf(year, month);

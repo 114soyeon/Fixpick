@@ -2,7 +2,9 @@
  * 지출 리포트 페이지 (시안: 04_지출 리포트 _ 월간 / 연간)
  * - 오른쪽 위 [월간 | 연간] 버튼으로 화면을 바꿔요. 처음엔 "월간"
  * - 이 파일은 제목 + 버튼만 있어요. 화면은 components/report/
- *   MonthlyReport(월간) / YearlyReport(연간) / ReportCards(카드 조각) / ReportCharts(차트)
+ *   MonthlyReport(월간) / YearlyReport(연간)
+ *   카드: StatCard(요약, components/common) / CategoryCard(카테고리 비율) / TrendCard(꺾은선) / ChangeCard(달라진 점)
+ *   조각: DiffValue(증감 글자) / CatIcon(카테고리 아이콘) / ReportCharts(차트)
  * - 계산은 utils/report.js
  * - class는 다른 페이지와 겹치지 않게 모두 "rpt-" 로 시작 (styles/report.css)
  */

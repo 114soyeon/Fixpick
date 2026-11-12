@@ -121,52 +121,22 @@
 .rpt-strong { font-weight: 600; }
 .rpt-muted { color: var(--rpt-gray); }
 
-/* ───── 요약 카드 3개 ───── */
+/* ───── 요약 카드 3개 ─────
+   카드 모양은 공통 StatCard (styles/StatCard.css). 여기서는 배치만 */
 .rpt-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
   margin-bottom: 24px;
 }
-.rpt-stat {
-  padding: 16px 22px; /* 위아래를 줄여서 카드를 납작하게 → 아래 copyright 자리 확보 */
-}
-/* 첫 번째 카드: 연한 파랑, 테두리 없음 */
-.rpt-stat.is-highlight {
-  background: var(--rpt-blue-light);
-  border-color: var(--rpt-blue-light);
-}
+/* "올해 달라진 점" 작은 카드(ChangeCard) 소제목 */
 .rpt-stat-label {
   font-size: 16px;
   color: var(--rpt-gray);
 }
-/* 소제목 오른쪽 비교 기간: "작년보다 (2025년 1~11월)" */
-.rpt-stat-period {
-  margin-left: 6px;
-  font-size: 12px;
-}
-.rpt-stat.is-highlight .rpt-stat-label,
-.rpt-stat.is-highlight .rpt-stat-sub {
-  color: var(--rpt-navy-soft);
-}
-.rpt-stat-value {
-  margin-top: 2px;
-  font-size: 26px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.rpt-stat-value.is-down {
-  color: var(--rpt-green);
-}
+/* "10월보다" 값 앞 화살표 (DiffValue) */
 .rpt-arrow {
   margin-right: 6px;
-}
-.rpt-stat-sub {
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--rpt-gray);
 }
 
 /* ───── 차트 카드 2개 ───── */
@@ -405,7 +375,7 @@
   .rpt-page {
     padding: 24px;
   }
-  .rpt-stat-value {
+  .rpt-stats .stat-card-value {
     font-size: 22px;
   }
 }
@@ -416,7 +386,7 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
   }
-  .rpt-stat {
+  .rpt-stats .stat-card {
     min-height: 0;
   }
 }

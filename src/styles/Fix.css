@@ -35,45 +35,37 @@
   margin-bottom: 20px;
 }
 
-.summary-card {
+/* 카드 모양은 공통 StatCard (styles/StatCard.css). 이 화면 크기만 덮어써요 */
+.summary-cards .stat-card {
   min-height: 75px;
   padding: 14px 18px;
-  box-sizing: border-box;
-  background-color: #ffffff;
-  border: 1px solid #e1e9f0;
+  border-color: #e1e9f0;
   border-radius: 16px;
+  align-items: center; /* 글자 묶음·배지를 세로 가운데로 */
+}
+
+.summary-cards .stat-card.is-highlight {
+  border: none;
+}
+
+.summary-cards .stat-card-body {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: flex-start;
   gap: 6px;
 }
 
-.summary-card p {
-  font-size: 16px;
+.summary-cards .stat-card-label {
   color: #536b84;
-  margin: 0 0 7px;
+  margin-bottom: 7px;
 }
 
-.summary-card h2 {
+.summary-cards .stat-card-value {
+  margin-top: 0;
   font-size: 30px;
-  font-weight: 700;
-  margin: 0;
   color: #102f4b;
-}
-
-.summary-card.primary {
-  background-color: #dceffd;
-  border: none;
-}
-
-.month-badge {
-  background-color: #102f4b;
-  color: white;
-  border-radius: 20px;
-  padding: 7px 20px;
-  font-size: 12px;
-  font-weight: 600;
+  white-space: normal; /* 이 화면은 길면 줄바꿈 (… 으로 줄이지 않아요) */
+  overflow: visible;
 }
 
 /* 카테고리 및 정렬 */
@@ -265,19 +257,18 @@
     gap: 12px;
   }
 
-  .summary-card {
-    min-height: 75px;
-    padding: 14px 18px;
-    box-sizing: border-box;
-    background-color: #ffffff;
-    border: 1px solid #e1e9f0;
-    border-radius: 16px;
-    display: flex;
+  /* 좁은 화면: 소제목은 위, 값은 아래로 벌려요 */
+  .summary-cards .stat-card {
+    align-items: stretch;
+  }
+  .summary-cards .stat-card-body {
     justify-content: space-between;
-    align-items: flex-start;
+  }
+  .summary-cards .stat-card-badge {
+    align-self: center;
   }
 
-  .summary-card h2 {
+  .summary-cards .stat-card-value {
     font-size: 22px;
   }
 
@@ -294,12 +285,6 @@
   .filter-area {
     flex-direction: column;
   }
-}
-
-.upcoming-card {
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .table-row {
