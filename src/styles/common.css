@@ -17,6 +17,14 @@ body {
     background: #F7F9FA;
 }
 
+/* 오른쪽 페이지 영역 (이 안에서만 스크롤) */
+.body_content__page {
+    flex: 1;
+    min-width: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
 /* 고정콕 로고 */
 .gk-wordmark {
   display: block;

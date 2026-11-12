@@ -1,71 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, ChevronRight, Eye, EyeOff, X } from "lucide-react";
-import { LogoMark, Wordmark } from "../components/Sidebar";
+import { Check, ChevronRight, Eye, EyeOff } from "lucide-react";
+import { LogoMark, Wordmark } from "../components/common/Logo";
 import { emailExists } from "../utils/auth";
 import { signup } from "../api/auth";
+import { DEMO_CODE, STEPS, STRENGTH, TERMS } from "../constants/signup";
+import { formatPhone, isValidEmail, isValidPhone, strengthOf } from "../utils/validate";
+import SignupComplete from "../components/signup/SignupComplete";
+import TermsModal from "../components/signup/TermsModal";
 import "../styles/signup.css"; // 이 페이지 스타일은 전부 여기 (class는 gk-sign- 로 시작)
-
-const STEPS = [
-  { n: 1, title: "간단한 정보로 가입", desc: "이름·휴대폰·이메일만 있으면 1분이면 끝나요" },
-  { n: 2, title: "고정지출 등록", desc: "월세·통신비·구독료를 한 번에" },
-  { n: 3, title: "결제일 알림 받기", desc: "돈 나가기 전에 미리 알려드려요" },
-];
-
-const TERMS = [
-  {
-    key: "service", label: "[필수] 서비스 이용약관 동의", title: "고정콕 서비스 이용약관", required: true,
-    body: [
-      ["제1조 (목적)", "이 약관은 고정콕(이하 \"서비스\")이 제공하는 고정지출 관리 서비스를 이용하는 데 필요한 회원과 서비스 사이의 권리, 의무 및 책임 사항을 정하는 것을 목적으로 합니다."],
-      ["제2조 (용어의 뜻)", "① \"회원\"이란 이 약관에 동의하고 가입하여 서비스를 이용하는 사람을 말합니다.\n② \"고정지출\"이란 회원이 직접 등록한 월세·통신비·구독료·보험료 등 정기적으로 나가는 돈을 말합니다."],
-      ["제3조 (서비스 내용)", "서비스는 다음 기능을 제공합니다.\n1. 고정지출 등록과 카테고리별 정리\n2. 결제일 캘린더와 결제일 알림\n3. 월별 지출 리포트와 예산 관리"],
-      ["제4조 (회원의 의무)", "회원은 가입할 때 정확한 정보를 입력해야 하며, 자신의 계정을 다른 사람이 쓰지 않도록 관리해야 합니다."],
-      ["제5조 (서비스 이용 제한)", "서비스는 회원이 이 약관을 위반하거나 서비스 운영을 방해하는 경우 이용을 제한할 수 있습니다."],
-      ["제6조 (책임의 한계)", "서비스가 보여주는 금액과 결제일은 회원이 입력한 정보를 바탕으로 하며, 실제 결제 내역과 다를 수 있습니다. 정확한 결제 정보는 각 카드사·금융사에서 확인해 주세요."],
-      ["제7조 (회원 탈퇴)", "회원은 언제든지 설정 페이지에서 탈퇴할 수 있으며, 탈퇴하면 등록한 고정지출과 설정 정보는 바로 삭제됩니다."],
-    ],
-  },
-  {
-    key: "privacy", label: "[필수] 개인정보 수집·이용 동의", title: "개인정보 수집·이용 동의", required: true,
-    body: [
-      ["1. 수집하는 항목", "이름, 휴대폰 번호, 이메일 주소, 비밀번호"],
-      ["2. 수집·이용 목적", "회원 가입과 본인 확인, 결제일 알림 발송, 고객 문의 응대"],
-      ["3. 보관 기간", "회원 탈퇴 시까지 보관하며, 탈퇴하면 바로 삭제합니다. 단, 관련 법령에 따라 보관해야 하는 정보는 정해진 기간 동안 보관합니다."],
-      ["4. 동의를 거부할 권리", "개인정보 수집·이용에 동의하지 않을 수 있습니다. 다만 필수 항목이라 동의하지 않으면 회원가입을 할 수 없어요."],
-    ],
-  },
-  {
-    key: "marketing", label: "[선택] 혜택·이벤트 알림 받기", title: "혜택·이벤트 알림 수신 동의", required: false,
-    body: [
-      ["1. 받는 내용", "새 기능 소개, 이벤트, 고정지출을 아끼는 팁 같은 소식을 보내드려요."],
-      ["2. 받는 방법", "이메일, 문자(SMS)"],
-      ["3. 보관 기간", "동의를 철회하거나 회원 탈퇴할 때까지"],
-      ["4. 동의하지 않아도 돼요", "선택 항목이라 동의하지 않아도 가입과 서비스 이용에는 아무 문제가 없어요. 설정 페이지에서 언제든 바꿀 수 있어요."],
-    ],
-  },
-];
-
-/** 비밀번호 강도: 0~3 */
-function strengthOf(pw) {
-  let s = 0;
-  if (pw.length >= 8) s++;
-  if (/[0-9]/.test(pw) && /[a-zA-Z]/.test(pw)) s++;
-  if (/[^a-zA-Z0-9]/.test(pw)) s++;
-  return pw ? Math.max(s, 1) : 0;
-}
-const STRENGTH = ["", "약해요", "보통이에요", "안전해요"];
-
-/** 숫자만 받아서 010-1234-5678 모양으로 */
-function formatPhone(v) {
-  const d = v.replace(/[^0-9]/g, "").slice(0, 11);
-  if (d.length < 4) return d;
-  if (d.length < 8) return `${d.slice(0, 3)}-${d.slice(3)}`;
-  if (d.length === 10) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
-  return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
-}
-const DEMO_CODE = "123456"; // 포트폴리오용 테스트 인증번호 (실제로는 이메일로 보내야 해요)
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_RE = /^01[016789]-\d{3,4}-\d{4}$/; // 010-1234-5678 모양
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -75,7 +18,7 @@ export default function Signup() {
   const [errors, setErrors] = useState({});
   const [viewing, setViewing] = useState(null); // 보고 있는 약관
   const [verify, setVerify] = useState({ sent: false, code: "", ok: false, left: 0 }); // 이메일 인증
-  const [done, setDone] = useState(null); // 가입 완료한 사람 이름
+  const [done] = useState(null); // 가입 완료한 사람 이름 (지금은 가입 후 로그인 페이지로 보내서 안 써요)
   const [busy, setBusy] = useState(false); // 가입 요청 진행 중
 
   // 인증번호 남은 시간 (3분)
@@ -88,8 +31,8 @@ export default function Signup() {
   const set = (k, v) => { setForm((f) => ({ ...f, [k]: v })); setErrors((e) => ({ ...e, [k]: "" })); };
 
   // ── 이메일 인증 ──
-  const emailValid = EMAIL_RE.test(form.email);
-  const phoneValid = PHONE_RE.test(form.phone);
+  const emailValid = isValidEmail(form.email);
+  const phoneValid = isValidPhone(form.phone);
   const sendCode = async () => {
     if (!emailValid) return setErrors((e) => ({ ...e, email: "이메일 주소를 다시 확인해 주세요." }));
     if (await emailExists(form.email)) return setErrors((e) => ({ ...e, email: "이미 가입된 이메일이에요." }));
@@ -186,7 +129,7 @@ export default function Signup() {
       {/* 오른쪽: 회원가입 폼 */}
       <section className="gk-sign-form-wrap">
         {done ? (
-          <Complete name={done} onHome={() => navigate("/")} onAdd={() => navigate("/fix", { state: { openAdd: true } })} />
+          <SignupComplete name={done} onHome={() => navigate("/")} onAdd={() => navigate("/fix", { state: { openAdd: true } })} />
         ) : (
         <form onSubmit={submit} noValidate className="gk-sign-rise gk-sign-form">
           {/* 작은 화면에서만 보이는 로고 */}
@@ -318,74 +261,6 @@ export default function Signup() {
         <TermsModal term={viewing} onClose={() => setViewing(null)}
           onAgree={() => { setAgree((a) => ({ ...a, [viewing.key]: true })); setViewing(null); }} />
       )}
-    </div>
-  );
-}
-
-/** 가입 완료 화면 */
-function Complete({ name, onHome, onAdd }) {
-  return (
-    <div className="gk-sign-rise gk-sign-done">
-      <span className="gk-sign-pop gk-sign-done__badge"><Check size={44} strokeWidth={2.6} /></span>
-      <div className="gk-sign-done__text">
-        <h2 className="gk-sign-head__title">가입을 마쳤어요!</h2>
-        <p className="gk-sign-done__desc">
-          <b>{name}님</b>, 고정콕에 오신 걸 환영해요.<br />매달 나가는 돈을 하나씩 등록해 볼까요?
-        </p>
-      </div>
-      <div className="gk-sign-done__list">
-        {[
-          ["1", "월세·통신비·구독료를 등록해요"],
-          ["2", "결제일 캘린더에서 날짜를 확인해요"],
-          ["3", "결제일 전에 알림을 받아요"],
-        ].map(([n, t]) => (
-          <div key={n} className="gk-sign-done__item">
-            <span className="gk-sign-done__num">{n}</span>
-            {t}
-          </div>
-        ))}
-      </div>
-      <div className="gk-sign-done__btns">
-        <button type="button" className="gk-sign-btn" onClick={onAdd}>첫 고정지출 등록하기</button>
-        <button type="button" className="gk-sign-btn gk-sign-btn--light" onClick={onHome}>홈으로 가기</button>
-      </div>
-    </div>
-  );
-}
-
-/** 약관 보기 창 */
-function TermsModal({ term, onClose, onAgree }) {
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === "Escape") onClose(); };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  return (
-    <div className="gk-term" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="gk-term__box" role="dialog" aria-modal="true" aria-labelledby="gk-term-title">
-        <div className="gk-term__head">
-          <div className="gk-term__titles">
-            <span className={`gk-term__tag ${term.required ? "is-required" : ""}`}>{term.required ? "필수" : "선택"}</span>
-            <h3 id="gk-term-title" className="gk-term__title">{term.title}</h3>
-          </div>
-          <button type="button" className="gk-sign-eye gk-term__close" aria-label="닫기" onClick={onClose}>
-            <X size={18} strokeWidth={2.2} />
-          </button>
-        </div>
-        <div className="gk-term__body">
-          {term.body.map(([h, p]) => (
-            <section key={h}>
-              <h4>{h}</h4>
-              <p>{p}</p>
-            </section>
-          ))}
-        </div>
-        <div className="gk-term__foot">
-          <button type="button" className="gk-sign-btn gk-sign-btn--light gk-term__btn-close" onClick={onClose}>닫기</button>
-          <button type="button" className="gk-sign-btn gk-term__btn-agree" onClick={onAgree}>동의하기</button>
-        </div>
-      </div>
     </div>
   );
 }
