@@ -3,41 +3,27 @@ import { useNavigate } from "react-router-dom";
 import "../styles/Fix.css";
 import SummaryCards from "../components/fix/SummaryCards";
 import ExpenseRow from "../components/fix/ExpenseRow";
-import { useItems } from "../utils/items";
-import { useFixItems } from "../utils/fixItems";
-import {
-  ALL_CATEGORY,
-  DEFAULT_SORT,
-  FIX_CATEGORIES,
-  PAGE_SIZE,
-  SORT_OPTIONS,
-} from "../utils/fixConstants";
-import {
-  calculateFixedExpense,
-  calculateMonthlySavings,
-  filterByCategory,
-  getUpcomingExpense,
-  sortExpenses,
-} from "../utils/fixCalculations";
+import { useFixItems, useRawFixItems } from "../utils/fixItems";
+import { ALL_CATEGORY, DEFAULT_SORT, FIX_CATEGORIES, SORT_OPTIONS } from "../utils/fixConstants";
+import { calculateFixedExpense, calculateMonthlySavings, filterByCategory, getUpcomingExpense, sortExpenses } from "../utils/fixCalculations";
+import { useMySub } from "../queries/subs";
 
 const Fix = () => {
   const navigate = useNavigate();
 
   const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORY);
-  const [showAll, setShowAll] = useState(false);
   const [sortOrder, setSortOrder] = useState(DEFAULT_SORT);
 
   // 사이드바에서 추가한 항목 + 상세에서 수정한 내용
   const allItems = useFixItems();
-  const rawItems = useItems();
+
+  const { data: subs } = useMySub();
+  const rawItems = useRawFixItems();
 
   const filteredExpenses = sortExpenses(
     filterByCategory(allItems, selectedCategory),
     sortOrder,
   );
-  const visibleExpenses = showAll
-    ? filteredExpenses
-    : filteredExpenses.slice(0, PAGE_SIZE);
 
   return (
     <div className="expenses-page">
@@ -98,23 +84,13 @@ const Fix = () => {
           <span>월 환산</span>
         </div>
 
-        {visibleExpenses.map((item) => (
+        {subs?.map((item) => (
           <ExpenseRow
             key={item.id}
             item={item}
             onClick={() => navigate(`/fix/${item.id}`)}
           />
         ))}
-
-        {/* 전체 항목 보기 */}
-        {filteredExpenses.length > PAGE_SIZE && (
-          <button
-            className="show-all-button"
-            onClick={() => setShowAll(!showAll)}
-          >
-            {showAll ? "접기" : `전체 ${filteredExpenses.length}개 보기`}
-          </button>
-        )}
 
         {filteredExpenses.length === 0 && (
           <p className="empty-message">등록된 고정지출이 없습니다.</p>

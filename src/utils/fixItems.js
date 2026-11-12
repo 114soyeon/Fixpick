@@ -1,9 +1,39 @@
-import { nextPayments, useItems } from "./items";
+import { nextPayments } from "./items";
 import { CATEGORY_NAMES } from "./fixConstants";
 import { dateToKorean, getMonthly, getToday, keyToDate } from "./fixFormat";
 import { loadEdits } from "./fixStorage";
+import { categoryKeyOf } from "./category";
+import { useMySub } from "../queries/subs";
 
 /* 내 고정지출 목록(Fix)과 상세(FixDetail)가 같이 쓰는 데이터 */
+
+/** DB 행(subscriptions) → 항목 추가 창이 저장하는 폼 */
+const fromDb = (row) => {
+  const cat = row.categories; // select 의 categories ( id, name )
+  return {
+    id: Number(row.id),
+    category: categoryKeyOf(cat?.name), // "구독 서비스" → "sub"
+    name: row.name,
+    amount: row.amount,
+    amountType: row.amount_type === "변동" ? "variable" : "fixed",
+    cycle: row.cycle,
+    day: row.day,        // 매달 며칠 / 매년 며칠
+    month: row.month,    // 매년 결제월
+    weekday: row.weekday,
+    every: row.every,
+    unit: row.unit,
+    start: row.start_date,   // "YYYY-MM-DD"
+    endDate: row.expiry_date,
+    payMethod: row.pay_method,
+    remind: row.remind,
+  };
+};
+
+/** DB 에서 내 고정지출 "원본" 목록 (다가오는 결제 카드가 써요) */
+export const useRawFixItems = () => {
+  const { data: rows } = useMySub();
+  return (rows ?? []).map(fromDb);
+};
 
 /** 항목 추가 창에서 저장한 항목 → 목록 페이지에서 쓰는 모양으로 바꾸기 */
 function toFixItem(item) {
@@ -29,7 +59,7 @@ function toFixItem(item) {
 
 /** 목록·상세에서 보여줄 전체 고정지출 (추가·수정·삭제가 모두 반영돼요) */
 export function useFixItems() {
-  const added = useItems(); // 항목을 추가·삭제하면 자동으로 다시 그려져요
+  const added = useRawFixItems(); // DB 에서 내 고정지출을 읽어요
   const edits = loadEdits();
 
   return added
