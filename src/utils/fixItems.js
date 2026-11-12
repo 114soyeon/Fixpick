@@ -1,8 +1,9 @@
+import { expenses } from "./expenses";
 import { nextPayments, useItems } from "./items";
 
 /*
  * 내 고정지출 목록(Fix)과 상세(FixDetail)가 같이 쓰는 데이터
- *   = 사이드바 "항목 추가"로 등록한 항목(items.js)
+ *   = 기본 예시 데이터(expenses) + 사이드바 "항목 추가"로 등록한 항목(items.js)
  *   + 상세 페이지에서 수정한 내용("expense-edits") − 삭제한 항목("expense-deleted")
  */
 
@@ -73,34 +74,7 @@ export function useFixItems() {
   const saved = JSON.parse(localStorage.getItem("expense-edits") || "{}");
   const deleted = JSON.parse(localStorage.getItem("expense-deleted") || "[]");
 
-  return added.map(toFixItem)
+  return [...expenses, ...added.map(toFixItem)]
     .map((e) => ({ ...e, ...saved[e.id] })) // 수정본이 있으면 덮어쓰기
     .filter((e) => !deleted.includes(e.id)); // 삭제된 건 빼기
 }
-
-/** "11월 5일" / "2027년 3월 4일" → 정렬용 숫자 (못 읽으면 0) */
-export const getDateValue = (date) => {
-  const currentYear = new Date().getFullYear();
-  const match = date.match(/(?:(\d{4})년 )?(\d{1,2})월 (\d{1,2})일/);
-
-  if (!match) return 0;
-
-  const year = Number(match[1] || currentYear);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-
-  return new Date(year, month - 1, day).getTime();
-};
-
-/** 목록 위 요약 카드 3개에 들어갈 값 (등록한 항목으로 계산) */
-export function fixSummary(items) {
-  const monthlyTotal = items.reduce((sum, e) => sum + (e.monthly || 0), 0);
-  const saving = items.filter((e) => e.category === "금융·저축").reduce((sum, e) => sum + (e.monthly || 0), 0);
-  // 다가오는 큰 지출: 10만 원 이상 중 결제일이 가장 가까운 것
-  const big = items
-    .filter((e) => e.amount >= 100000 && getDateValue(e.date) > 0)
-    .sort((a, b) => getDateValue(a.date) - getDateValue(b.date))[0];
-  const bigMonth = big ? new Date(getDateValue(big.date)).getMonth() + 1 : null;
-  return { monthlyTotal, saving, big, bigMonth };
-}
-

@@ -24,9 +24,3 @@ export const scheduleText = (item) =>
 
 /** Date → "11월 25일" */
 export const monthDay = (date) => `${date.getMonth() + 1}월 ${date.getDate()}일`;
-
-/** 목록의 금액(amount) 합계 */
-export const sumAmount = (list) => list.reduce((sum, item) => sum + item.amount, 0);
-
-/** 숫자만 남기기 ("1234-5678" → "12345678") */
-export const onlyDigits = (text) => text.replace(/[^0-9]/g, "");

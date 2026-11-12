@@ -2,17 +2,6 @@ import { useState } from "react";
 import "../../styles/PaymentEditModal.css";
 import { Calendar } from "lucide-react";
 
-// 날짜 입력칸 (달력 아이콘 + input)
-// 모달 안에서 만들면 글자를 칠 때마다 새로 만들어져서 밖으로 뺐어요
-function DateInput({ value, onChange }) {
-  return (
-    <div className="date-input">
-      <Calendar size={16} />
-      <input type="date" value={value} onChange={onChange} />
-    </div>
-  );
-}
-
 // 결제 정보 수정 모달
 // props 설명
 //  - info    : 현재 결제 정보 (모달 입력칸의 처음 값으로 사용)
@@ -27,6 +16,15 @@ function PaymentEditModal({ info, onClose, onSave }) {
   const [startDate, setStartDate] = useState(info.startDate); // 시작일
   const [endDate, setEndDate] = useState(info.endDate); // 만기일
   const [nextDate, setNextDate] = useState(info.nextDate); // 다음 결제일
+
+  function DateInput({ value, onChange }) {
+    return (
+      <div className="date-input">
+        <Calendar size={16} />
+        <input type="date" value={value} onChange={onChange} />
+      </div>
+    );
+  }
 
   // 저장 버튼 클릭
   function handleSave() {

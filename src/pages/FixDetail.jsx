@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useFixItems } from "../utils/fixItems";
 import { removeItem } from "../utils/items";
@@ -17,7 +17,7 @@ const FixDetail = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 전체 목록(추가한 항목, 수정본 반영)에서 항목 찾기
+  // 전체 목록(기본 + 추가한 항목, 수정본 반영)에서 항목 찾기
   const allItems = useFixItems();
   const mergedItem = allItems.find((e) => e.id === Number(id));
 
@@ -39,8 +39,12 @@ const FixDetail = () => {
     );
   }
 
-  // 금액 변화 그래프: 지난 해 금액 기록은 아직 없어서 올해 금액만 보여줘요
-  const history = [{ year: new Date().getFullYear(), amount: item.amount }];
+  // 금액 변화 그래프용 예시 값 (실제 데이터가 생기면 바꿔주세요)
+  const history = [
+    { year: 2024, amount: Math.round(item.amount * 0.94) },
+    { year: 2025, amount: Math.round(item.amount * 0.97) },
+    { year: 2026, amount: item.amount },
+  ];
 
   // 팝업에서 "저장"을 눌렀을 때 실행돼요
   const handleSave = (newInfo) => {

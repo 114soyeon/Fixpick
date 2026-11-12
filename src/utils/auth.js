@@ -153,7 +153,3 @@ export function useUser() {
     () => null
   );
 }
-
-/* 이름 → 프로필 글자: 김민지 → 동그라미 "김", 제목 "민지님" */
-export const firstChar = (name) => name.trim().slice(0, 1);
-export const callName = (name) => (/^[가-힣]{3,}$/.test(name.trim()) ? name.trim().slice(1) : name.trim());

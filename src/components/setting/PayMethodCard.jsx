@@ -14,7 +14,7 @@ const PayMethodCard = ({ methods, items, onAddClick }) => {
 
   return (
     <section className="set-card set-pay">
-      <CardHead icon={CreditCard} tone="purple" title="결제 수단" desc="고정지출이 빠져나가는 카드·계좌" />
+      <CardHead icon={CreditCard} color="#7364C6" bg="#EDEAFE" title="결제 수단" desc="고정지출이 빠져나가는 카드·계좌" />
       {methods.length > 0 ? (
         <ul className="set-methods">
           {methods.map((m) => (

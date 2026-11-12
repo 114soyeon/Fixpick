@@ -112,18 +112,3 @@ export function endedInYear(items, year, today) {
     })
     .sort((a, b) => endDateOf(b) - endDateOf(a));
 }
-
-// 세로축 눈금: 4줄(3칸), 칸 크기는 1·2·3·5 × 만 단위로 보기 좋게
-// 예) 140만~143만 → 138만·140만·142만·144만
-const NICE = [1, 2, 3, 5];
-export function yRange(values) {
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  for (let unit = 10000; ; unit *= 10) {
-    for (const n of NICE) {
-      const step = n * unit;
-      const lo = Math.max(0, Math.floor(((min + max) / 2 - step * 1.5) / step) * step);
-      if (lo <= min && lo + step * 3 >= max) return { min: lo, max: lo + step * 3, step };
-    }
-  }
-}

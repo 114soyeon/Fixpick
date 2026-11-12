@@ -4,15 +4,14 @@
  */
 import { percent, won } from "../../utils/format";
 import { categoryStyle } from "../../constants/categories";
-import { catClass } from "../../utils/category";
 import { CategoryDonut, TrendLine } from "./ReportCharts";
 
-// 카테고리 아이콘 박스 (size: 24 | 26 | 30, 크기·색은 report.css의 .rpt-cat-icon)
+// 카테고리 아이콘 박스
 export const CatIcon = ({ category, size = 26 }) => {
-  const { icon: Icon } = categoryStyle(category);
+  const { icon: Icon, bg, color } = categoryStyle(category);
   return (
-    <span className={`rpt-cat-icon ${size === 26 ? "" : `rpt-cat-icon--${size}`} ${catClass(category)}`}>
-      {Icon && <Icon size={Math.round(size * 0.55)} strokeWidth={2} />}
+    <span className="rpt-cat-icon" style={{ background: bg, width: size, height: size }}>
+      {Icon && <Icon size={Math.round(size * 0.55)} strokeWidth={2} color={color} />}
     </span>
   );
 };
@@ -68,7 +67,7 @@ export const CategoryCard = ({ title, cats, total }) => {
           <ul className="rpt-legend">
             {cats.map((c) => (
               <li key={c.key} className="rpt-legend-row">
-                <span className={`rpt-legend-dot ${catClass(c.key)}`} />
+                <span className="rpt-legend-dot" style={{ background: categoryStyle(c.key).bar }} />
                 <CatIcon category={c.key} size={24} />
                 <span className="rpt-legend-name">{categoryStyle(c.key).name}</span>
                 <strong className="rpt-legend-pct">{percent(c.value, total)}</strong>

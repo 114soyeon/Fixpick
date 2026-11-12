@@ -155,10 +155,6 @@
   display: flex;
   gap: 12px;
 }
-/* 아이콘 박스 색: tone="blue" | "yellow" | "purple" */
-.set-head-icon.is-blue   { background: #DCEFFD; color: #2F7FC0; }
-.set-head-icon.is-yellow { background: #FFF8D6; color: #B8891F; }
-.set-head-icon.is-purple { background: #EDEAFE; color: #7364C6; }
 .set-head-icon {
   width: 40px;
   height: 40px;

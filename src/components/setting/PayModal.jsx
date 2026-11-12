@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { BANKS, CARD_COMPANIES } from "../../constants/setting";
 import CardIcon from "../add-item/CardIcon";
-import { onlyDigits } from "../../utils/format";
+
+const onlyNum = (text) => text.replace(/[^0-9]/g, "");
 
 /** 결제 수단 추가 창 (카드 / 계좌 탭) */
 export default function PayModal({ onClose, onAdd }) {
@@ -31,7 +32,7 @@ export default function PayModal({ onClose, onAdd }) {
 
   // 카드번호 한 칸 입력 → 4자리 다 쓰면 다음 칸으로
   const typeCard = (i, value) => {
-    const v = onlyDigits(value).slice(0, 4);
+    const v = onlyNum(value).slice(0, 4);
     setCard((list) => list.map((c, n) => (n === i ? v : c)));
     if (v.length === 4 && i < 3) boxes.current[i + 1]?.focus();
   };
@@ -97,7 +98,7 @@ export default function PayModal({ onClose, onAdd }) {
             inputMode="numeric"
             placeholder="- 없이 숫자만 입력"
             value={account}
-            onChange={(e) => setAccount(onlyDigits(e.target.value).slice(0, 16))}
+            onChange={(e) => setAccount(onlyNum(e.target.value).slice(0, 16))}
           />
         )}
 

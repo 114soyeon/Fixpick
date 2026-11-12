@@ -10,9 +10,13 @@ import { useState } from "react";
 import "../styles/report.css";
 
 import { useItems } from "../utils/items";
-import { VIEWS } from "../constants/report";
 import MonthlyReport from "../components/report/MonthlyReport";
 import YearlyReport from "../components/report/YearlyReport";
+
+const VIEWS = [
+  { key: "monthly", label: "월간" },
+  { key: "yearly", label: "연간" },
+];
 
 const Report = () => {
   const [view, setView] = useState("monthly"); // 처음엔 월간

@@ -29,18 +29,5 @@ export const CATEGORY_STYLE = {
   etc:     { name: "기타", icon: Shapes,         bg: "#F0ECE8", color: "#4E433C", bar: "#9A8D82" }, // 기타
 };
 
-/** 내 고정지출 목록에서 쓰는 카테고리 이름 → key */
-export const CATEGORY_KEY_BY_NAME = {
-  "주거·공과": "home",
-  통신: "phone",
-  구독: "sub",
-  가전: "rental",
-  보험: "insure",
-  "금융·저축": "saving",
-  교통: "transit",
-  자동차: "car",
-  기타: "etc",
-};
-
 /** 카테고리 key로 스타일 찾기 (모르는 key면 "기타") */
 export const categoryStyle = (key) => CATEGORY_STYLE[key] ?? CATEGORY_STYLE.etc;

@@ -13,8 +13,9 @@ import interactionPlugin from "@fullcalendar/react/interaction"; // 날짜 클�
 // 스타일(FullCalendar CSS + calendar.css)은 pages/Calendar.jsx에서 순서대로 불러와요
 
 import { isSameDay } from "../../utils/date";
-import { WEEKDAYS } from "../../constants/addItem";
 import useChipsPerDay from "./useChipsPerDay";
+
+const WEEK_DAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 // 일정 칩 모양: [아이콘] 이름  (시안의 연한 파란 칩)
 const renderEvent = (arg) => {
@@ -76,7 +77,7 @@ const PayCalendar = ({ controller, title, events, selectedDate, onSelect, onToda
           dayMaxEvents={chipsPerDay > 0 ? chipsPerDay : true}
           moreLinkClass="paycal-more" // 넘친 개수 표시("+n개")는 CSS에서 숨김 → 전체 목록은 오른쪽 날짜 카드에서
           // 요일 헤더: 일 월 화 ...
-          dayHeaderContent={(arg) => WEEKDAYS[arg.dow]}
+          dayHeaderContent={(arg) => WEEK_DAYS[arg.dow]}
           // 날짜 숫자: "2일" 대신 "2"
           dayCellTopContent={(arg) => <span className="paycal-day-num">{arg.date.getDate()}</span>}
           // 날짜 숫자 영역 (왼쪽 정렬용 class)

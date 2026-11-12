@@ -5,7 +5,11 @@
  */
 import { useRef, useState } from "react";
 import { Pencil } from "lucide-react";
-import { callName, firstChar, updateUser } from "../../utils/auth";
+import { updateUser } from "../../utils/auth";
+
+// 이름 → 프로필 글자: 김민지 → 동그라미 "김", 제목 "민지님"
+const firstChar = (name) => name.trim().slice(0, 1);
+const callName = (name) => (/^[가-힣]{3,}$/.test(name.trim()) ? name.trim().slice(1) : name.trim());
 
 const ProfileCard = ({ user, items }) => {
   const name = user?.name || "게스트";

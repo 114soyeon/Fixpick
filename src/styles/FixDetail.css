@@ -150,7 +150,6 @@
 }
 .chart-bar {
   width: 48px;
-  height: var(--bar-h, 0px); /* 금액 비율로 정한 높이 (AmountChart에서 넘겨줘요) */
   border-radius: 8px;
   background: #dcefFD;
 }

@@ -12,8 +12,8 @@ const AmountChart = ({ history }) => {
               {Math.round(h.amount / 10000)}만
             </span>
             <div
-              className={h.year === new Date().getFullYear() ? "chart-bar current" : "chart-bar"}
-              style={{ "--bar-h": `${(h.amount / maxAmount) * 160}px` }} // 높이는 금액 비율이라 CSS 변수로만 넘겨요
+              className={h.year === 2026 ? "chart-bar current" : "chart-bar"}
+              style={{ height: `${(h.amount / maxAmount) * 160}px` }}
             />
             <span className="chart-year">{h.year}</span>
           </div>

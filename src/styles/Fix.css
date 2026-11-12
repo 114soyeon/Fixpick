@@ -185,13 +185,6 @@
   justify-content: center;
   align-items: center;
   font-size: 19px;
-  background: var(--cat-bg);
-  color: var(--cat-color);
-}
-/* 큰 지출은 진한 남색 */
-.expense-icon.is-big {
-  background: #102f4b;
-  color: #ffffff;
 }
 
 /* 상태 뱃지 */

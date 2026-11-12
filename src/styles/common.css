@@ -25,18 +25,6 @@ body {
     overflow-y: auto;
 }
 
-/* 카테고리 색 (constants/categories.js의 CATEGORY_STYLE과 같은 값)
- * className={catClass(key)} 로 붙이면 --cat-bg(배경) --cat-color(글자·아이콘) --cat-bar(막대) 를 쓸 수 있어요 */
-.gk-cat--home    { --cat-bg: #E1EEF9; --cat-color: #154A7D; --cat-bar: #4C8DF6; }
-.gk-cat--phone   { --cat-bg: #DDF3F9; --cat-color: #0A6480; --cat-bar: #36C2CE; }
-.gk-cat--sub     { --cat-bg: #FBE6EE; --cat-color: #9E2152; --cat-bar: #FF7EB3; }
-.gk-cat--rental  { --cat-bg: #DCF5F1; --cat-color: #0C6B5E; --cat-bar: #5ED3A0; }
-.gk-cat--insure  { --cat-bg: #EEE9FF; --cat-color: #5B3FC4; --cat-bar: #9B8AFB; }
-.gk-cat--saving  { --cat-bg: #F1EFCB; --cat-color: #5E5300; --cat-bar: #FFC94D; }
-.gk-cat--transit { --cat-bg: #FCEADD; --cat-color: #A04508; --cat-bar: #FF9466; }
-.gk-cat--car     { --cat-bg: #EEF1F5; --cat-color: #536579; --cat-bar: #8796A8; }
-.gk-cat--etc     { --cat-bg: #F0ECE8; --cat-color: #4E433C; --cat-bar: #9A8D82; }
-
 /* 고정콕 로고 */
 .gk-wordmark {
   display: block;
