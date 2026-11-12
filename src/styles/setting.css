@@ -107,6 +107,12 @@
   font-size: 16px;
   color: #3e4247;
 }
+/* 이름 저장 실패 안내 (ProfileCard) — 빨간색은 탈퇴 버튼(.set-btn-red)과 같은 색 */
+.set-name-error {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #d9534f;
+}
 .set-stats {
   display: flex;
   gap: 10px;
