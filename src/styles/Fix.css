@@ -63,12 +63,8 @@
 }
 
 .summary-card.primary {
-  background-color: #DCEFFD;
+  background-color: #dceffd;
   border: none;
-}
-
-.upcoming-card {
-  align-items: center;
 }
 
 .month-badge {
@@ -187,6 +183,17 @@
   font-size: 19px;
 }
 
+/* 카테고리별 아이콘 색 (constants/categories.js 의 bg / color 와 같은 값) */
+.expense-icon--home    { background: #e1eef9; color: #154a7d; }
+.expense-icon--phone   { background: #ddf3f9; color: #0a6480; }
+.expense-icon--sub     { background: #fbe6ee; color: #9e2152; }
+.expense-icon--rental  { background: #dcf5f1; color: #0c6b5e; }
+.expense-icon--insure  { background: #eee9ff; color: #5b3fc4; }
+.expense-icon--saving  { background: #f1efcb; color: #5e5300; }
+.expense-icon--transit { background: #fceadd; color: #a04508; }
+.expense-icon--car     { background: #eef1f5; color: #536579; }
+.expense-icon--etc     { background: #f0ece8; color: #4e433c; }
+
 /* 상태 뱃지 */
 .expected-badge {
   background-color: #e6edf2;
@@ -194,15 +201,6 @@
   padding: 6px 15px;
   border-radius: 20px;
   font-size: 11px;
-  margin-left: 12px;
-}
-
-.big-badge {
-  background-color: #102f4b;
-  color: white;
-  padding: 8px 17px;
-  border-radius: 20px;
-  font-size: 12px;
   margin-left: 12px;
 }
 
@@ -296,10 +294,6 @@
   .filter-area {
     flex-direction: column;
   }
-
-  .sort-button {
-    align-self: flex-end;
-  }
 }
 
 .upcoming-card {
@@ -308,8 +302,12 @@
   align-items: center;
 }
 
-.table-row { cursor: pointer; }
-.table-row:hover { background: #f7f9fa; }
+.table-row {
+  cursor: pointer;
+}
+.table-row:hover {
+  background: #f7f9fa;
+}
 
 .copyright {
   padding: 24px 0;

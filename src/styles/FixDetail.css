@@ -38,10 +38,6 @@
   background: #dcefFD;
   color: #0b2a45;
 }
-.tag.dark {
-  background: #0b2a45;
-  color: #fff;
-}
 
 .outline-button {
   padding: 10px 28px;
@@ -156,6 +152,18 @@
 .chart-bar.current {
   background: #5cb8f2;
 }
+
+/* 막대 높이 단계 (가장 큰 금액 = 10단계 = 160px) */
+.chart-bar--1  { height: 16px; }
+.chart-bar--2  { height: 32px; }
+.chart-bar--3  { height: 48px; }
+.chart-bar--4  { height: 64px; }
+.chart-bar--5  { height: 80px; }
+.chart-bar--6  { height: 96px; }
+.chart-bar--7  { height: 112px; }
+.chart-bar--8  { height: 128px; }
+.chart-bar--9  { height: 144px; }
+.chart-bar--10 { height: 160px; }
 .chart-value,
 .chart-year {
   font-size: 12px;

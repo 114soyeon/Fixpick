@@ -1,76 +1,43 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Fix.css";
-import { useFixItems } from "../utils/fixItems";
 import SummaryCards from "../components/fix/SummaryCards";
 import ExpenseRow from "../components/fix/ExpenseRow";
-
-// 카테고리 목록
-const categories = [
-  "전체",
-  "주거·공과",
-  "통신",
-  "구독",
-  "가전",
-  "보험",
-  "금융·저축",
-  "교통",
-  "기타",
-  "자동차",
-];
-
-// 정렬 기능
-const getDateValue = (date) => {
-  const currentYear = new Date().getFullYear();
-  const match = date.match(/(?:(\d{4})년 )?(\d{1,2})월 (\d{1,2})일/);
-
-  if (!match) return 0;
-
-  const year = Number(match[1] || currentYear);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-
-  return new Date(year, month - 1, day).getTime();
-};
+import { useItems } from "../utils/items";
+import { useFixItems } from "../utils/fixItems";
+import {
+  ALL_CATEGORY,
+  DEFAULT_SORT,
+  FIX_CATEGORIES,
+  PAGE_SIZE,
+  SORT_OPTIONS,
+} from "../utils/fixConstants";
+import {
+  calculateFixedExpense,
+  calculateMonthlySavings,
+  filterByCategory,
+  getUpcomingExpense,
+  sortExpenses,
+} from "../utils/fixCalculations";
 
 const Fix = () => {
   const navigate = useNavigate();
 
-  // 기본 데이터 + 사이드바에서 추가한 항목 + 상세에서 수정한 내용
-  const allItems = useFixItems();
-  const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORY);
   const [showAll, setShowAll] = useState(false);
-  const [sortOrder, setSortOrder] = useState("high");
+  const [sortOrder, setSortOrder] = useState(DEFAULT_SORT);
 
-  // 카테고리 필터링
-  let filteredExpenses =
-    selectedCategory === "전체"
-      ? allItems
-      : allItems.filter((item) => item.category === selectedCategory);
+  // 사이드바에서 추가한 항목 + 상세에서 수정한 내용
+  const allItems = useFixItems();
+  const rawItems = useItems();
 
-  filteredExpenses = [...filteredExpenses].sort((a, b) => {
-    switch (sortOrder) {
-      case "high":
-        return b.amount - a.amount;
-
-      case "low":
-        return a.amount - b.amount;
-
-      case "latest":
-        return getDateValue(b.date) - getDateValue(a.date);
-
-      case "oldest":
-        return getDateValue(a.date) - getDateValue(b.date);
-
-      default:
-        return 0;
-    }
-  });
-
-  // 처음에는 8개만 표시
+  const filteredExpenses = sortExpenses(
+    filterByCategory(allItems, selectedCategory),
+    sortOrder,
+  );
   const visibleExpenses = showAll
     ? filteredExpenses
-    : filteredExpenses.slice(0, 8);
+    : filteredExpenses.slice(0, PAGE_SIZE);
 
   return (
     <div className="expenses-page">
@@ -83,12 +50,16 @@ const Fix = () => {
       </header>
 
       {/* 요약 카드 */}
-      <SummaryCards />
+      <SummaryCards
+        fixedExpense={calculateFixedExpense(allItems)}
+        monthlySavings={calculateMonthlySavings(allItems)}
+        upcomingExpense={getUpcomingExpense(rawItems)}
+      />
 
       {/* 카테고리 및 정렬 */}
       <section className="filter-area">
         <div className="category-list">
-          {categories.map((category) => (
+          {FIX_CATEGORIES.map((category) => (
             <button
               key={category}
               className={
@@ -108,10 +79,11 @@ const Fix = () => {
           value={sortOrder}
           onChange={(e) => setSortOrder(e.target.value)}
         >
-          <option value="latest">최신순</option>
-          <option value="oldest">과거순</option>
-          <option value="high">금액 높은순</option>
-          <option value="low">금액 낮은순</option>
+          {SORT_OPTIONS.map(({ value, label }) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
         </select>
       </section>
 
@@ -135,7 +107,7 @@ const Fix = () => {
         ))}
 
         {/* 전체 항목 보기 */}
-        {filteredExpenses.length > 8 && (
+        {filteredExpenses.length > PAGE_SIZE && (
           <button
             className="show-all-button"
             onClick={() => setShowAll(!showAll)}
