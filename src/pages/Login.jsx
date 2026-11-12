@@ -7,7 +7,7 @@ import ResetModal from "../components/login/ResetModal";
 import FindIdModal from "../components/login/FindIdModal";
 import { BRAND_TAGS, SOCIALS } from "../constants/login";
 import { openAddItem, takeLoginReason } from "../utils/items";
-import { readLastLogin, saveLastLogin } from "../utils/login";
+import { loginError, readLastLogin, saveLastLogin } from "../utils/login";
 import { isValidEmail } from "../utils/validate";
 import { useAuthStore } from "../store/authStore";
 import "../styles/login.css";
@@ -33,9 +33,13 @@ export default function Login() {
     e.preventDefault();
     if (!isValidEmail(email)) return fail("email", "이메일 주소를 다시 확인해 주세요.");
     if (!pw) return fail("pw", "비밀번호를 입력해 주세요.");
-    await login(email, pw);
-    //if (!res.ok) return fail(res.field, res.message);
-    //setError({ field: "", message: "" });
+    try {
+      await login(email, pw);
+    } catch (err) {
+      const { field, message } = loginError(err); // 틀렸을 때 문구 (utils/login.js)
+      return fail(field, message);
+    }
+    setError({ field: "", message: "" });
     //saveLastLogin("email");
     navigate("/"); // 로그인 후 홈으로
     if (reason === "add") setTimeout(openAddItem, 400); // 하려던 항목 추가 창을 바로 열어 줘요
@@ -94,13 +98,13 @@ export default function Login() {
 
           <label className="gk-login-field">
             <span className="gk-login-label">이메일</span>
-            <input id="login-email" type="email" autoComplete="email" className={`gk-login-input ${error.field === "email" ? "is-error" : ""}`} placeholder="example@email.com" value={email} onChange={(e) => { setEmail(e.target.value); setError({ field: "", message: "" }); }} />
+            <input id="login-email" type="email" autoComplete="email" className={`gk-login-input ${error.field === "email" || error.field === "both" ? "is-error" : ""}`} placeholder="example@email.com" value={email} onChange={(e) => { setEmail(e.target.value); setError({ field: "", message: "" }); }} />
           </label>
 
           <label className="gk-login-field">
             <span className="gk-login-label">비밀번호</span>
             <span className="gk-login-pw">
-              <input id="login-pw" type={showPw ? "text" : "password"} autoComplete="current-password" className={`gk-login-input gk-login-input--pw ${error.field === "pw" ? "is-error" : ""}`} placeholder="비밀번호 입력" value={pw} onChange={(e) => { setPw(e.target.value); setError({ field: "", message: "" }); }} />
+              <input id="login-pw" type={showPw ? "text" : "password"} autoComplete="current-password" className={`gk-login-input gk-login-input--pw ${error.field === "pw" || error.field === "both" ? "is-error" : ""}`} placeholder="비밀번호 입력" value={pw} onChange={(e) => { setPw(e.target.value); setError({ field: "", message: "" }); }} />
               <button type="button" className="gk-login-eye" aria-label={showPw ? "비밀번호 숨기기" : "비밀번호 보기"} onClick={() => setShowPw((v) => !v)}>
                 {showPw ? <EyeOff size={20} strokeWidth={2} /> : <Eye size={20} strokeWidth={2} />}
               </button>
