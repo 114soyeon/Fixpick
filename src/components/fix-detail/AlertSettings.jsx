@@ -1,44 +1,37 @@
 import { useState } from "react";
+import {
+  ALERT_OPTIONS,
+  DEFAULT_END_ALERT,
+  DEFAULT_PAY_ALERT,
+} from "../../utils/fixConstants";
 
-const ALERT_OPTIONS = ["30일 전", "7일 전", "3일 전", "1일 전"];
+// 버튼 한 줄 (label: 왼쪽 글자, value: 선택된 값, onChange: 고를 때 실행)
+const AlertRow = ({ label, value, onChange }) => (
+  <div className="alert-row">
+    <span>{label}</span>
+    <div className="segment">
+      {ALERT_OPTIONS.map((opt) => (
+        <button
+          key={opt}
+          className={value === opt ? "active" : ""}
+          onClick={() => onChange(opt)}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  </div>
+);
 
 const AlertSettings = () => {
-  const [payAlert, setPayAlert] = useState("1일 전");
-  const [endAlert, setEndAlert] = useState("7일 전");
+  const [payAlert, setPayAlert] = useState(DEFAULT_PAY_ALERT);
+  const [endAlert, setEndAlert] = useState(DEFAULT_END_ALERT);
 
   return (
     <section className="card">
       <h3>알림</h3>
-
-      <div className="alert-row">
-        <span>결제 알림</span>
-        <div className="segment">
-          {ALERT_OPTIONS.map((opt) => (
-            <button
-              key={opt}
-              className={payAlert === opt ? "active" : ""}
-              onClick={() => setPayAlert(opt)}
-            >
-              {opt}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="alert-row">
-        <span>만기 전 알림</span>
-        <div className="segment">
-          {ALERT_OPTIONS.map((opt) => (
-            <button
-              key={opt}
-              className={endAlert === opt ? "active" : ""}
-              onClick={() => setEndAlert(opt)}
-            >
-              {opt}
-            </button>
-          ))}
-        </div>
-      </div>
+      <AlertRow label="결제 알림" value={payAlert} onChange={setPayAlert} />
+      <AlertRow label="만기 전 알림" value={endAlert} onChange={setEndAlert} />
     </section>
   );
 };
