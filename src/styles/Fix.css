@@ -114,13 +114,27 @@
 .sort-select {
   height: 41px;
   min-width: 140px;
-  padding: 0 16px;
+  padding: 0 28px 0 16px;
   border: 1px solid #e1e9f0;
   border-radius: 10px;
   background-color: #ffffff;
   color: #52677e;
   font-size: 13px;
   cursor: pointer;
+  appearance: none;
+}
+
+/* 정렬 선택 화살표 (lucide ChevronDown) */
+.sort-select-wrap {
+  position: relative;
+}
+.sort-select-icon {
+  position: absolute;
+  top: 50%;
+  right: 12px; /* ← 숫자를 키울수록 화살표가 왼쪽으로 */
+  transform: translateY(-50%);
+  color: #52677e;
+  pointer-events: none; /* 아이콘을 눌러도 선택창이 열리게 */
 }
 
 /* 테이블 */
@@ -184,15 +198,42 @@
 }
 
 /* 카테고리별 아이콘 색 (constants/categories.js 의 bg / color 와 같은 값) */
-.expense-icon--home    { background: #e1eef9; color: #154a7d; }
-.expense-icon--phone   { background: #ddf3f9; color: #0a6480; }
-.expense-icon--sub     { background: #fbe6ee; color: #9e2152; }
-.expense-icon--rental  { background: #dcf5f1; color: #0c6b5e; }
-.expense-icon--insure  { background: #eee9ff; color: #5b3fc4; }
-.expense-icon--saving  { background: #f1efcb; color: #5e5300; }
-.expense-icon--transit { background: #fceadd; color: #a04508; }
-.expense-icon--car     { background: #eef1f5; color: #536579; }
-.expense-icon--etc     { background: #f0ece8; color: #4e433c; }
+.expense-icon--home {
+  background: #e1eef9;
+  color: #154a7d;
+}
+.expense-icon--phone {
+  background: #ddf3f9;
+  color: #0a6480;
+}
+.expense-icon--sub {
+  background: #fbe6ee;
+  color: #9e2152;
+}
+.expense-icon--rental {
+  background: #dcf5f1;
+  color: #0c6b5e;
+}
+.expense-icon--insure {
+  background: #eee9ff;
+  color: #5b3fc4;
+}
+.expense-icon--saving {
+  background: #f1efcb;
+  color: #5e5300;
+}
+.expense-icon--transit {
+  background: #fceadd;
+  color: #a04508;
+}
+.expense-icon--car {
+  background: #eef1f5;
+  color: #536579;
+}
+.expense-icon--etc {
+  background: #f0ece8;
+  color: #4e433c;
+}
 
 /* 상태 뱃지 */
 .expected-badge {
@@ -314,4 +355,8 @@
   text-align: center;
   font-size: 12px;
   color: #8a94a6;
+}
+
+.summary-card h2.empty-text {
+  font-size: 28px;
 }

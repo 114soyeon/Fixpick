@@ -1,6 +1,6 @@
 import { bigPayments } from "./items";
 import { ALL_CATEGORY, SAVING_CATEGORY } from "./fixConstants";
-import { getDateValue, getToday } from "./fixFormat";
+import { getDateValue, getToday, toDate } from "./fixFormat";
 
 /** 한 달 고정지출 합계 (금융·저축 카테고리는 제외) */
 export const calculateFixedExpense = (items) =>
@@ -68,3 +68,27 @@ export const getAmountHistory = (item) => [
 /** 그래프 막대 높이 단계 1~10 (가장 큰 금액 = 10) → CSS .chart-bar--<단계> */
 export const getBarLevel = (amount, maxAmount) =>
   maxAmount > 0 ? Math.max(1, Math.round((amount / maxAmount) * 10)) : 1;
+
+/**
+ * 상세 > 만기일 카드: 오늘부터 만기일까지 남은 일수
+ * endDate: "2027년 3월 4일" 형태 글자 → 숫자(일) / 못 읽으면 null
+ */
+export const getDaysUntilEnd = (endDate) => {
+  const end = toDate(endDate);
+  if (!end) return null;
+  const t = new Date();
+  const today = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+  return Math.max(0, Math.round((end - today) / (1000 * 60 * 60 * 24)));
+};
+
+/**
+ * 상세 > 만기일 카드: 시작일~만기일 중 지나간 정도 0~10단계
+ * → CSS .end-progress-fill--<단계> (10단계 = 100%)
+ */
+export const getEndProgressLevel = (startDate, endDate) => {
+  const start = toDate(startDate);
+  const end = toDate(endDate);
+  if (!start || !end || end <= start) return 0;
+  const ratio = (Date.now() - start) / (end - start);
+  return Math.min(10, Math.max(0, Math.round(ratio * 10)));
+};

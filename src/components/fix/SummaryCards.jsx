@@ -18,10 +18,10 @@ const SummaryCards = ({ fixedExpense, monthlySavings, upcomingExpense }) => {
       <div className="summary-card upcoming-card">
         <div>
           <p>다가오는 큰 지출</p>
-          <h2>
+          <h2 className={upcomingExpense ? "" : "empty-text"}>
             {upcomingExpense
               ? `${upcomingExpense.title} ${formatWon(upcomingExpense.amount)}`
-              : "예정된 지출이 없습니다."}
+              : "없음"}
           </h2>
         </div>
 

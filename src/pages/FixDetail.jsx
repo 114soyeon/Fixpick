@@ -7,13 +7,12 @@ import AmountChart from "../components/fix-detail/AmountChart.jsx";
 import PaymentInfoCard from "../components/fix-detail/PaymentInfoCard.jsx";
 import HeroCard from "../components/fix-detail/HeroCard.jsx";
 import MemoCard from "../components/fix-detail/MemoCard.jsx";
-import { useFixItems } from "../utils/fixItems";
+import EndDateCard from "../components/fix-detail/EndDateCard.jsx";
 import { DEFAULT_AMOUNT_TYPE } from "../utils/fixConstants";
 import { toInputDate } from "../utils/fixFormat";
 import { getAmountHistory, getPayMethods } from "../utils/fixCalculations";
 import {
   deleteFixItem,
-  loadMemo,
   saveEdit,
   saveMemo,
   toEditedFields,
@@ -24,26 +23,6 @@ const FixDetail = () => {
   const { id } = useParams(); // 주소 /fix/8 에서 8을 꺼내와요
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // 전체 목록(추가한 항목 + 수정본)에서 이 항목 찾기
-  const allItems = useFixItems();
-  const mergedItem = allItems.find((e) => e.id === Number(id));
-
-  const [item, setItem] = useState(() =>
-    mergedItem ? { ...mergedItem, memo: loadMemo(id) ?? "" } : null,
-  );
-
-  // 없는 번호로 들어왔을 때
-  if (!item) {
-    return (
-      <div className="detail-page">
-        <p>항목을 찾을 수 없어요.</p>
-        <button className="outline-button" onClick={() => navigate("/fix")}>
-          목록으로
-        </button>
-      </div>
-    );
-  }
 
   // 팝업에서 "저장"을 눌렀을 때
   const handleSave = (newInfo) => {
@@ -99,6 +78,8 @@ const FixDetail = () => {
           <AmountChart history={getAmountHistory(item)} />
 
           <AlertSettings />
+
+          <EndDateCard startDate={item.startDate} endDate={item.endDate} />
         </div>
       </div>
 
