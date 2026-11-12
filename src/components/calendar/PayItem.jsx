@@ -5,13 +5,14 @@
  */
 import { amountText } from "../../utils/format";
 import { categoryStyle } from "../../constants/categories";
+import { catClass } from "../../utils/category";
 
 const PayItem = ({ item, sub }) => {
-  const { icon: Icon, color, bg } = categoryStyle(item.category);
+  const { icon: Icon } = categoryStyle(item.category);
   return (
     <li className="paycal-item">
-      <span className="paycal-item-icon" style={{ background: bg }}>
-        {Icon && <Icon size={16} strokeWidth={2} color={color} />}
+      <span className={`paycal-item-icon ${catClass(item.category)}`}>
+        {Icon && <Icon size={16} strokeWidth={2} />}
       </span>
       <div className="paycal-item-info">
         <p className="paycal-item-name">{item.name}</p>

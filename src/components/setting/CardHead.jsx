@@ -1,8 +1,9 @@
-/** 설정 카드 머리: [아이콘 박스] 제목 + 설명 */
-const CardHead = ({ icon: Icon, color, bg, title, desc }) => (
+/** 설정 카드 머리: [아이콘 박스] 제목 + 설명
+ * tone: 아이콘 박스 색 ("blue" | "yellow" | "purple", setting.css의 .set-head-icon.is-<tone>) */
+const CardHead = ({ icon: Icon, tone, title, desc }) => (
   <div className="set-head">
-    <span className="set-head-icon" style={{ background: bg }}>
-      <Icon size={20} strokeWidth={1.7} color={color} />
+    <span className={`set-head-icon is-${tone}`}>
+      <Icon size={20} strokeWidth={1.7} />
     </span>
     <div>
       <h2 className="set-head-title">{title}</h2>

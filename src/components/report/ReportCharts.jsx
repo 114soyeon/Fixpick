@@ -15,18 +15,14 @@ import {
 } from "chart.js";
 import { Doughnut, Line } from "react-chartjs-2";
 import { categoryStyle } from "../../constants/categories";
+import { BLUE, GRAY, GRID, LABEL_GAP, LABEL_W, LEFT_GAP, NAVY } from "../../constants/report";
+import { yRange } from "../../utils/report";
 
 // 쓰는 부품만 등록해요
 ChartJS.register(ArcElement, LineElement, PointElement, CategoryScale, LinearScale);
 
 // 차트 글자도 페이지와 같은 글꼴로
 ChartJS.defaults.font.family = "'Pretendard', 'Noto Sans KR', system-ui, -apple-system, sans-serif";
-
-// 시안 색
-const BLUE = "#5BB8F5";
-const NAVY = "#0b2a45";
-const GRAY = "#52637a";
-const GRID = "#E3EAF0";
 
 /* ═════════ 도넛 ═════════ */
 // cats: [{ key, value }] (큰 순서)
@@ -53,26 +49,6 @@ export const CategoryDonut = ({ cats }) => (
 );
 
 /* ═════════ 꺾은선 ═════════ */
-
-// 세로축 눈금: 4줄(3칸), 칸 크기는 1·2·3·5 × 만 단위로 보기 좋게
-// 예) 140만~143만 → 138만·140만·142만·144만
-const NICE = [1, 2, 3, 5];
-function yRange(values) {
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  for (let unit = 10000; ; unit *= 10) {
-    for (const n of NICE) {
-      const step = n * unit;
-      const lo = Math.max(0, Math.floor(((min + max) / 2 - step * 1.5) / step) * step);
-      if (lo <= min && lo + step * 3 >= max) return { min: lo, max: lo + step * 3, step };
-    }
-  }
-}
-
-// 시안 간격(px): 세로축 글자 → 13 → 가로선 시작 → 16 → 첫 점
-const LABEL_W = 31; // "210만" 글자 칸
-const LABEL_GAP = 13;
-const LEFT_GAP = 16;
 
 // 시안처럼 직접 그리는 것들: 세로축 글자, 가로 눈금선, 이번 달 세로선, 평균 점선 + "평균" 글자
 // (chart.js 기본 축은 자기 마음대로 여백을 잡아서 시안 간격과 달라져요)

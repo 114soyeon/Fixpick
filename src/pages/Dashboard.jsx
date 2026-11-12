@@ -1,130 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { amountIn, cycleText, nextPayments, openAddItem, payDaysIn, paysIn, useItems } from "../utils/items";
+import { cycleText, nextPayments, openAddItem, useItems } from "../utils/items";
+import { MONTH, TODAY, catClass, ddayText, payByDay, toCard, useDashData } from "../utils/dashboard";
+import { useCountUp } from "../utils/useCountUp";
+import { loadBudget } from "../utils/budget";
+import { comma as won } from "../utils/format";
+import { LINE_ICON as line, MAX_CARDS, MAX_LINES } from "../constants/dashboard";
+import { WEEKDAYS } from "../constants/addItem";
+import { Icon } from "../components/dashboard/DashIcon";
 import { useAuthStore } from "../store/authStore";
 import "../styles/dashboard.css";
 
 // 사이드바는 components/Layout.jsx에서 그려요.
-
-/** 0부터 목표 숫자까지 부드럽게 올라가는 숫자 */
-function useCountUp(target, duration = 1100, delay = 250) {
-  const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-  const [value, setValue] = useState(reduce ? target : 0);
-  useEffect(() => {
-    if (reduce) return;
-    let raf;
-    let start;
-    const timer = setTimeout(() => {
-      const tick = (t) => {
-        if (start === undefined) start = t;
-        const p = Math.min((t - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - p, 3);
-        setValue(Math.round(target * eased));
-        if (p < 1) raf = requestAnimationFrame(tick);
-      };
-      raf = requestAnimationFrame(tick);
-    }, delay);
-    return () => { clearTimeout(timer); cancelAnimationFrame(raf); };
-  }, [target, duration, delay, reduce]);
-  return value;
-}
-
-const won = (n) => n.toLocaleString("ko-KR");
-
-/* ───────── 이번 달 (실제 날짜로 자동) ───────── */
-const now = new Date();
-const TODAY = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
-const MONTH = TODAY.month;
-const monthAgo = (n) => ((MONTH - n - 1 + 120) % 12) + 1; // n달 전이 몇 월인지
-
-/* ───────── 예시 데이터 ───────── */
-// 카테고리 색은 dashboard.css의 .gk-dash-cat--<key>에 있어요
-const CATEGORIES = [
-  { key: "home", name: "주거·공과", desc: "월세·관리비·공과금", icon: "building" },
-  { key: "phone", name: "통신", desc: "휴대폰·인터넷·IPTV", icon: "phone" },
-  { key: "sub", name: "구독", desc: "OTT·음악·멤버십", icon: "play", highlight: true },
-  { key: "rental", name: "가전", desc: "정수기·안마의자·건조기", icon: "washer" },
-  { key: "insure", name: "보험", desc: "실손·자동차·운전자", icon: "shield" },
-  { key: "saving", name: "금융·저축", desc: "적금·청약·대출이자", icon: "piggy" },
-  { key: "transit", name: "교통", desc: "교통카드·주차", icon: "bus" },
-  { key: "car", name: "자동차", desc: "할부·주유·자동차보험", icon: "car" },
-  { key: "etc", name: "기타", desc: "경조사비·세금·관리", icon: "shapes" },
-];
-const catClass = (key) => `gk-dash-cat--${key}`;
-
-const monthlyRows = (values) => values.map((value, i) => ({
-  label: i === values.length - 1 ? `${MONTH}월 예정` : `${monthAgo(values.length - 1 - i)}월`,
-  value, // null이면 기록 없음
-  current: i === values.length - 1,
-}));
-
-/**
- * 메인 화면에 보여줄 숫자 (로그인해야 등록할 수 있어요)
- * - 등록한 게 없음: 0원 (등록 전 화면)
- * - 등록함: 내가 등록한 항목으로 계산
- */
-function useDashData() {
-  const items = useItems();
-  const thisMonth = items.filter((it) => paysIn(it, TODAY.year, MONTH)); // 매년·몇 달마다 항목은 결제하는 달에만 들어가요
-  const cats = CATEGORIES.map((c) => {
-    const mine = thisMonth.filter((it) => it.category === c.key);
-    return {
-      ...c,
-      amount: mine.reduce((sum, it) => sum + amountIn(it, TODAY.year, MONTH), 0), // 매일·매주는 이번 달 횟수만큼
-      count: mine.length,
-      desc: mine.length ? mine.map((it) => it.name).join("·") : c.desc,
-      empty: mine.length === 0,
-      list: [...mine].sort((a, b) => b.amount - a.amount), // 카드 안에 보여줄 항목 (금액 큰 순)
-    };
-  });
-  const total = cats.reduce((sum, c) => sum + c.amount, 0);
-  const count = cats.reduce((sum, c) => sum + c.count, 0);
-  const subNow = cats.find((c) => c.key === "sub").amount;
-  return {
-    mode: count ? "mine" : "empty",
-    cats,
-    total,
-    count,
-    monthly: monthlyRows([null, null, null, null, null, subNow]), // 지난달 기록은 다음 달부터 쌓여요
-  };
-}
-
-/* 예산: 설정·지출 리포트 페이지에서 바꾼 값을 읽어와요 */
-const loadBudget = () => {
-  try { return JSON.parse(localStorage.getItem("gk-settings") || "{}").budget ?? 1300000; } catch { return 1300000; }
-};
-
-const BIG = 100000; // 이 금액 이상이면 노란색(큰 지출)으로 표시
-const ddayText = (d) => (d > 0 ? `D-${d}` : d === 0 ? "D-DAY" : "결제 완료");
-
-/** 내가 등록한 항목 → 다가오는 결제 카드 모양으로 */
-const toCard = (p) => ({
-  key: p.id,
-  month: p.month,
-  payDay: p.payDay,
-  dday: p.dday,
-  title: `${p.name} ${p.amountType === "variable" ? "약 " : ""}${won(p.amount)}원`,
-  sub: `${p.amountType === "variable" ? "예상 금액 · " : ""}${p.payMethod || "결제 수단 미등록"} · ${cycleText(p)}`,
-  warn: p.amount >= BIG,
-  cat: CATEGORIES.find((c) => c.key === p.category) || CATEGORIES[CATEGORIES.length - 1], // 카드 색 = 카테고리 색
-});
-
-/* ───────── 아이콘 ───────── */
-const line = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
-const ICON_PATHS = {
-  building: (<><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" /><path d="M6 11H4.5A1.5 1.5 0 0 0 3 12.5V21h3M18 9h1.5A1.5 1.5 0 0 1 21 10.5V21h-3M3 21h18M10 7h4M10 11h4M10 21v-3a2 2 0 0 1 4 0v3" /></>),
-  phone: (<><rect x="6.5" y="2.5" width="11" height="19" rx="2.5" /><path d="M11 18h2" /></>),
-  play: (<><circle cx="12" cy="12" r="9" /><path d="M10 8.5l5.5 3.5-5.5 3.5z" /></>),
-  washer: (<><rect x="3.5" y="2.5" width="17" height="19" rx="2.5" /><path d="M7 6h2M16 6h.01" /><circle cx="12" cy="13.5" r="4.5" /><path d="M12 18a2.25 2.25 0 0 0 0-4.5 2.25 2.25 0 0 1 0-4.5" /></>),
-  shield: (<><path d="M12 3l8 3v6c0 4.8-3.4 8-8 9-4.6-1-8-4.2-8-9V6z" /><path d="M9 12l2 2 4-4" /></>),
-  piggy: (<><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z" /><path d="M2 9v1c0 1.1.9 2 2 2h1M16 11h.01" /></>),
-  bus: (<><rect x="4" y="3" width="16" height="15" rx="3" /><path d="M4 11h16M7 18v3M17 18v3M9 7h6" /><circle cx="8" cy="14.5" r="1" /><circle cx="16" cy="14.5" r="1" /></>),
-  car: (<><path d="m21 8-2 2-1.5-3.7A2 2 0 0 0 15.646 5H8.4a2 2 0 0 0-1.903 1.257L5 10 3 8" /><path d="M7 14h.01M17 14h.01" /><rect x="3" y="10" width="18" height="8" rx="2" /><path d="M5 18v2M19 18v2" /></>),
-  shapes: (<><path d="M8.3 10a.7.7 0 0 1-.6-1.1L11.4 3a.7.7 0 0 1 1.2 0l3.7 5.9a.7.7 0 0 1-.6 1.1Z" /><rect x="3" y="14" width="7" height="7" rx="1" /><circle cx="17.5" cy="17.5" r="3.5" /></>),
-};
-const Icon = ({ name, size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" {...line} aria-hidden="true">{ICON_PATHS[name]}</svg>
-);
 
 /* ───────── 1. 이번 달에 나갈 구독료 ───────── */
 function TotalCard({ data }) {
@@ -184,9 +71,6 @@ function TotalCard({ data }) {
 }
 
 /* ───────── 2. 내 고정지출 ───────── */
-const MAX_CARDS = 3; // 메인에는 카테고리를 최대 3개까지 (금액 큰 순)
-const MAX_LINES = 3; // 카드 한 장에 보여줄 항목 수
-
 function CategoryCard({ c, total, onOpen }) {
   const pct = total ? Math.round((c.amount / total) * 100) : 0;
   const shown = c.list.slice(0, MAX_LINES);
@@ -396,15 +280,7 @@ function CalendarCard() {
   const goCalendar = (day = null) => navigate("/calendar", { state: { year: view.year, month: view.month, day } });
 
   // 내가 등록한 항목으로 달력·다가오는 결제를 채워요
-  const PAY = {};
-  items.forEach((it) => {
-    payDaysIn(it, view.year, view.month).forEach((d) => { // 매주·매일 결제는 그 달에 여러 날
-      const prev = PAY[d];
-      PAY[d] = prev
-        ? { name: `${prev.first} 외 ${prev.count}`, first: prev.first, count: prev.count + 1, warn: prev.warn || it.amount >= BIG }
-        : { name: it.name, first: it.name, count: 1, warn: it.amount >= BIG };
-    });
-  });
+  const PAY = payByDay(items, view.year, view.month);
   const upcoming = nextPayments(items, TODAY).map(toCard);
 
   return (
@@ -423,7 +299,7 @@ function CalendarCard() {
       </div>
 
       <div className="gk-cal-weekdays">
-        {["일", "월", "화", "수", "목", "금", "토"].map((w) => (
+        {WEEKDAYS.map((w) => (
           <span key={w} className="gk-cal-weekday">{w}</span>
         ))}
       </div>
@@ -488,7 +364,6 @@ function CalendarCard() {
 /* ───────── 페이지 ───────── */
 export default function Dashboard() {
   const { user } = useAuthStore();
-  
   const navigate = useNavigate();
   const data = useDashData();
   return (

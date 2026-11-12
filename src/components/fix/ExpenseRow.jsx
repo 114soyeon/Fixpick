@@ -1,32 +1,16 @@
 import { categoryStyle } from "../../constants/categories";
+import { catClass, categoryKeyOf } from "../../utils/category";
+import { won } from "../../utils/format";
 
-const CATEGORY_KEY = {
-  "주거·공과": "home",
-  통신: "phone",
-  구독: "sub",
-  가전: "rental",
-  보험: "insure",
-  "금융·저축": "saving",
-  교통: "transit",
-  자동차: "car",
-  기타: "etc",
-};
-
+// 아이콘 색은 카테고리 색(common.css의 .gk-cat--<key>), 큰 지출은 진한 남색(Fix.css의 .expense-icon.is-big)
 const ExpenseIcon = ({ item }) => {
-  const { icon: Icon, bg, color } = categoryStyle(CATEGORY_KEY[item.category]);
-  const style = item.big
-    ? { background: "#102f4b", color: "#ffffff" }
-    : { background: bg, color };
-
+  const key = categoryKeyOf(item.category);
+  const { icon: Icon } = categoryStyle(key);
   return (
-    <div className="expense-icon" style={style}>
+    <div className={`expense-icon ${catClass(key)} ${item.big ? "is-big" : ""}`}>
       <Icon size={20} strokeWidth={2} aria-hidden="true" />
     </div>
   );
-};
-
-const formatMoney = (number) => {
-  return number.toLocaleString("ko-KR") + "원";
 };
 
 const ExpenseRow = ({ item, onClick }) => {
@@ -41,8 +25,8 @@ const ExpenseRow = ({ item, onClick }) => {
       <span>{item.category}</span>
       <span>{item.period}</span>
       <span>{item.date}</span>
-      <strong className="amount">{formatMoney(item.amount)}</strong>
-      <span className="monthly-amount">{formatMoney(item.monthly)}</span>
+      <strong className="amount">{won(item.amount)}</strong>
+      <span className="monthly-amount">{won(item.monthly)}</span>
     </div>
   );
 };

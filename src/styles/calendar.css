@@ -247,6 +247,7 @@
   overflow: hidden;
 }
 .paycal-progress-bar {
+  width: var(--progress, 0%); /* 결제된 비율 (SummaryCard에서 넘겨줘요) */
   height: 100%;
   background: var(--paycal-blue);
   border-radius: 999px;
@@ -329,7 +330,8 @@
   width: 32px;
   height: 32px;
   border-radius: 9px;
-  background: #eef1f5; /* bg를 안 주면 기본 회색 */
+  background: var(--cat-bg, #eef1f5); /* 카테고리 색 (common.css의 .gk-cat--<key>), 없으면 회색 */
+  color: var(--cat-color, #536579);
   flex-shrink: 0;
 }
 .paycal-item-info {

@@ -109,6 +109,10 @@
 
 /* 카테고리 아이콘 박스 (크기는 JSX에서) */
 .rpt-cat-icon {
+  width: 26px;
+  height: 26px;
+  background: var(--cat-bg);
+  color: var(--cat-color);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -225,7 +229,11 @@
   height: 29px;
   font-size: 13px;
 }
+/* 아이콘 박스 크기 */
+.rpt-cat-icon--24 { width: 24px; height: 24px; }
+.rpt-cat-icon--30 { width: 30px; height: 30px; }
 .rpt-legend-dot {
+  background: var(--cat-bar);
   width: 9px;
   height: 9px;
   border-radius: 2px;

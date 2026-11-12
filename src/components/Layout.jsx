@@ -1,21 +1,12 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import { PATHS } from "../constants/routes";
 import { logout } from "../utils/auth";
 import "../styles/common.css";
 import { supabase } from "../lib/supabase";
 import { useEffect, useRef } from "react"; // useRef : 값을 저장해 두었다가 나중에 다시 사용할 수 있도록 해주는 기능
 import { useAuthStore } from "../store/authStore";
 
-
-const PATHS = {
-  home: "/",
-  expenses: "/fix",
-  calendar: "/calendar",
-  report: "/report",
-  settings: "/setting",
-  login: "/login",
-  signup: "/signup"
-};
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -69,7 +60,7 @@ export default function Layout() {
         onLogout={() => { logout(); navigate("/"); }}
       />
 
-      <div ref={scrollRef} style={{ flex: 1, minWidth: 0, height: "100vh", overflowY: "auto" }}>
+      <div ref={scrollRef} className="body_content__page">
         <Outlet />
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { Icons } from "./icons";
+
 /* 알림 종류별 아이콘 모양 (색은 sidebar.css의 .gk-noti__row.is-<종류>) */
 const NOTI_ICONS = {
   pay: <><rect x="3" y="5" width="18" height="16" rx="2.5" /><path d="M16 3v4M8 3v4M3 10h18" /></>,
@@ -8,7 +10,7 @@ const NOTI_ICONS = {
 };
 
 /** 알림 패널 */
-export default function NotificationPanel({ items, onRead, onReadAll, onClose, onSettings, onGo }) {
+export default function NotificationPanel({ items, hasItems, onRead, onReadAll, onClose, onSettings, onGo }) {
   const unread = items.filter((n) => n.unread).length;
   return (
     <div className="gk-noti" role="dialog" aria-label="알림">
@@ -25,6 +27,15 @@ export default function NotificationPanel({ items, onRead, onReadAll, onClose, o
         </div>
       </div>
 
+      {items.length === 0 ? (
+        <div className="gk-noti__empty">
+          <span className="gk-noti__empty-icon">{Icons.bell}</span>
+          <b className="gk-noti__empty-title">{hasItems ? "새 알림이 없어요" : "아직 알림이 없어요"}</b>
+          <span className="gk-noti__empty-desc">
+            {hasItems ? "결제일이 다가오면 여기에서 알려드릴게요." : <>고정지출을 등록하면<br />결제일 전에 미리 알려드려요.</>}
+          </span>
+        </div>
+      ) : (
       <ul className="gk-noti__list">
         {items.map((n) => (
           <li key={n.id} className="gk-noti__item">
@@ -47,6 +58,7 @@ export default function NotificationPanel({ items, onRead, onReadAll, onClose, o
           </li>
         ))}
       </ul>
+      )}
 
       <div className="gk-noti__foot">
         <button type="button" className="gk-noti__link" onClick={onSettings}>알림 설정</button>

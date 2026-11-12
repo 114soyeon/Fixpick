@@ -34,7 +34,7 @@ const BudgetCard = ({ initial }) => {
 
   return (
     <section className="set-card">
-      <CardHead icon={Wallet} color="#B8891F" bg="#FFF8D6" title="예산" desc="한 달에 고정지출로 쓸 금액" />
+      <CardHead icon={Wallet} tone="yellow" title="예산" desc="한 달에 고정지출로 쓸 금액" />
       <div className="set-budget">
         <label className="set-budget-box">
           <input

@@ -1,6 +1,5 @@
 import { useState } from "react";
-
-const ALERT_OPTIONS = ["30일 전", "7일 전", "3일 전", "1일 전"];
+import { ALERT_OPTIONS } from "../../constants/fixDetail";
 
 const AlertSettings = () => {
   const [payAlert, setPayAlert] = useState("1일 전");

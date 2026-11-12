@@ -25,7 +25,7 @@ const AlertCard = ({ setting }) => {
 
   return (
     <section className="set-card set-alert">
-      <CardHead icon={Bell} color="#2F7FC0" bg="#DCEFFD" title="알림" desc="결제일 전에 미리 알려드려요" />
+      <CardHead icon={Bell} tone="blue" title="알림" desc="결제일 전에 미리 알려드려요" />
       <ul className="set-rows">
         {alertRow(ALERTS[0])}
 

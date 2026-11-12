@@ -3,10 +3,7 @@
  * - payments: 그 달에 나가는 결제 전체
  * - todayStart: 오늘 0시. 결제일이 이보다 앞이면 "결제된" 것으로 봐요 (오늘은 아직 남은 결제)
  */
-import { won } from "../../utils/format";
-
-// 목록 금액 합계
-const sumAmount = (list) => list.reduce((sum, item) => sum + item.amount, 0);
+import { sumAmount, won } from "../../utils/format";
 
 const SummaryCard = ({ month, payments, todayStart }) => {
   const paidList = payments.filter((p) => p.date < todayStart);
@@ -22,7 +19,8 @@ const SummaryCard = ({ month, payments, todayStart }) => {
       {/* 결제 진행률: [진행 바] 결제된 건수/이번 달 전체 건수 (시안: 같은 줄) */}
       <div className="paycal-progress-row">
         <div className="paycal-progress">
-          <div className="paycal-progress-bar" style={{ width: `${progress}%` }} />
+          {/* 길이는 결제된 비율이라 CSS 변수(--progress)로만 넘겨요 */}
+          <div className="paycal-progress-bar" style={{ "--progress": `${progress}%` }} />
         </div>
         <p className="paycal-progress-text">
           {paidList.length}/{payments.length}건

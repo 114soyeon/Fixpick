@@ -1,42 +1,15 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Fix.css";
-import { useFixItems } from "../utils/fixItems";
+import { getDateValue, useFixItems } from "../utils/fixItems";
+import { FIX_TABS } from "../constants/fix";
 import SummaryCards from "../components/fix/SummaryCards";
 import ExpenseRow from "../components/fix/ExpenseRow";
-
-// 카테고리 목록
-const categories = [
-  "전체",
-  "주거·공과",
-  "통신",
-  "구독",
-  "가전",
-  "보험",
-  "금융·저축",
-  "교통",
-  "기타",
-  "자동차",
-];
-
-// 정렬 기능
-const getDateValue = (date) => {
-  const currentYear = new Date().getFullYear();
-  const match = date.match(/(?:(\d{4})년 )?(\d{1,2})월 (\d{1,2})일/);
-
-  if (!match) return 0;
-
-  const year = Number(match[1] || currentYear);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-
-  return new Date(year, month - 1, day).getTime();
-};
 
 const Fix = () => {
   const navigate = useNavigate();
 
-  // 기본 데이터 + 사이드바에서 추가한 항목 + 상세에서 수정한 내용
+  // 사이드바에서 추가한 항목 + 상세에서 수정한 내용
   const allItems = useFixItems();
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [showAll, setShowAll] = useState(false);
@@ -83,12 +56,12 @@ const Fix = () => {
       </header>
 
       {/* 요약 카드 */}
-      <SummaryCards />
+      <SummaryCards items={allItems} />
 
       {/* 카테고리 및 정렬 */}
       <section className="filter-area">
         <div className="category-list">
-          {categories.map((category) => (
+          {FIX_TABS.map((category) => (
             <button
               key={category}
               className={

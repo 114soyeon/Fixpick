@@ -213,31 +213,351 @@
   box-shadow: 0 12px 30px rgba(11,42,69,.3);
   animation: gkLoginToast 2.4s cubic-bezier(.22,1,.36,1) both;
 }
+/* ───────── 페이지 틀 ───────── */
+.gk-login-page {
+  min-height: 100vh;
+  display: flex;
+  background: #F7F9FA;
+  font-family: 'Pretendard', 'Noto Sans KR', system-ui, -apple-system, sans-serif;
+  color: #0B2A45;
+  letter-spacing: -0.2px;
+}
+
+/* 왼쪽: 브랜드 */
+.gk-login-brand {
+  flex: 1 1 50%;
+  background: #DCEFFD;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 64px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+.gk-login-home {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  align-self: flex-start;
+}
+.gk-login-brand__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+}
+.gk-login-hero {
+  filter: drop-shadow(0 24px 40px rgba(11,42,69,.12));
+}
+.gk-login-copy {
+  --d: 150ms;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.gk-login-copy__title {
+  margin: 0;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -1.4px;
+  line-height: 1.3;
+}
+.gk-login-copy__desc {
+  margin: 0;
+  font-size: 17px;
+  color: #3E4247;
+  line-height: 1.6;
+}
+.gk-login-tags {
+  --d: 300ms;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.gk-login-tag {
+  background: #FFFFFF;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* 오른쪽: 로그인 폼 */
+.gk-login-form-wrap {
+  flex: 1 1 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  box-sizing: border-box;
+}
+.gk-login-form {
+  --d: 80ms;
+  width: 440px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.gk-login-mobile-logo {
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  align-self: flex-start;
+}
+.gk-login-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.gk-login-head__title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+.gk-login-head__desc {
+  margin: 0;
+  font-size: 16px;
+  color: #5B5F66;
+}
+
+/* 입력칸 묶음 (라벨 + 입력) */
+.gk-login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.gk-login-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+.gk-login-pw {
+  position: relative;
+}
+.gk-login-input--pw {
+  padding-right: 54px;
+}
+.gk-login-alert {
+  margin: -8px 0 0;
+  font-size: 14px;
+  color: #D9534F;
+}
+.gk-login-error {
+  font-size: 13px;
+  color: #D9534F;
+}
+.gk-login-error--tight {
+  margin-top: -6px;
+}
+.gk-login-link--strong {
+  font-weight: 700;
+  color: #0B2A45;
+}
+.gk-login-link--signup {
+  font-size: 15px;
+}
+
+/* 로그인 상태 유지 · 아이디/비밀번호 찾기 */
+.gk-login-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.gk-login-keep {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #3E4247;
+  cursor: pointer;
+}
+.gk-login-finds {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.gk-login-finds__bar {
+  width: 1px;
+  height: 12px;
+  background: #D5DCE3;
+}
+
+/* ── 간편 로그인 ── */
+.gk-login-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #9AA1A9;
+  font-size: 13px;
+}
+.gk-login-or__line {
+  flex: 1;
+  height: 1px;
+  background: #E3E8ED;
+}
+.gk-login-socials {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.gk-login-social--kakao {
+  background: #FEE500;
+  color: rgba(0,0,0,.85);
+  border-color: #FEE500;
+}
+.gk-login-social--google {
+  background: #FFFFFF;
+  color: #1F1F1F;
+  border-color: #DADCE0;
+}
+.gk-login-foot {
+  margin: 0;
+  text-align: center;
+  font-size: 15px;
+  color: #5B5F66;
+}
+
+/* 모달 안 버튼 줄 */
+.gk-login-actions {
+  display: flex;
+  gap: 10px;
+}
+.gk-login-btn--ghost {
+  flex: 0 0 110px;
+  background: #F3F5F7;
+}
+.gk-login-btn--wide {
+  flex-basis: 130px;
+}
+.gk-login-btn--grow {
+  flex: 1;
+}
+
+/* ───────── 비밀번호·아이디 찾기 창 ───────── */
+.gk-login-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.gk-login-modal-head__text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gk-login-modal-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+}
+.gk-login-modal-desc {
+  margin: 0;
+  font-size: 15px;
+  color: #5B5F66;
+  line-height: 1.55;
+}
+.gk-login-modal-desc__strong {
+  color: #0B2A45;
+}
+/* 닫기 버튼: 눈 버튼 모양을 쓰되 제자리에 */
+.gk-login-eye--close {
+  position: static;
+  transform: none;
+}
+/* 비밀번호 찾기: 메일 보낸 뒤 안내 */
+.gk-login-mailnote {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #DCEFFD;
+  font-size: 14px;
+  color: #3E4247;
+}
+.gk-login-mailnote__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #5CB8F2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.gk-login-found-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.gk-login-found {
+  border-radius: 16px;
+  background: #DCEFFD;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.gk-login-found__label {
+  font-size: 13px;
+  color: #5B5F66;
+}
+.gk-login-found__email {
+  font-size: 20px;
+  letter-spacing: -0.3px;
+  word-break: break-all;
+  text-align: center;
+}
+.gk-login-found__joined {
+  font-size: 12.5px;
+  color: #8A9099;
+}
+.gk-login-toast__icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #5CB8F2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .gk-login-mobile-logo {
   display: none;
 }
 /* 작은 화면 */
 @media (max-width: 1440px) {
   .gk-login-brand {
-    padding: 40px 48px !important;
+    padding: 40px 48px;
   }
   .gk-login-hero svg {
     width: 230px;
     height: 230px;
   }
-  .gk-login-brand h1 {
-    font-size: 34px !important;
+  .gk-login-copy__title {
+    font-size: 34px;
   }
 }
 @media (max-width: 1000px) {
   .gk-login-brand {
-    display: none !important;
+    display: none;
   }
   .gk-login-mobile-logo {
     display: flex;
   }
   .gk-login-form-wrap {
-    padding: 32px 24px !important;
+    padding: 32px 24px;
   }
 }
 @media (prefers-reduced-motion: reduce) { .gk-login-last, .gk-login-rise, .gk-login-float, .gk-login-page .gk-modal, .gk-login-page .gk-modal__box, .gk-login-page .gk-toast { animation: none; } }
