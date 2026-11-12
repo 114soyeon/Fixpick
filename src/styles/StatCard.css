@@ -4,7 +4,10 @@
    - 화면마다 크기가 다르면 그 화면 CSS에서 덮어써요
      (예: Fix.css → .summary-cards .stat-card)
    ========================================================= */
+/* 카드 높이: 어느 화면이든 같은 높이 (설명 sub 줄이 없어도 있는 카드와 같아요)
+   = 위아래 여백 32 + 테두리 2 + 소제목 20 + 2 + 값 34 + 4 + 설명 16 */
 .stat-card {
+  min-height: 110px;
   display: flex;
   align-items: flex-start; /* 왼쪽 글자 묶음 + 오른쪽 배지 */
   justify-content: space-between;
@@ -32,6 +35,7 @@
 
 .stat-card-label {
   font-size: 16px;
+  line-height: 20px;
   color: #52637a;
 }
 /* 소제목 오른쪽 비교 기간: "작년보다 (2025년 1~11월)" */
@@ -43,6 +47,7 @@
 .stat-card-value {
   margin-top: 2px;
   font-size: 26px;
+  line-height: 34px;
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
@@ -56,6 +61,7 @@
 .stat-card-sub {
   margin-top: 4px;
   font-size: 12px;
+  line-height: 16px;
   color: #52637a;
 }
 

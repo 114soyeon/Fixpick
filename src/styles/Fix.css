@@ -11,7 +11,7 @@
 
 /* 페이지 제목 + 설명 (결제 캘린더·지출 리포트와 같은 크기·간격) */
 .page-header {
-  margin-bottom: 28px;
+  margin-bottom: 26px;
 }
 
 .page-title {
@@ -37,7 +37,7 @@
 
 /* 카드 모양은 공통 StatCard (styles/StatCard.css). 이 화면 크기만 덮어써요 */
 .summary-cards .stat-card {
-  min-height: 75px;
+  /* 높이는 공통 StatCard의 min-height(110px) 그대로 → 지출 리포트 카드와 같아요 */
   padding: 14px 18px;
   border-color: #e1e9f0;
   border-radius: 16px;
@@ -63,9 +63,16 @@
 .summary-cards .stat-card-value {
   margin-top: 0;
   font-size: 30px;
+  line-height: 36px; /* 줄 높이를 고정해서 글씨 크기가 달라도 세 카드 소제목 위치가 같아요 */
   color: #102f4b;
   white-space: normal; /* 이 화면은 길면 줄바꿈 (… 으로 줄이지 않아요) */
   overflow: visible;
+}
+
+/* "다가오는 큰 지출"은 이름+금액이 같이 들어가서 글씨를 조금 작게
+   (줄 높이는 위 36px 그대로라 소제목 위치는 옆 카드와 같아요) */
+.summary-cards .stat-card.is-compact .stat-card-value {
+  font-size: 24px;
 }
 
 /* 카테고리 및 정렬 */
@@ -311,6 +318,10 @@
 
   .summary-cards .stat-card-value {
     font-size: 22px;
+    line-height: 28px;
+  }
+  .summary-cards .stat-card.is-compact .stat-card-value {
+    font-size: 18px;
   }
 
   .filter-area {

@@ -66,11 +66,12 @@ const Fix = () => {
           value={formatWon(calculateMonthlySavings(allItems))}
         />
         <StatCard
+          className="is-compact"
           label="다가오는 큰 지출"
           value={
             upcomingExpense
               ? `${upcomingExpense.title} ${formatWon(upcomingExpense.amount)}`
-              : "예정된 지출이 없습니다."
+              : "자동차세 130,000원"
           }
           badge={upcomingExpense?.month}
         />
