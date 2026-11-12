@@ -70,6 +70,30 @@ export const useAuthStore = create((set, get) => ({
     set({ user: { ...cur, name: data.name || cur.name, phone: data.phone || "" } });
   },
 
+  // 이름 바꾸기 (설정 페이지 프로필에서 사용)
+  // 1) users 테이블의 내 이름을 바꿔요
+  // 2) 성공하면 화면의 user.name도 바꿔요 → 사이드바·대시보드 이름도 같이 바뀌어요
+  // 성공하면 true, 실패하면 false를 돌려줘요
+  updateName: async (name) => {
+    const cur = get().user;
+    if (!cur) return false;
+    const { data, error } = await supabase
+      .from("users")
+      .update({ name })
+      .eq("id", cur.id)
+      .select("name"); // 바뀐 줄을 돌려받아요 (아래에서 진짜 바뀌었는지 확인하려고)
+
+    // 수정 권한이 없으면 오류 없이 아무것도 안 바뀌고 빈 배열([])만 와요
+    // 그래서 "오류가 있거나 돌아온 줄이 없으면" 실패로 봐요
+    if (error || !data?.length) return false;
+
+    const now = get().user;
+    if (!now || now.id !== cur.id) return false; // 그 사이 사용자가 로그아웃을 하면 return
+
+    set({ user: { ...now, name } });
+    return true;
+  },
+
   // 로그인 상태 변경
   setAuth: (session) => {
     const userSession = session?.user;
