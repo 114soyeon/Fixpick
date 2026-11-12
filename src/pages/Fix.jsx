@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import "../styles/Fix.css";
-import SummaryCards from "../components/fix/SummaryCards";
+import StatCard from "../components/common/StatCard";
 import ExpenseRow from "../components/fix/ExpenseRow";
+import { formatWon } from "../utils/fixFormat";
 import { useItems } from "../utils/items";
 import { useFixItems } from "../utils/fixItems";
 import {
@@ -40,6 +41,9 @@ const Fix = () => {
     ? filteredExpenses
     : filteredExpenses.slice(0, PAGE_SIZE);
 
+  // 다가오는 큰 지출: { title, amount, month } 또는 null
+  const upcomingExpense = getUpcomingExpense(rawItems);
+
   return (
     <div className="expenses-page">
       {/* 페이지 제목 + 설명 */}
@@ -50,12 +54,27 @@ const Fix = () => {
         </p>
       </header>
 
-      {/* 요약 카드 */}
-      <SummaryCards
-        fixedExpense={calculateFixedExpense(allItems)}
-        monthlySavings={calculateMonthlySavings(allItems)}
-        upcomingExpense={getUpcomingExpense(rawItems)}
-      />
+      {/* 요약 카드 — 모양은 공통 StatCard, 이 화면 크기는 Fix.css의 .summary-cards .stat-card */}
+      <section className="summary-cards">
+        <StatCard
+          highlight
+          label="한 달 고정지출 (월 환산)"
+          value={formatWon(calculateFixedExpense(allItems))}
+        />
+        <StatCard
+          label="자동으로 빠지는 저축 (별도)"
+          value={formatWon(calculateMonthlySavings(allItems))}
+        />
+        <StatCard
+          label="다가오는 큰 지출"
+          value={
+            upcomingExpense
+              ? `${upcomingExpense.title} ${formatWon(upcomingExpense.amount)}`
+              : "예정된 지출이 없습니다."
+          }
+          badge={upcomingExpense?.month}
+        />
+      </section>
 
       {/* 카테고리 및 정렬 */}
       <section className="filter-area">

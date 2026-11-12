@@ -1,7 +1,7 @@
 /*
- * 지출 리포트 차트 (react-chartjs-2) — pages/Report.jsx에서 사용
- * - CategoryDonut: 카테고리 비율 도넛
- * - TrendLine: 꺾은선 (최근 6개월 / 월별 흐름)
+ * 지출 리포트 차트 (react-chartjs-2)
+ * - CategoryDonut: 카테고리 비율 도넛 → CategoryCard.jsx 안에서 사용
+ * - TrendLine: 꺾은선 (최근 6개월 / 월별 흐름) → TrendCard.jsx 안에서 사용
  * 모양(색·굵기·점 크기)은 시안 SVG 값 그대로예요.
  * 시안에 없는 마우스 효과(툴팁·확대)는 넣지 않았어요 → events: []
  */
