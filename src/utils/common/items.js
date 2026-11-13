@@ -43,11 +43,6 @@ export function addItem(item) {
   return true;
 }
 
-/** 항목 지우기 */
-export function removeItem(id) {
-  writeItems(owner(), readItems(owner()).filter((it) => it.id !== id));
-}
-
 /** 항목 목록이 바뀔 때마다 cb 를 불러요 → 그만 듣는 함수를 돌려줘요 (hooks/useItems.js 가 써요) */
 export function subscribeItems(cb) {
   window.addEventListener(EVENT, cb);

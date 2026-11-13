@@ -15,6 +15,18 @@ export const addSubs = async (input) => {
     }
 };
 
+// 고정 지출 항목 수정
+export const updateSubs = async (id, patch) => {
+  const { error } = await supabase.from("subscriptions").update(patch).eq("id", id);
+  if (error) throw error;
+};
+
+// 고정 지출 항목 삭제
+export const deleteSubs = async (id) => {
+  const { error } = await supabase.from("subscriptions").delete().eq("id", id);
+  if (error) throw error;
+};
+
 // 내 고정지출 항목 리스트
 export const getMySubs = async () => {
     const { data, error } = await supabase.from("subscriptions").select(`
