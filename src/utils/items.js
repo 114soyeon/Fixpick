@@ -44,11 +44,6 @@ export function addItem(item) {
   return true;
 }
 
-/** 항목 고치기 (예: 변동 금액을 결제 후 실제 금액으로) */
-export function updateItem(id, changes) {
-  writeItems(owner(), readItems(owner()).map((it) => (it.id === id ? { ...it, ...changes } : it)));
-}
-
 /** 항목 지우기 */
 export function removeItem(id) {
   writeItems(owner(), readItems(owner()).filter((it) => it.id !== id));

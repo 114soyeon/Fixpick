@@ -50,9 +50,6 @@ export const saveEdit = (id, fields) => {
   );
 };
 
-/** 메모 읽기 (저장된 게 없으면 null) */
-export const loadMemo = (id) => localStorage.getItem(memoKey(id));
-
 /** 메모 저장 */
 export const saveMemo = (id, memo) => localStorage.setItem(memoKey(id), memo);
 

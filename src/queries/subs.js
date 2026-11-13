@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getCategories, addSubs, getSubs, getMySubs } from "../api/subs";
+import { getCategories, addSubs, getMySubs } from "../api/subs";
 
 // 카테고리 목록
 export const useCategories = () => {
@@ -7,11 +7,6 @@ export const useCategories = () => {
 }
 
 const subs = "subscriptions";
-// 고정 지출 항목 목록
-export const useSubs = () => {
-    return useQuery({queryKey: [subs], queryFn: getSubs})
-}
-
 // 고정 지출 항목 추가
 export const useAddSub = () => {
     const queryClient = useQueryClient();

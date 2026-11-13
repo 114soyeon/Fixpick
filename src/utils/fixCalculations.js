@@ -1,6 +1,6 @@
 import { bigPayments } from "./items";
-import { ALL_CATEGORY, SAVING_CATEGORY } from "./fixConstants";
-import { getDateValue, toDate } from "./fixFormat";
+import { SAVING_CATEGORY } from "./fixConstants";
+import { toDate } from "./fixFormat";
 import { getToday } from "./date";
 
 /** 한 달 고정지출 합계 (금융·저축 카테고리는 제외) */
@@ -28,29 +28,6 @@ export const getUpcomingExpense = (rawItems) => {
     month: `${big.date.getMonth() + 1}월`,
   };
 };
-
-/** 카테고리 필터 */
-export const filterByCategory = (items, category) =>
-  category === ALL_CATEGORY
-    ? items
-    : items.filter((item) => item.category === category);
-
-/** 정렬 (원본 배열은 건드리지 않아요) */
-export const sortExpenses = (items, sortOrder) =>
-  [...items].sort((a, b) => {
-    switch (sortOrder) {
-      case "high":
-        return b.amount - a.amount;
-      case "low":
-        return a.amount - b.amount;
-      case "latest":
-        return getDateValue(b.date) - getDateValue(a.date);
-      case "oldest":
-        return getDateValue(a.date) - getDateValue(b.date);
-      default:
-        return 0;
-    }
-  });
 
 /** 내 항목들에서 쓴 결제 수단 목록 (중복 제거) — 수정 모달의 선택지 */
 export const getPayMethods = (items) => [

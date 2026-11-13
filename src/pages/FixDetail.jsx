@@ -11,6 +11,8 @@ import EndDateCard from "../components/fix-detail/EndDateCard.jsx";
 import { DEFAULT_AMOUNT_TYPE } from "../utils/fixConstants";
 import { toInputDate } from "../utils/fixFormat";
 import { getAmountHistory, getPayMethods } from "../utils/fixCalculations";
+import { useFixItems } from "../utils/fixItems";
+import { useMySub } from "../queries/subs";
 import {
   deleteFixItem,
   saveEdit,
@@ -24,11 +26,47 @@ const FixDetail = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // 전체 목록(DB 항목 + 수정본)에서 이 항목 찾기
+  // DB 데이터는 조금 늦게 와서, 화면을 그릴 때마다 다시 찾아요
+  const allItems = useFixItems();
+  const { isLoading } = useMySub(); // 아직 불러오는 중인지
+  const found = allItems.find((e) => e.id === Number(id));
+
+  const [changes, setChanges] = useState({}); // 이 화면에서 고친 값 (수정 팝업에서 저장한 것)
+  // 메모는 브라우저에 "memo-<id>" 로 저장돼 있어요 (저장은 fixStorage.js saveMemo)
+  const [memo, setMemo] = useState(() => {
+    try { return localStorage.getItem(`memo-${id}`) ?? ""; } catch { return ""; }
+  });
+
+  // 불러오는 중
+  if (isLoading) {
+    return (
+      <div className="detail-page">
+        <p>불러오는 중이에요.</p>
+      </div>
+    );
+  }
+
+  // 없는 번호로 들어왔을 때 (또는 로그인 안 했을 때)
+  if (!found) {
+    return (
+      <div className="detail-page">
+        <p>항목을 찾을 수 없어요.</p>
+        <button className="outline-button" onClick={() => navigate("/fix")}>
+          목록으로
+        </button>
+      </div>
+    );
+  }
+
+  // 화면에 보여줄 항목 = DB 항목 + 메모 + 이 화면에서 고친 값
+  const item = { ...found, memo, ...changes };
+
   // 팝업에서 "저장"을 눌렀을 때
   const handleSave = (newInfo) => {
     const fields = toEditedFields(newInfo);
     saveEdit(id, fields);
-    setItem({ ...item, ...fields });
+    setChanges((prev) => ({ ...prev, ...fields }));
     setIsModalOpen(false);
   };
 
@@ -42,7 +80,7 @@ const FixDetail = () => {
   // 메모 칸에 글자를 칠 때마다
   const handleMemoChange = (e) => {
     const newMemo = e.target.value;
-    setItem({ ...item, memo: newMemo });
+    setMemo(newMemo);
     saveMemo(id, newMemo);
   };
 

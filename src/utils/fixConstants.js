@@ -31,9 +31,6 @@ export const SORT_OPTIONS = [
 ];
 export const DEFAULT_SORT = "created";
 
-// 목록에서 처음에 보여줄 개수
-export const PAGE_SIZE = 8;
-
 // 상세 > 알림 선택 버튼
 export const ALERT_OPTIONS = ["30일 전", "7일 전", "3일 전", "1일 전"];
 export const DEFAULT_PAY_ALERT = "1일 전";

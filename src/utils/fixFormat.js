@@ -9,9 +9,6 @@ export const toDate = (text) => {
   return new Date(year, Number(match[2]) - 1, Number(match[3]));
 };
 
-// 정렬용 숫자 (날짜를 못 읽으면 0)
-export const getDateValue = (text) => toDate(text)?.getTime() ?? 0;
-
 // "2027-03-04" → Date
 export const keyToDate = (key) => {
   if (!key) return null;

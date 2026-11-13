@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import { supabase } from "../lib/supabase";
+import * as authApi from "../api/auth"; // Supabase 요청은 api/auth.js 에서 해요
+
+/*
+ * 로그인 상태 저장소 — "누가 로그인했는지"만 들고 있어요
+ * Supabase 를 직접 부르지 않고 api/auth.js 함수를 불러요
+ */
 
 const userInfo = (user) =>
   user
@@ -19,54 +24,30 @@ export const useAuthStore = create((set, get) => ({
 
   // 초기 로그인 상태 확인
   initialize: async () => {
-    const { data, error } =
-      await supabase.auth.getSession();
-
-    if (!error) {
-      set({
-        session: data.session,
-        user: userInfo(data.session?.user),
-        loading: false
-      });
-    } else {
+    try {
+      const session = await authApi.getSession();
+      set({ session, user: userInfo(session?.user), loading: false });
+    } catch {
       set({ loading: false });
     }
   },
 
-  // 로그인
-  signIn: async (email, password) => {
-    const { data, error } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-    if (error) throw error;
-    return data;
-  },
-
-  // 회원가입
-  signUp: async (email, password) => {
-    const { data, error } =
-      await supabase.auth.signUp({
-        email,
-        password
-      });
-    if (error) throw error;
-    return data;
-  },
+  // 로그인 (틀리면 error 를 throw → 로그인 페이지가 문구를 보여줘요)
+  signIn: (email, password) => authApi.signIn(email, password),
 
   // 로그인한 사람의 이름·전화는 users 테이블
   loadProfile: async (id) => {
-    const { data, error } = await supabase
-      .from("users")
-      .select("name, phone")
-      .eq("id", id)
-      .single();
-    if (error || !data) return; // 못 가져오면 임시 이름(이메일 앞글자) 유지
-    
+    let data;
+    try {
+      data = await authApi.getProfile(id);
+    } catch {
+      return; // 못 가져오면 임시 이름(이메일 앞글자) 유지
+    }
+    if (!data) return;
+
     const cur = get().user;
     if (!cur || cur.id !== id) return; // 그 사이 사용자가 로그아웃을 하면 return
-    
+
     set({ user: { ...cur, name: data.name || cur.name, phone: data.phone || "" } });
   },
 
@@ -74,15 +55,15 @@ export const useAuthStore = create((set, get) => ({
   updateName: async (name) => {
     const cur = get().user;
     if (!cur) return false;
-    const { data, error } = await supabase
-      .from("users")
-      .update({ name })
-      .eq("id", cur.id)
-      .select("name");
 
-    // 수정 권한이 없으면 오류 없이 아무것도 안 바뀌고 빈 배열([])만 와요
-    // 그래서 "오류가 있거나 돌아온 줄이 없으면" 실패로 봐요
-    if (error || !data?.length) return false;
+    let data;
+    try {
+      data = await authApi.updateUserName(cur.id, name);
+    } catch {
+      return false;
+    }
+    // 수정 권한이 없으면 오류 없이 빈 배열([])만 와요 → 돌아온 줄이 없으면 실패로 봐요
+    if (!data?.length) return false;
 
     const now = get().user;
     if (!now || now.id !== cur.id) return false; // 그 사이 사용자가 로그아웃을 하면 return
@@ -103,9 +84,5 @@ export const useAuthStore = create((set, get) => ({
   },
 
   // 로그아웃
-  signOut: async () => {
-    const { error } =
-      await supabase.auth.signOut();
-    if (error) throw error;
-  }
+  signOut: () => authApi.signOut(),
 }));

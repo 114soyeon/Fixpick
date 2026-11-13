@@ -6,12 +6,6 @@ export const getCategories = async () => {
     return data;
 }
 
-// 고정 지출 항목 조회
-export const getSubs = async() => {
-    const {data} = await supabase.from("subscriptions").select("*");
-    return data;
-}
-
 // 고정 지출 항목 추가 - 실패 시 error throw
 export const addSubs = async (input) => {
     const { error } = await supabase.from("subscriptions").insert(input);

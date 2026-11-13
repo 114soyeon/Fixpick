@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { useAuthStore } from "../store/authStore";
-import { supabase } from "../lib/supabase";
+import { signOut } from "../api/auth";
 
 /*
  * 로그인 정보를 저장하는 도구예요.
@@ -107,24 +107,10 @@ export function login({ email, password, keep = true }) {
 /** 로그아웃 (Supabase 세션을 지워요) */
 export async function logout() {
   try {
-    await supabase.auth.signOut();
+    await signOut(); // Supabase 요청은 api/auth.js
   } catch {
     /* 네트워크가 안 돼도 로컬 세션은 정리돼요 */
   }
-}
-
-/** 이름 바꾸기 (설정 페이지에서 사용) */
-export function updateUser(changes) {
-  const user = readUser();
-  if (!user) return;
-  const next = { ...user, ...changes };
-  const inSession = Boolean(read(USER_KEY, null, "session"));
-  saveUser(next, !inSession);
-  const accounts = read(ACCOUNTS_KEY, {});
-  const key = user.email.toLowerCase();
-  if (accounts[key]) accounts[key] = { ...accounts[key], name: next.name };
-  write(ACCOUNTS_KEY, accounts);
-  notify();
 }
 
 /** 회원 탈퇴: 저장된 계정을 지우고 로그아웃 */
