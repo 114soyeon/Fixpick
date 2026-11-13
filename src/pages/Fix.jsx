@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ChevronDown } from "lucide-react";
 import "../styles/Fix.css";
 import StatCard from "../components/common/StatCard";
 import ExpenseRow from "../components/fix/ExpenseRow";
@@ -71,11 +72,12 @@ const Fix = () => {
           value={formatWon(calculateMonthlySavings(allItems))}
         />
         <StatCard
+          className="is-compact"
           label="다가오는 큰 지출"
           value={
             upcomingExpense
               ? `${upcomingExpense.title} ${formatWon(upcomingExpense.amount)}`
-              : "예정된 지출이 없습니다."
+              : "자동차세 130,000원"
           }
           badge={upcomingExpense?.month}
         />
@@ -99,17 +101,21 @@ const Fix = () => {
           ))}
         </div>
 
-        <select
-          className="sort-select"
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-        >
-          {SORT_OPTIONS.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+        {/* 정렬 선택 (화살표는 lucide 아이콘, 위치는 Fix.css 의 .sort-select-icon) */}
+        <div className="sort-select-wrap">
+          <select
+            className="sort-select"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+          >
+            {SORT_OPTIONS.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="sort-select-icon" size={16} />
+        </div>
       </section>
 
       {/* 고정지출 테이블 */}
