@@ -7,7 +7,7 @@
  *   month          매년: 결제 월 (1~12)
  *   custom_number  사용자화: 반복 간격 숫자 (1 이상의 정수)
  *   custom_text    사용자화: 반복 단위 ("day" | "week" | "month" | "year")
- *   start_date     사용자화: 반복을 세기 시작하는 날 ("YYYY-MM-DD", 등록한 날)
+ *   start_date     첫 결제일 ("YYYY-MM-DD", 등록할 때 고른 결제일로 계산). 사용자화는 이 날부터 반복을 세요
  *   expiry_date    만기일 ("YYYY-MM-DD", 없으면 null). 다음 결제일이 만기 뒤면 null
  *
  * 반환값: Date (계산할 수 없거나 만기가 지났으면 null)
@@ -67,8 +67,8 @@ export function getNextPaymentDate(data) {
         }[data.custom_text];
         if (!nth) return null;
 
-        // 시작일 다음 반복부터 세서, 오늘보다 뒤인 첫 날
-        let k = 1;
+        // 시작일(= 첫 결제일)부터 세서, 오늘보다 뒤인 첫 날
+        let k = 0;
         while (nth(k) <= today) k++;
         return nth(k);
       }
