@@ -2,9 +2,9 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cycleText, nextPayments } from "@/utils/common/payment";
 import { openAddItem } from "@/utils/common/addItemFlow";
-import { useMySub } from "@/queries/subs";
+import { useCategories, useMySub } from "@/queries/subs";
 import { fromDbRow } from "@/utils/common/dbItem";
-import { useCategoryColors, dashCatVars } from "@/hooks/useCategoryColors";
+import { useCategoryOf, dashCatVars } from "@/hooks/useCategoryOf";
 import { ddayText } from "@/utils/common/date";
 import { MONTH, TODAY, catClass, dashData, payByDay, toCard } from "@/utils/dashboard/dashboard";
 import { useCountUp } from "@/hooks/useCountUp";
@@ -12,7 +12,6 @@ import { loadBudget } from "@/utils/setting/budget";
 import { comma as won } from "@/utils/common/format";
 import { LINE_ICON as line, MAX_CARDS, MAX_LINES } from "@/constants/dashboard";
 import { WEEKDAYS } from "@/constants/addItem";
-import { Icon } from "@/components/dashboard/DashIcon";
 import { useAuthStore } from "@/store/authStore";
 import "@/styles/dashboard.css";
 
@@ -22,7 +21,7 @@ import "@/styles/dashboard.css";
 function TotalCard({ data }) {
   const { mode, cats, total, count } = data;
   const shown = useCountUp(total);
-  const colorOf = useCategoryColors(); // DB 색
+  const catOf = useCategoryOf(); // DB 카테고리 아이콘·색
   const filled = cats.filter((c) => c.amount > 0);
   return (
     <section className="gk-rise gk-dash-total">
@@ -57,12 +56,12 @@ function TotalCard({ data }) {
               <div role="img" aria-label={filled.map((c) => `${c.name} ${won(c.amount)}원`).join(", ")} className="gk-reveal gk-dash-stack">
                 {filled.map((c) => (
                   // 막대 길이는 금액 비율이라 CSS 변수(--grow)로만 넘겨요
-                  <span key={c.key} title={`${c.name} ${won(c.amount)}원 · ${Math.round((c.amount / total) * 100)}%`} className={`gk-dash-stack__part ${catClass(c.key)}`} style={{ "--grow": c.amount, ...dashCatVars(colorOf(c.key)) }} />
+                  <span key={c.key} title={`${c.name} ${won(c.amount)}원 · ${Math.round((c.amount / total) * 100)}%`} className={`gk-dash-stack__part ${catClass(c.key)}`} style={{ "--grow": c.amount, ...dashCatVars(catOf(c.key)) }} />
                 ))}
               </div>
               <div className="gk-fade gk-dash-legend">
                 {filled.map((c) => (
-                  <span key={c.key} className={`gk-dash-legend__item ${catClass(c.key)}`} style={dashCatVars(colorOf(c.key))}>
+                  <span key={c.key} className={`gk-dash-legend__item ${catClass(c.key)}`} style={dashCatVars(catOf(c.key))}>
                     <span className="gk-dash-legend__dot" />
                     {c.name}
                   </span>
@@ -81,12 +80,13 @@ function CategoryCard({ c, total, onOpen }) {
   const pct = total ? Math.round((c.amount / total) * 100) : 0;
   const shown = c.list.slice(0, MAX_LINES);
   const rest = c.list.length - shown.length;
-  const colorOf = useCategoryColors(); // DB 색
+  const catOf = useCategoryOf(); // DB 카테고리 아이콘·색
+  const { icon: CatIcon } = catOf(c.key); // DB 아이콘
   return (
-    <div className={`gk-rise gk-cat-card ${catClass(c.key)}`} style={dashCatVars(colorOf(c.key))} role="button" tabIndex={0} onClick={onOpen} onKeyDown={(e) => e.key === "Enter" && onOpen()}>
+    <div className={`gk-rise gk-cat-card ${catClass(c.key)}`} style={dashCatVars(catOf(c.key))} role="button" tabIndex={0} onClick={onOpen} onKeyDown={(e) => e.key === "Enter" && onOpen()}>
       <div className="gk-cat-card__head">
         <span className="gk-cat-card__icon">
-          <Icon name={c.icon} />
+          <CatIcon size={18} strokeWidth={2} aria-hidden="true" />
         </span>
         <b className="gk-cat-card__name">{c.name}</b>
         <span className="gk-cat-card__count">{c.count}건</span>
@@ -258,7 +258,7 @@ function BudgetCard({ data }) {
 // items: DB에서 읽은 내 고정지출 (페이지에서 받아요)
 function CalendarCard({ items }) {
   const navigate = useNavigate();
-  const colorOf = useCategoryColors(); // DB 색
+  const catOf = useCategoryOf(); // DB 카테고리 아이콘·색
   const [view, setView] = useState({ year: TODAY.year, month: TODAY.month });
   const [dir, setDir] = useState(null); // "next" | "prev" | null
 
@@ -352,7 +352,7 @@ function CalendarCard({ items }) {
           </div>
         )}
         {upcoming.map((u) => (
-          <a key={u.key ?? u.day} href="/calendar" onClick={(e) => { e.preventDefault(); navigate("/calendar", { state: { year: TODAY.year, month: u.month, day: u.payDay } }); }} className={`gk-rise gk-cal-up ${catClass(u.cat.key)}`} style={dashCatVars(colorOf(u.cat.key))}>
+          <a key={u.key ?? u.day} href="/calendar" onClick={(e) => { e.preventDefault(); navigate("/calendar", { state: { year: TODAY.year, month: u.month, day: u.payDay } }); }} className={`gk-rise gk-cal-up ${catClass(u.catKey)}`} style={dashCatVars(catOf(u.catKey))}>
             <span className="gk-cal-up__date">
               <span className="gk-cal-up__month">{u.month}월</span>
               <b className="gk-cal-up__day">{u.payDay}</b>
@@ -379,7 +379,8 @@ export default function Dashboard() {
   // DB 한 줄 → 계산용 항목 (rows가 바뀔 때만 다시 바꿔요)
   const items = useMemo(() => (rows ?? []).map(fromDbRow), [rows]);
 
-  const data = dashData(items);
+  const { data: categories } = useCategories(); // DB 카테고리 목록
+  const data = dashData(items, categories ?? []);
   return (
     <main className="gk-dash-main">
       <div className="gk-rise gk-dash-head">

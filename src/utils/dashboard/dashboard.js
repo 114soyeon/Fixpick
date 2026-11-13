@@ -1,4 +1,4 @@
-import { BIG, CATEGORIES } from "@/constants/dashboard";
+import { BIG } from "@/constants/dashboard";
 import { comma } from "@/utils/common/format";
 import { amountIn, cycleText, payDaysIn, paysIn } from "@/utils/common/payment";
 import { getToday } from "@/utils/common/date";
@@ -24,23 +24,24 @@ const monthlyRows = (values) => values.map((value, i) => ({
  * - 등록한 게 없음: 0원 (등록 전 화면)
  * - 등록함: 내가 등록한 항목으로 계산
  * items: DB에서 읽은 내 고정지출 (pages/Dashboard.jsx 가 useMySub 로 읽어서 넘겨줘요)
+ * categories: DB 카테고리 목록 (pages/Dashboard.jsx 가 useCategories 로 읽어서 넘겨줘요)
  */
-export function dashData(items) {
+export function dashData(items, categories = []) {
   const thisMonth = items.filter((it) => paysIn(it, TODAY.year, MONTH)); // 매년·몇 달마다 항목은 결제하는 달에만 들어가요
-  const cats = CATEGORIES.map((c) => {
+  const cats = categories.map((c) => {
     const mine = thisMonth.filter((it) => it.category === c.key);
     return {
-      ...c,
+      key: c.key,
+      name: c.name, // DB 카테고리 이름
       amount: mine.reduce((sum, it) => sum + amountIn(it, TODAY.year, MONTH), 0), // 매일·매주는 이번 달 횟수만큼
       count: mine.length,
-      desc: mine.length ? mine.map((it) => it.name).join("·") : c.desc,
       empty: mine.length === 0,
       list: [...mine].sort((a, b) => b.amount - a.amount), // 카드 안에 보여줄 항목 (금액 큰 순)
     };
   });
   const total = cats.reduce((sum, c) => sum + c.amount, 0);
   const count = cats.reduce((sum, c) => sum + c.count, 0);
-  const subNow = cats.find((c) => c.key === "sub").amount;
+  const subNow = cats.find((c) => c.key === "sub")?.amount ?? 0; // DB 카테고리를 불러오는 중이면 0
   return {
     mode: count ? "mine" : "empty",
     cats,
@@ -59,7 +60,7 @@ export const toCard = (p) => ({
   title: `${p.name} ${p.amountType === "variable" ? "약 " : ""}${comma(p.amount)}원`,
   sub: `${p.amountType === "variable" ? "예상 금액 · " : ""}${p.payMethod || "결제 수단 미등록"} · ${cycleText(p)}`,
   warn: p.amount >= BIG,
-  cat: CATEGORIES.find((c) => c.key === p.category) || CATEGORIES[CATEGORIES.length - 1], // 카드 색 = 카테고리 색
+  catKey: p.category, // 카드 색 = 카테고리 색 (DB categories.key)
 });
 
 /** 달력 칸마다 결제 이름 모으기 { 날짜: { name, first, count, warn } } */

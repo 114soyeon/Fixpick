@@ -11,18 +11,17 @@ import { useMemo, useState } from "react";
 import { useCalendarController } from "@fullcalendar/react";
 
 // 스타일 — 순서가 중요해요! FullCalendar CSS 먼저, 이 페이지 CSS(calendar.css)는 맨 뒤 (그래야 덮어써요)
+// FullCalendar 테마(monarch)는 쓰지 않아요 (빼면 클릭·달 이동이 더 빨라요). 모양은 calendar.css에서 직접 맞춰요
 import "@fullcalendar/react/skeleton.css"; // 항상 필요
-import "@fullcalendar/react/themes/monarch/theme.css";
-import "@fullcalendar/react/themes/monarch/palettes/purple.css";
 import "@/styles/calendar.css"; // 이 페이지 전용 스타일 (class는 모두 paycal- 로 시작)
 
-import { bigPayments, isEnded, payDaysIn, paymentsInMonth } from "@/utils/common/payment";
+import { bigPayments, paymentsInMonth } from "@/utils/common/payment";
 import { useItems } from "@/hooks/useItems";
 import { useMySub } from "@/queries/subs";
 import { fromDbRow } from "@/utils/common/dbItem";
-import { useCategoryColors } from "@/hooks/useCategoryColors";
-import { dateKey, getToday, isSameDay } from "@/utils/common/date";
-import { categoryStyle } from "@/constants/categories";
+import { useCategoryOf } from "@/hooks/useCategoryOf";
+import { getToday, isSameDay } from "@/utils/common/date";
+import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import PayCalendar from "@/components/calendar/PayCalendar";
 import SummaryCard from "@/components/calendar/SummaryCard";
 import DayCard from "@/components/calendar/DayCard";
@@ -53,7 +52,7 @@ const Calendar = () => {
   const { data: rows } = useMySub();
   // DB 한 줄 → 계산용 항목 (rows가 바뀔 때만 다시 바꿔요)
   const dbItems = useMemo(() => (rows ?? []).map(fromDbRow), [rows]);
-  const colorOf = useCategoryColors(); // 칩 아이콘 색 (DB categories)
+  const catOf = useCategoryOf(); // 칩 아이콘·색 (DB categories)
 
   // 오늘 (시간 0시 기준)
   const now = new Date();
@@ -63,32 +62,9 @@ const Calendar = () => {
   // ① 지금 보이는 달에 실제로 나가는 결제 (규칙 → 실제 날짜)
   const monthPayments = paymentsInMonth(items, viewYear, viewMonth);
 
-  // ② 달력에 그릴 일정 (FullCalendar 형식으로 바꾸기)
-  //    달력 첫 주·마지막 주에는 앞뒤 달 날짜도 보여서, 앞뒤 달 결제도 같이 넣어요
-  //    (그 칸은 CSS에서 흐리게 보여요. 화면 밖 날짜의 일정은 FullCalendar가 알아서 안 그려요)
-  //    DB 데이터(dbItems)로 그려요. 매주·매일 결제는 그 달에 여러 날이라 날짜마다 칩을 하나씩 만들어요
-  const events = [-1, 0, 1]
-    .flatMap((n) => {
-      const d = new Date(viewYear, viewMonth - 1 + n, 1);
-      const y = d.getFullYear();
-      const m = d.getMonth() + 1;
-      return dbItems.flatMap((it) =>
-        payDaysIn(it, y, m) // 그 달에 결제하는 날짜들 (예: [2, 9, 16, 23, 30])
-          .map((day) => ({ ...it, date: new Date(y, m - 1, day) }))
-          .filter((p) => !isEnded(p, p.date)) // 만기일 지난 날은 빼요
-      );
-    })
-    .map((p) => {
-      const style = categoryStyle(p.category);
-      const date = dateKey(p.date); // "2026-11-25"
-      return {
-        id: `${p.id}-${date}`, // 같은 항목이 여러 날에 나와서 날짜까지 붙여요
-        title: p.name,
-        date,
-        allDay: true,
-        extendedProps: { icon: style.icon, color: colorOf(p.category).color },
-      };
-    });
+  // ② 달력에 그릴 일정 (FullCalendar 형식, 앞뒤 달 포함) — hooks/useCalendarEvents.js
+  //    데이터·보이는 달이 바뀔 때만 다시 만들어요 (날짜 클릭 때는 그대로 → 빨라요)
+  const events = useCalendarEvents(dbItems, viewYear, viewMonth, catOf);
 
   // ③ 선택한 날짜의 결제 목록 (선택한 날짜가 속한 달 기준으로 계산)
   const dayPayments = paymentsInMonth(items, selectedDate.getFullYear(), selectedDate.getMonth() + 1)

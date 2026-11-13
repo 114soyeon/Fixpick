@@ -10,7 +10,6 @@ import {
   WEEKDAY_OPTIONS,
 } from "@/constants/addItem";
 import { firstPayKey } from "@/utils/common/payment";
-import { categoryKeyOf } from "@/utils/common/category";
 import { useAuthStore } from "@/store/authStore";
 import DatePicker from "@/components/add-item/DatePicker";
 import MiniSelect from "@/components/add-item/MiniSelect";
@@ -90,7 +89,7 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
     (!custom || (customNumberNum >= 1 && customNumberNum <= 99));
 
   const picked = categories?.find((c) => c.id === form.category);
-  const hint = picked ? NAME_HINTS[categoryKeyOf(picked.name)] : null;
+  const hint = picked ? NAME_HINTS[picked.key] : null; // DB 카테고리 key로 예시 찾기
 
   useEffect(() => {
     nameRef.current?.focus();
@@ -233,7 +232,7 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
               <button
                 key={c.id}
                 type="button"
-                className={`gk-chip is-${categoryKeyOf(c.name)}`}
+                className={`gk-chip is-${c.key}`}
                 style={{ "--chip-color": c.chart, "--chip-tint": c.bg }} // DB 색 (sidebar.css 의 칩 색을 덮어써요)
                 aria-pressed={form.category === c.id}
                 onClick={() => set("category", c.id)}

@@ -1,19 +1,9 @@
 /* 항목 추가 창에서 쓰는 데이터
  * 카테고리 색과 카드 배지 색은 styles/sidebar.css에 있어요. */
 
-export const ADD_CATEGORIES = [
-  { key: "home", name: "주거" },
-  { key: "phone", name: "통신" },
-  { key: "sub", name: "구독 서비스" },
-  { key: "rental", name: "가전" },
-  { key: "insure", name: "보험" },
-  { key: "saving", name: "금융/저축" },
-  { key: "transit", name: "교통" },
-  { key: "car", name: "자동차" },
-  { key: "etc", name: "기타" },
-];
+/* 카테고리 목록(이름·색·아이콘)은 DB categories 테이블에서 가져와요 (queries/subs.js useCategories) */
 
-/** 카테고리를 고르면 항목 이름 칸 안에 그 카테고리 예시가 보여요 */
+/** 카테고리를 고르면 항목 이름 칸 안에 그 카테고리 예시가 보여요 (key = DB categories.key) */
 export const NAME_HINTS = {
   home: "월세, 관리비, 전기요금",
   phone: "휴대폰 요금, 인터넷, IPTV",
