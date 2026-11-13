@@ -1,5 +1,6 @@
 import { removeItem } from "./items";
-import { getMonthly, toKoreanDate } from "./fixFormat";
+import { getMonthly } from "./fixFormat";
+import { prettyDate } from "./date";
 
 /*
  * 상세 페이지에서 바꾼 내용을 브라우저(localStorage)에 저장해요.
@@ -29,9 +30,9 @@ export const toEditedFields = (newInfo) => {
     amount,
     monthly: getMonthly(amount, newInfo.cycle),
     method: newInfo.method,
-    startDate: toKoreanDate(newInfo.startDate),
-    endDate: toKoreanDate(newInfo.endDate),
-    date: toKoreanDate(newInfo.nextDate),
+    startDate: prettyDate(newInfo.startDate),
+    endDate: prettyDate(newInfo.endDate),
+    date: prettyDate(newInfo.nextDate),
   };
 };
 

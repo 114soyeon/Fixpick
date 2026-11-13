@@ -34,13 +34,6 @@ export const dateToKorean = (date) => {
     : `${date.getFullYear()}년 ${md}`;
 };
 
-// "2027-03-04" → "2027년 3월 4일" (모달의 날짜를 화면용 글자로)
-export const toKoreanDate = (text) => {
-  if (!text) return "";
-  const [year, month, day] = text.split("-");
-  return `${year}년 ${Number(month)}월 ${Number(day)}일`;
-};
-
 // "2027년 3월 4일" → "2027-03-04" (모달의 날짜 칸용)
 export const toInputDate = (text) => {
   const date = toDate(text);

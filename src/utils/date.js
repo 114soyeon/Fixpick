@@ -10,7 +10,7 @@ export const todayKey = () => { const t = new Date(); return toKey(t.getFullYear
 /** 오늘부터 n년 뒤 (그 달에 없는 날이면 말일로) */
 export const addYears = (n) => { const t = new Date(); const y = t.getFullYear() + n, m = t.getMonth() + 1; return toKey(y, m, Math.min(t.getDate(), new Date(y, m, 0).getDate())); };
 
-/** "2026년 11월 9일" */
+/** "2026-11-09" → "2026년 11월 9일" (비어 있으면 "") */
 export const prettyDate = (key) => { if (!key) return ""; const [y, m, d] = key.split("-").map(Number); return `${y}년 ${m}월 ${d}일`; };
 
 /** Date → 키 "2026-11-25" */
