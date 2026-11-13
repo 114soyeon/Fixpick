@@ -6,12 +6,15 @@
  *   카드: StatCard(요약, components/common) / CategoryCard(카테고리 비율) / TrendCard(꺾은선) / ChangeCard(달라진 점)
  *   조각: DiffValue(증감 글자) / CatIcon(카테고리 아이콘) / ReportCharts(차트)
  * - 계산은 utils/report.js
+ * - 데이터: 리액트 쿼리 useMySub(queries/subs.js)로 DB의 내 고정지출을 읽어요
+ *   → utils/report.js fromDbRow 로 계산하기 좋은 모양으로 바꿔요 (로그인 안 했으면 빈 목록)
  * - class는 다른 페이지와 겹치지 않게 모두 "rpt-" 로 시작 (styles/report.css)
  */
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import "../styles/report.css";
 
-import { useItems } from "../utils/items";
+import { useMySub } from "../queries/subs";
+import { fromDbRow } from "../utils/report";
 import MonthlyReport from "../components/report/MonthlyReport";
 import YearlyReport from "../components/report/YearlyReport";
 
@@ -22,7 +25,10 @@ const VIEWS = [
 
 const Report = () => {
   const [view, setView] = useState("monthly"); // 처음엔 월간
-  const items = useItems();
+  // DB에서 내 고정지출 불러오기 (리액트 쿼리)
+  const { data: rows, isLoading } = useMySub();
+  // DB 한 줄 → 리포트 계산용 항목 (rows가 바뀔 때만 다시 바꿔요)
+  const items = useMemo(() => (rows ?? []).map(fromDbRow), [rows]);
 
   // 오늘 기준 (이번 달 / 올해)
   const now = new Date();
@@ -55,7 +61,7 @@ const Report = () => {
       </header>
 
       {view === "monthly" ? (
-        <MonthlyReport items={items} year={year} month={month} />
+        <MonthlyReport items={items} year={year} month={month} loading={isLoading} />
       ) : (
         <YearlyReport items={items} year={year} month={month} today={today} />
       )}
