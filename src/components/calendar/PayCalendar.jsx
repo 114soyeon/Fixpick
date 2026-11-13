@@ -17,12 +17,12 @@ import useChipsPerDay from "@/hooks/useChipsPerDay";
 
 const WEEK_DAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
-// 일정 칩 모양: [아이콘] 이름  (시안의 연한 파란 칩)
+// 일정 칩 모양: [아이콘] 이름  (배경은 카테고리 연한 색 bg, 없으면 CSS의 연한 파랑)
 const renderEvent = (arg) => {
-  const { icon: Icon, color } = arg.event.extendedProps;
+  const { icon: Icon, color, bg } = arg.event.extendedProps;
   return (
-    <div className="paycal-event-chip">
-      {Icon && <Icon className="paycal-event-icon" size={11} strokeWidth={2} color={color} />}
+    <div className="paycal-event-chip" style={{ background: bg }}>
+      {Icon && <Icon className="paycal-event-icon" size={14} strokeWidth={2.5} color={color} />}
       <span className="paycal-event-title">{arg.event.title}</span>
     </div>
   );

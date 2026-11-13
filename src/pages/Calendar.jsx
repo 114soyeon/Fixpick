@@ -80,13 +80,14 @@ const Calendar = () => {
     })
     .map((p) => {
       const style = categoryStyle(p.category);
+      const c = colorOf(p.category); // 이 카테고리 색 { chart, color, bg }
       const date = dateKey(p.date); // "2026-11-25"
       return {
         id: `${p.id}-${date}`, // 같은 항목이 여러 날에 나와서 날짜까지 붙여요
         title: p.name,
         date,
         allDay: true,
-        extendedProps: { icon: style.icon, color: colorOf(p.category).color },
+        extendedProps: { icon: style.icon, color: c.color, bg: c.bg },
       };
     });
 
