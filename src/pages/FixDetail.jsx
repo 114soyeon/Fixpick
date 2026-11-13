@@ -11,19 +11,16 @@ import { useFixItems } from "../utils/fixItems";
 import { DEFAULT_AMOUNT_TYPE } from "../utils/fixConstants";
 import { toInputDate } from "../utils/fixFormat";
 import { getAmountHistory, getPayMethods } from "../utils/fixCalculations";
-import {
-  deleteFixItem,
-  loadMemo,
-  saveEdit,
-  saveMemo,
-  toEditedFields,
-} from "../utils/fixStorage";
+import { deleteFixItem, loadMemo, saveEdit, saveMemo, toEditedFields } from "../utils/fixStorage";
+import { useUpdateSub, useDeleteSub } from "../queries/subs";
 
 const FixDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams(); // 주소 /fix/8 에서 8을 꺼내와요
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const updateSub = useUpdateSub();
+  const deleteSub = useDeleteSub();
 
   // 전체 목록(추가한 항목 + 수정본)에서 이 항목 찾기
   const allItems = useFixItems();
@@ -47,18 +44,36 @@ const FixDetail = () => {
 
   // 팝업에서 "저장"을 눌렀을 때
   const handleSave = (newInfo) => {
-    const fields = toEditedFields(newInfo);
-    saveEdit(id, fields);
-    setItem({ ...item, ...fields });
-    setIsModalOpen(false);
+  const amount = Number(newInfo.amount) || 0;
+  const patch = {
+    amount,
+    amount_type: newInfo.amountType === "변동" ? "변동" : "고정",
+    cycle: newInfo.cycle === "매월" ? "매달" : newInfo.cycle, // DB 표기는 "매달"
+    pay_method: newInfo.method || null,
+    start_date: newInfo.startDate || null,   // "YYYY-MM-DD"
+    expiry_date: newInfo.endDate || null,    // "YYYY-MM-DD"
   };
 
-  // "삭제"를 눌렀을 때
+  updateSub.mutate(
+    { id: Number(id), data: patch },          // mutationFn이 ({id, data}) 형태
+    {
+      onSuccess: () => {
+        setItem({ ...item, ...toEditedFields(newInfo) }); // 화면도 바로 갱신
+        setIsModalOpen(false);
+      },
+      onError: () => window.alert("저장하지 못했어요. 다시 시도해 주세요"),
+    },
+  );
+};
+
+  // 세부 페이지에서 "삭제"를 눌렀을 때
   const handleDelete = () => {
-    if (!window.confirm(`'${item.name}' 항목을 삭제할까요?`)) return;
-    deleteFixItem(Number(id));
-    navigate("/fix");
-  };
+  if (!window.confirm(`'${item.name}' 항목을 삭제할까요?`)) return;
+  deleteSub.mutate(Number(id), {
+    onSuccess: () => navigate("/fix"),
+    onError: () => window.alert("삭제하지 못했어요. 다시 시도해 주세요"),
+  });
+};
 
   // 메모 칸에 글자를 칠 때마다
   const handleMemoChange = (e) => {

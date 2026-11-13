@@ -1,7 +1,6 @@
 import { nextPayments } from "./items";
 import { CATEGORY_NAMES } from "./fixConstants";
 import { dateToKorean, getMonthly, getToday, keyToDate } from "./fixFormat";
-import { loadEdits } from "./fixStorage";
 import { categoryKeyOf } from "./category";
 import { useMySub } from "../queries/subs";
 
@@ -24,6 +23,7 @@ const fromDb = (row) => {
     unit: row.custom_text,       // 사용자화 단위 ("day" | "week" | "month" | "year")
     start: row.start_date,   // "YYYY-MM-DD"
     endDate: row.expiry_date,
+    memo: row.memo ?? "",
     payMethod: row.pay_method,
     remind: row.remind,
   };
@@ -54,15 +54,13 @@ function toFixItem(item) {
     method: item.payMethod || "",
     startDate: dateToKorean(keyToDate(item.start) || new Date(item.id)),
     endDate: dateToKorean(keyToDate(item.endDate)),
+    memo: item.memo ?? "",
   };
 }
 
-/** 목록·상세에서 보여줄 전체 고정지출 (추가·수정·삭제가 모두 반영돼요) */
+/* 목록·상세에서 보여줄 전체 고정지출 */
 export function useFixItems() {
-  const added = useRawFixItems(); // DB 에서 내 고정지출을 읽어요
-  const edits = loadEdits();
+  const added = useRawFixItems();
 
-  return added
-    .map(toFixItem)
-    .map((item) => ({ ...item, ...edits[item.id] })); // 수정본이 있으면 덮어쓰기
+  return added.map(toFixItem);
 }
