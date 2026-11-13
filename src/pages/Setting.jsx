@@ -5,17 +5,18 @@
  * - class는 다른 페이지와 겹치지 않게 모두 "set-" 로 시작 (styles/setting.css)
  */
 import { useState } from "react";
-import "../styles/setting.css";
+import "@/styles/setting.css";
 
-import { useUser } from "../utils/auth";
-import { useItems } from "../utils/items";
-import { addMethod, useSetting } from "../utils/setting";
-import ProfileCard from "../components/setting/ProfileCard";
-import AlertCard from "../components/setting/AlertCard";
-import BudgetCard from "../components/setting/BudgetCard";
-import PayMethodCard from "../components/setting/PayMethodCard";
-import AccountCard from "../components/setting/AccountCard";
-import PayModal from "../components/setting/PayModal";
+import { useUser } from "@/hooks/useUser";
+import { useItems } from "@/hooks/useItems";
+import { addMethod } from "@/utils/setting/setting";
+import { useSetting } from "@/hooks/useSetting";
+import ProfileCard from "@/components/setting/ProfileCard";
+import AlertCard from "@/components/setting/AlertCard";
+import BudgetCard from "@/components/setting/BudgetCard";
+import PayMethodCard from "@/components/setting/PayMethodCard";
+import AccountCard from "@/components/setting/AccountCard";
+import PayModal from "@/components/setting/PayModal";
 
 const Setting = () => {
   const user = useUser(); // 로그인 안 했으면 null

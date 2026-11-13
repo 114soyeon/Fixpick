@@ -1,5 +1,5 @@
 import { useId } from "react";
-import "../../styles/common.css";
+import "@/styles/common.css";
 
 /** 캘린더 + 메모지 + 압정 로고 그림 */
 export function LogoMark({ size = 36 }) {

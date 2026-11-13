@@ -8,14 +8,13 @@ import {
   NAME_HINTS,
   UNIT_OPTIONS,
   WEEKDAY_OPTIONS,
-} from "../../constants/addItem";
-import { firstPayKey } from "../../utils/items";
-import { categoryKeyOf } from "../../utils/category";
-import { useAuthStore } from "../../store/authStore";
-import DatePicker from "./DatePicker";
-import MiniSelect from "./MiniSelect";
-import PayPicker from "./PayPicker";
-import { useCategories, useAddSub } from "../../queries/subs";
+} from "@/constants/addItem";
+import { firstPayKey } from "@/utils/common/payment";
+import { useAuthStore } from "@/store/authStore";
+import DatePicker from "@/components/add-item/DatePicker";
+import MiniSelect from "@/components/add-item/MiniSelect";
+import PayPicker from "@/components/add-item/PayPicker";
+import { useCategories, useAddSub } from "@/queries/subs";
 
 /** 고정지출 항목 추가 창 (DB에 저장해요) */
 export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
@@ -90,7 +89,7 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
     (!custom || (customNumberNum >= 1 && customNumberNum <= 99));
 
   const picked = categories?.find((c) => c.id === form.category);
-  const hint = picked ? NAME_HINTS[categoryKeyOf(picked.name)] : null;
+  const hint = picked ? NAME_HINTS[picked.key] : null; // DB 카테고리 key로 예시 찾기
 
   useEffect(() => {
     nameRef.current?.focus();
@@ -233,7 +232,7 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
               <button
                 key={c.id}
                 type="button"
-                className={`gk-chip is-${categoryKeyOf(c.name)}`}
+                className={`gk-chip is-${c.key}`}
                 style={{ "--chip-color": c.chart, "--chip-tint": c.bg }} // DB 색 (sidebar.css 의 칩 색을 덮어써요)
                 aria-pressed={form.category === c.id}
                 onClick={() => set("category", c.id)}

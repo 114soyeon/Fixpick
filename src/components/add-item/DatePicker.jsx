@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { QUICK_END_DATES, WEEKDAYS } from "../../constants/addItem";
-import { addYears, leftText, prettyDate, toKey, todayKey } from "../../utils/date";
+import { QUICK_END_DATES, WEEKDAYS } from "@/constants/addItem";
+import { addYears, leftText, prettyDate, toKey, todayKey } from "@/utils/common/date";
 
 /** 만기일 고르기 (작은 달력) */
 export default function DatePicker({ value, onChange }) {

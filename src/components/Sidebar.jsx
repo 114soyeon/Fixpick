@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { initialOf } from "../utils/auth";
-import { setLoginReason, useItems } from "../utils/items";
-import { buildNotifications, loadRead, saveRead } from "../utils/notifications";
-import { useAuthStore } from "../store/authStore";
-import { MENU_ITEMS } from "../constants/sidebar";
-import { LogoMark, Wordmark } from "./common/Logo";
-import { Icons } from "./sidebar/icons";
-import NotificationPanel from "./sidebar/NotificationPanel";
-import SidebarToast from "./sidebar/SidebarToast";
-import AddItemModal from "./add-item/AddItemModal";
+import { initialOf } from "@/utils/auth/auth";
+import { setLoginReason } from "@/utils/common/addItemFlow";
+import { useItems } from "@/hooks/useItems";
+import { buildNotifications, loadRead, saveRead } from "@/utils/sidebar/notifications";
+import { useAuthStore } from "@/store/authStore";
+import { MENU_ITEMS } from "@/constants/sidebar";
+import { LogoMark, Wordmark } from "@/components/common/Logo";
+import { Icons } from "@/components/sidebar/icons";
+import NotificationPanel from "@/components/sidebar/NotificationPanel";
+import SidebarToast from "@/components/sidebar/SidebarToast";
+import AddItemModal from "@/components/add-item/AddItemModal";
 import { UserRound, ChevronRight } from "lucide-react";
-import "../styles/sidebar.css";
+import "@/styles/sidebar.css";
 
 export default function Sidebar({
   active = "home",

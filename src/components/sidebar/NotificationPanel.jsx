@@ -1,4 +1,4 @@
-import { Icons } from "./icons";
+import { Icons } from "@/components/sidebar/icons";
 
 /* 알림 종류별 아이콘 모양 (색은 sidebar.css의 .gk-noti__row.is-<종류>) */
 const NOTI_ICONS = {

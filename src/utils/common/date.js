@@ -1,0 +1,86 @@
+/* 날짜 키("2026-11-09") 만들기·보여주기 */
+
+/** 오늘 → { year, month(1~12), day } (utils/items.js 함수들이 받는 모양). 부를 때마다 새로 계산해요 */
+export const getToday = () => {
+  const t = new Date();
+  return { year: t.getFullYear(), month: t.getMonth() + 1, day: t.getDate() };
+};
+
+export const pad2 = (n) => String(n).padStart(2, "0");
+
+/** m: 1~12 */
+export const toKey = (y, m, d) => `${y}-${pad2(m)}-${pad2(d)}`;
+
+export const todayKey = () => { const t = new Date(); return toKey(t.getFullYear(), t.getMonth() + 1, t.getDate()); };
+
+/** 오늘부터 n년 뒤 (그 달에 없는 날이면 말일로) */
+export const addYears = (n) => { const t = new Date(); const y = t.getFullYear() + n, m = t.getMonth() + 1; return toKey(y, m, Math.min(t.getDate(), new Date(y, m, 0).getDate())); };
+
+/** "2026-11-09" → "2026년 11월 9일" (비어 있으면 "") */
+export const prettyDate = (key) => { if (!key) return ""; const [y, m, d] = key.split("-").map(Number); return `${y}년 ${m}월 ${d}일`; };
+
+/** Date → 키 "2026-11-25" */
+export const dateKey = (date) => toKey(date.getFullYear(), date.getMonth() + 1, date.getDate());
+
+/** 두 Date가 같은 날인지 (시간은 무시) */
+export const isSameDay = (a, b) =>
+  a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+/** 오늘부터 그 날짜까지 며칠 남았는지 (시간은 무시, 지났으면 음수, 날짜가 없으면 null) */
+export const daysUntil = (date) => {
+  if (!date) return null;
+  const t = new Date();
+  const today = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  return Math.round((target - today) / 86400000);
+};
+
+/** 남은 날 수 → D-day 글자 (모든 페이지 공통)
+ *  3 → "D-3" / 0 → "D-DAY" / 지났으면 "결제 완료" / 없으면 "" */
+export const ddayText = (days) => {
+  if (days == null) return "";
+  if (days > 0) return `D-${days}`;
+  return days === 0 ? "D-DAY" : "결제 완료";
+};
+
+/** 만기까지 남은 기간 ("3개월 남음", "1년 2개월 남음") */
+export const leftText = (key) => {
+  if (!key) return "";
+  const [y, m, d] = key.split("-").map(Number);
+  const t = new Date(); const days = Math.round((new Date(y, m - 1, d) - new Date(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000);
+  if (days <= 0) return "오늘 만기";
+  if (days < 31) return `${days}일 남음`;
+  const months = (y - t.getFullYear()) * 12 + (m - 1 - t.getMonth()) - (d < t.getDate() ? 1 : 0);
+  return months >= 12 ? `${Math.floor(months / 12)}년${months % 12 ? ` ${months % 12}개월` : ""} 남음` : `${months}개월 남음`;
+};
+
+/* ── 아래는 utils/fixFormat.js 에서 옮겨 왔어요 (내 고정지출·상세에서 사용) ── */
+
+/** "11월 5일" 또는 "2027년 3월 4일" → Date (못 읽으면 null) */
+export const toDate = (text) => {
+  if (!text) return null;
+  const match = text.match(/(?:(\d{4})년 )?(\d{1,2})월 (\d{1,2})일/);
+  if (!match) return null;
+  const year = Number(match[1] || new Date().getFullYear());
+  return new Date(year, Number(match[2]) - 1, Number(match[3]));
+};
+
+/** "2027-03-04" → Date (비어 있으면 null) */
+export const keyToDate = (key) => {
+  if (!key) return null;
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
+/** Date → "11월 5일" (올해) / "2027년 3월 4일" (다른 해) */
+export const dateToKorean = (date) => {
+  if (!date) return "";
+  const md = `${date.getMonth() + 1}월 ${date.getDate()}일`;
+  return date.getFullYear() === new Date().getFullYear() ? md : `${date.getFullYear()}년 ${md}`;
+};
+
+/** "2027년 3월 4일" → "2027-03-04" (수정 팝업의 날짜 칸용) */
+export const toInputDate = (text) => {
+  const date = toDate(text);
+  return date ? dateKey(date) : "";
+};

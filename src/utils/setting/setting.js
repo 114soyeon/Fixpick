@@ -1,5 +1,4 @@
-import { useSyncExternalStore } from "react";
-import { getUser } from "./auth";
+import { getUser } from "@/utils/auth/auth";
 
 /*
  * 설정(알림·예산·결제 수단)을 사람마다 브라우저에 저장해요.
@@ -20,7 +19,8 @@ const keyOf = () => `gk-setting:${(getUser()?.email || "guest").toLowerCase()}`;
 
 let cache = { key: null, value: DEFAULT };
 
-function readSetting() {
+/** 지금 사람의 설정 (같은 객체를 다시 돌려줘서 화면이 쓸데없이 다시 그려지지 않아요) */
+export function readSetting() {
   const key = keyOf();
   if (cache.key !== key) {
     let saved = null;
@@ -44,17 +44,12 @@ export function addMethod(method) {
   saveSetting({ methods: [...methods, { id: Date.now(), ...method }] });
 }
 
-/** 컴포넌트에서 설정을 쓰는 훅 */
-export function useSetting() {
-  return useSyncExternalStore(
-    (cb) => {
-      window.addEventListener(EVENT, cb);
-      window.addEventListener("gk-auth-change", cb); // 로그인·로그아웃하면 그 사람 설정으로
-      return () => {
-        window.removeEventListener(EVENT, cb);
-        window.removeEventListener("gk-auth-change", cb);
-      };
-    },
-    readSetting
-  );
+/** 설정이 바뀌거나 로그인·로그아웃할 때마다 cb 를 불러요 (hooks/useSetting.js 가 써요) */
+export function subscribeSetting(cb) {
+  window.addEventListener(EVENT, cb);
+  window.addEventListener("gk-auth-change", cb); // 로그인·로그아웃하면 그 사람 설정으로
+  return () => {
+    window.removeEventListener(EVENT, cb);
+    window.removeEventListener("gk-auth-change", cb);
+  };
 }

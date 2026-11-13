@@ -17,8 +17,8 @@
 
 -- ############################################################################
 -- 1. categories 시드 — 항목 추가 창의 9개 카테고리
---    이름은 src/constants/addItem.js 의 ADD_CATEGORIES 와 같아야 해요
---    (프론트는 이름으로 key 를 찾으므로 순서는 상관없어요)
+--    프론트는 key 로 카테고리를 찾고, 이름·색·아이콘은 이 테이블 값을 그대로 써요 (hooks/useCategoryOf.js)
+--    icon 은 Lucide 아이콘 이름 (src/constants/categories.js 의 표에 있어야 그려져요)
 -- ############################################################################
 insert into public.categories (name, example, icon, color)
 select v.name, v.example, v.icon, v.color

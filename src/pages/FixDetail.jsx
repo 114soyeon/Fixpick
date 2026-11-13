@@ -1,40 +1,53 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "../styles/FixDetail.css";
-import PaymentEditModal from "../components/paymentEditModal/PaymentEditModal.jsx";
-import AlertSettings from "../components/fix-detail/AlertSettings.jsx";
-import AmountChart from "../components/fix-detail/AmountChart.jsx";
-import PaymentInfoCard from "../components/fix-detail/PaymentInfoCard.jsx";
-import HeroCard from "../components/fix-detail/HeroCard.jsx";
-import MemoCard from "../components/fix-detail/MemoCard.jsx";
-import { useFixItems } from "../utils/fixItems";
-import { DEFAULT_AMOUNT_TYPE } from "../utils/fixConstants";
-import { toInputDate } from "../utils/fixFormat";
-import { getAmountHistory, getPayMethods } from "../utils/fixCalculations";
-import {
-  deleteFixItem,
-  loadMemo,
-  saveEdit,
-  saveMemo,
-  toEditedFields,
-} from "../utils/fixStorage";
+import "@/styles/FixDetail.css";
+import PaymentEditModal from "@/components/paymentEditModal/PaymentEditModal.jsx";
+import AlertSettings from "@/components/fix-detail/AlertSettings.jsx";
+import AmountChart from "@/components/fix-detail/AmountChart.jsx";
+import PaymentInfoCard from "@/components/fix-detail/PaymentInfoCard.jsx";
+import HeroCard from "@/components/fix-detail/HeroCard.jsx";
+import MemoCard from "@/components/fix-detail/MemoCard.jsx";
+import EndDateCard from "@/components/fix-detail/EndDateCard.jsx";
+import { DEFAULT_AMOUNT_TYPE } from "@/constants/fix";
+import { toInputDate } from "@/utils/common/date";
+import { getAmountHistory, getPayMethods } from "@/utils/fix/fixCalculations";
+import { useFixItems } from "@/hooks/useFixItems";
+import { useMySub, useUpdateSub, useDeleteSub } from "@/queries/subs";
 
 const FixDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams(); // 주소 /fix/8 에서 8을 꺼내와요
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const updateSub = useUpdateSub(); // DB 수정
+  const deleteSub = useDeleteSub(); // DB 삭제
 
-  // 전체 목록(추가한 항목 + 수정본)에서 이 항목 찾기
+  // DB 목록에서 이 항목 찾기
+  // DB 데이터는 조금 늦게 와서, 화면을 그릴 때마다 다시 찾아요
+  // (저장·삭제하면 목록을 다시 불러와서 화면도 저절로 바뀌어요)
   const allItems = useFixItems();
-  const mergedItem = allItems.find((e) => e.id === Number(id));
+  const { isLoading } = useMySub(); // 아직 불러오는 중인지
+  const found = allItems.find((e) => e.id === Number(id));
 
-  const [item, setItem] = useState(() =>
-    mergedItem ? { ...mergedItem, memo: loadMemo(id) ?? "" } : null,
-  );
+  // 메모: 기본값은 DB(found.memo), 입력 중에는 draft 사용
+  const [memoDraft, setMemoDraft] = useState(null);
+  const [prevId, setPrevId] = useState(id);
+  if (prevId !== id) { // 다른 항목으로 이동하면 원래 값으로
+    setPrevId(id);
+    setMemoDraft(null);
+  }
 
-  // 없는 번호로 들어왔을 때
-  if (!item) {
+  // 불러오는 중
+  if (isLoading) {
+    return (
+      <div className="detail-page">
+        <p>불러오는 중이에요.</p>
+      </div>
+    );
+  }
+
+  // 없는 번호로 들어왔을 때 (또는 로그인 안 했을 때)
+  if (!found) {
     return (
       <div className="detail-page">
         <p>항목을 찾을 수 없어요.</p>
@@ -45,26 +58,47 @@ const FixDetail = () => {
     );
   }
 
-  // 팝업에서 "저장"을 눌렀을 때
+  // 화면에 보여줄 항목 = DB 항목 + 메모
+  const item = { ...found, memo: memoDraft ?? found.memo ?? "" };
+
+  // 팝업에서 "저장"을 눌렀을 때 → DB에 저장
   const handleSave = (newInfo) => {
-    const fields = toEditedFields(newInfo);
-    saveEdit(id, fields);
-    setItem({ ...item, ...fields });
-    setIsModalOpen(false);
+    const patch = {
+      amount: Number(newInfo.amount) || 0,
+      amount_type: newInfo.amountType === "변동" ? "변동" : "고정",
+      cycle: newInfo.cycle === "매월" ? "매달" : newInfo.cycle, // DB 표기는 "매달"
+      pay_method: newInfo.method || null,
+      start_date: newInfo.startDate || null, // "YYYY-MM-DD"
+      expiry_date: newInfo.endDate || null, // "YYYY-MM-DD"
+    };
+
+    updateSub.mutate(
+      { id: Number(id), data: patch }, // mutationFn이 ({id, data}) 형태
+      {
+        onSuccess: () => setIsModalOpen(false),
+        onError: () => window.alert("저장하지 못했어요. 다시 시도해 주세요"),
+      },
+    );
   };
 
-  // "삭제"를 눌렀을 때
+  // "삭제"를 눌렀을 때 → DB에서 삭제
   const handleDelete = () => {
     if (!window.confirm(`'${item.name}' 항목을 삭제할까요?`)) return;
-    deleteFixItem(Number(id));
-    navigate("/fix");
+    deleteSub.mutate(Number(id), {
+      onSuccess: () => navigate("/fix"),
+      onError: () => window.alert("삭제하지 못했어요. 다시 시도해 주세요"),
+    });
   };
 
   // 메모 칸에 글자를 칠 때마다
-  const handleMemoChange = (e) => {
-    const newMemo = e.target.value;
-    setItem({ ...item, memo: newMemo });
-    saveMemo(id, newMemo);
+  const handleMemoChange = (e) => setMemoDraft(e.target.value);
+
+  const handleMemoBlur = () => {
+    if (memoDraft == null || memoDraft === (found.memo ?? "")) return; // 안 바뀌었으면 스킵
+    updateSub.mutate(
+      { id: Number(id), data: { memo: memoDraft } },
+      { onError: () => window.alert("메모를 저장하지 못했어요. 다시 시도해 주세요") },
+    );
   };
 
   return (
@@ -91,14 +125,25 @@ const FixDetail = () => {
 
           <PaymentInfoCard item={item} onEdit={() => setIsModalOpen(true)} />
 
-          <MemoCard memo={item.memo} onChange={handleMemoChange} />
+          <MemoCard memo={item.memo} onChange={handleMemoChange} onBlur={handleMemoBlur} />
         </div>
 
         {/* 오른쪽 */}
         <div className="detail-right">
           <AmountChart history={getAmountHistory(item)} />
 
-          <AlertSettings />
+          <AlertSettings
+            payDays={item.payAlertDays}
+            endDays={item.endAlertDays}
+            onChange={(patch) =>
+              updateSub.mutate(
+                { id: Number(id), data: patch },
+                { onError: () => window.alert("알림 설정을 저장하지 못했어요. 다시 시도해 주세요") },
+              )
+            }
+          />
+
+          <EndDateCard startDate={item.startDate} endDate={item.endDate} />
         </div>
       </div>
 

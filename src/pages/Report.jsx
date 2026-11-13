@@ -5,18 +5,18 @@
  *   MonthlyReport(월간) / YearlyReport(연간)
  *   카드: StatCard(요약, components/common) / CategoryCard(카테고리 비율) / TrendCard(꺾은선) / ChangeCard(달라진 점)
  *   조각: DiffValue(증감 글자) / CatIcon(카테고리 아이콘) / ReportCharts(차트)
- * - 계산은 utils/report.js
+ * - 계산은 utils/report/report.js
  * - 데이터: 리액트 쿼리 useMySub(queries/subs.js)로 DB의 내 고정지출을 읽어요
- *   → utils/report.js fromDbRow 로 계산하기 좋은 모양으로 바꿔요 (로그인 안 했으면 빈 목록)
+ *   → utils/dbItem.js fromDbRow 로 계산하기 좋은 모양으로 바꿔요 (로그인 안 했으면 빈 목록)
  * - class는 다른 페이지와 겹치지 않게 모두 "rpt-" 로 시작 (styles/report.css)
  */
 import { useMemo, useState } from "react";
-import "../styles/report.css";
+import "@/styles/report.css";
 
-import { useMySub } from "../queries/subs";
-import { fromDbRow } from "../utils/report";
-import MonthlyReport from "../components/report/MonthlyReport";
-import YearlyReport from "../components/report/YearlyReport";
+import { useMySub } from "@/queries/subs";
+import { fromDbRow } from "@/utils/common/dbItem";
+import MonthlyReport from "@/components/report/MonthlyReport";
+import YearlyReport from "@/components/report/YearlyReport";
 
 const VIEWS = [
   { key: "monthly", label: "월간" },

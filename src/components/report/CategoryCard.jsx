@@ -1,17 +1,16 @@
 /*
  * 지출 리포트: 카테고리 비율 카드 (왼쪽 도넛 + 오른쪽 목록) — 월간·연간 같이 써요
- * - cats: 카테고리별 합계, 큰 순서 [{ key, value }] (utils/report.js byCategory)
+ * - cats: 카테고리별 합계, 큰 순서 [{ key, value }] (utils/report/report.js byCategory)
  * - total: 전체 합계 (비율 계산용)
  */
-import { percent, won } from "../../utils/format";
-import { categoryStyle } from "../../constants/categories";
-import { useCategoryColors } from "../../hooks/useCategoryColors";
-import { CategoryDonut } from "./ReportCharts";
-import CatIcon from "./CatIcon";
+import { percent, won } from "@/utils/common/format";
+import { useCategoryOf } from "@/hooks/useCategoryOf";
+import { CategoryDonut } from "@/components/report/ReportCharts";
+import CatIcon from "@/components/report/CatIcon";
 
 const CategoryCard = ({ title, cats, total }) => {
   const top = cats[0];
-  const colorOf = useCategoryColors(); // DB 색
+  const catOf = useCategoryOf(); // DB 이름·색
   return (
     <section className="rpt-card rpt-chart-card">
       <div className="rpt-card-head">
@@ -29,16 +28,16 @@ const CategoryCard = ({ title, cats, total }) => {
             <CategoryDonut cats={cats} />
             {/* 가운데 글자 (예: 주거 48.5%) — 차트 위에 겹쳐서 보여줘요 */}
             <div className="rpt-donut-center">
-              <span className="rpt-donut-label">{categoryStyle(top.key).name}</span>
+              <span className="rpt-donut-label">{catOf(top.key).name}</span>
               <strong className="rpt-donut-value">{percent(top.value, total)}</strong>
             </div>
           </div>
           <ul className="rpt-legend">
             {cats.map((c) => (
               <li key={c.key} className="rpt-legend-row">
-                <span className="rpt-legend-dot" style={{ background: colorOf(c.key).chart }} />
+                <span className="rpt-legend-dot" style={{ background: catOf(c.key).chart }} />
                 <CatIcon category={c.key} size={24} />
-                <span className="rpt-legend-name">{categoryStyle(c.key).name}</span>
+                <span className="rpt-legend-name">{catOf(c.key).name}</span>
                 <strong className="rpt-legend-pct">{percent(c.value, total)}</strong>
                 <span className="rpt-legend-amount">{won(c.value)}</span>
               </li>

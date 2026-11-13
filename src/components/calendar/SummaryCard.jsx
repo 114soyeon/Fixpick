@@ -3,7 +3,7 @@
  * - payments: 그 달에 나가는 결제 전체
  * - todayStart: 오늘 0시. 결제일이 이보다 앞이면 "결제된" 것으로 봐요 (오늘은 아직 남은 결제)
  */
-import { won } from "../../utils/format";
+import { won } from "@/utils/common/format";
 
 // 목록 금액 합계
 const sumAmount = (list) => list.reduce((sum, item) => sum + item.amount, 0);

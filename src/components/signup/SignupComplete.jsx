@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { NEXT_STEPS } from "../../constants/signup";
+import { NEXT_STEPS } from "@/constants/signup";
 
 /** 가입 완료 화면 */
 export default function SignupComplete({ name, onHome, onAdd }) {

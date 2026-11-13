@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/Fix.css";
-import StatCard from "../components/common/StatCard";
-import ExpenseRow from "../components/fix/ExpenseRow";
-import { useFixItems, useRawFixItems } from "../utils/fixItems";
-import { calculateFixedExpense, calculateMonthlySavings, getUpcomingExpense } from "../utils/fixCalculations";
-import { useMySub } from "../queries/subs";
-import { ALL_CATEGORY, CATEGORY_NAMES, DEFAULT_SORT, FIX_CATEGORIES, SORT_OPTIONS } from "../utils/fixConstants";
-import { categoryKeyOf } from "../utils/category";
-import { getNextPaymentDate } from "../utils/cycle";
-import { formatWon } from "../utils/fixFormat";
+import { ChevronDown } from "lucide-react";
+import "@/styles/Fix.css";
+import StatCard from "@/components/common/StatCard";
+import ExpenseRow from "@/components/fix/ExpenseRow";
+import { useFixItems, useRawFixItems } from "@/hooks/useFixItems";
+import { calculateFixedExpense, calculateMonthlySavings, getUpcomingExpense } from "@/utils/fix/fixCalculations";
+import { useCategories, useMySub } from "@/queries/subs";
+import { ALL_CATEGORY, DEFAULT_SORT, SORT_OPTIONS } from "@/constants/fix";
+import { nextPayDate } from "@/utils/common/payment";
+import { fromDbRow } from "@/utils/common/dbItem";
+import { won } from "@/utils/common/format";
 
 const Fix = () => {
   const navigate = useNavigate();
@@ -21,20 +22,25 @@ const Fix = () => {
   const allItems = useFixItems();
 
   const { data: subs } = useMySub();
+  // 카테고리 필터 버튼: "전체" + DB 카테고리 이름들
+  const { data: categories } = useCategories();
+  const filterNames = [ALL_CATEGORY, ...(categories ?? []).map((c) => c.name)];
   const rawItems = useRawFixItems();
 
   // 다음 결제일을 숫자로 (계산 안 되면 0 → 목록 맨 뒤로)
-  const nextValue = (row) => getNextPaymentDate(row)?.getTime() ?? 0;
+  const nextValue = (row) => nextPayDate(fromDbRow(row))?.getTime() ?? 0; // 다음 결제일 (정렬용)
+  // 등록 시각을 숫자로 (거의 동시에 등록한 건 id로 순서 고정)
+  const createdValue = (row) => Date.parse(row.created_at) || 0;
 
   // 카테고리 필터 + 정렬
   const visibleRows = (subs ?? [])
     .filter((row) => {
       if (selectedCategory === ALL_CATEGORY) return true;
-      const key = row.categories?.key ?? categoryKeyOf(row.categories?.name);
-      return CATEGORY_NAMES[key] === selectedCategory;
+      return row.categories?.name === selectedCategory; // DB 카테고리 이름으로 비교
     })
     .sort((a, b) => {
       switch (sortOrder) {
+        case "created": return createdValue(b) - createdValue(a) || b.id - a.id; // 최신 등록순
         case "high":   return Number(b.amount) - Number(a.amount); // 금액 높은순
         case "low":    return Number(a.amount) - Number(b.amount); // 금액 낮은순
         case "latest": return nextValue(b) - nextValue(a);         // 최신순
@@ -61,17 +67,18 @@ const Fix = () => {
         <StatCard
           highlight
           label="한 달 고정지출 (월 환산)"
-          value={formatWon(calculateFixedExpense(allItems))}
+          value={won(calculateFixedExpense(allItems))}
         />
         <StatCard
           label="자동으로 빠지는 저축 (별도)"
-          value={formatWon(calculateMonthlySavings(allItems))}
+          value={won(calculateMonthlySavings(allItems))}
         />
         <StatCard
+          className="is-compact"
           label="다가오는 큰 지출"
           value={
             upcomingExpense
-              ? `${upcomingExpense.title} ${formatWon(upcomingExpense.amount)}`
+              ? `${upcomingExpense.title} ${won(upcomingExpense.amount)}`
               : "예정된 지출이 없습니다."
           }
           badge={upcomingExpense?.month}
@@ -81,7 +88,7 @@ const Fix = () => {
       {/* 카테고리 및 정렬 */}
       <section className="filter-area">
         <div className="category-list">
-          {FIX_CATEGORIES.map((category) => (
+          {filterNames.map((category) => (
             <button
               key={category}
               className={
@@ -96,17 +103,21 @@ const Fix = () => {
           ))}
         </div>
 
-        <select
-          className="sort-select"
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-        >
-          {SORT_OPTIONS.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+        {/* 정렬 선택 (화살표는 lucide 아이콘, 위치는 Fix.css 의 .sort-select-icon) */}
+        <div className="sort-select-wrap">
+          <select
+            className="sort-select"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+          >
+            {SORT_OPTIONS.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="sort-select-icon" size={16} />
+        </div>
       </section>
 
       {/* 고정지출 테이블 */}

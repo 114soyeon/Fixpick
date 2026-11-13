@@ -1,11 +1,11 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import Sidebar from "./Sidebar";
-import { PATHS } from "../constants/routes";
-import { logout } from "../utils/auth";
-import "../styles/common.css";
-import { supabase } from "../lib/supabase";
+import Sidebar from "@/components/Sidebar";
+import { PATHS } from "@/constants/routes";
+import { logout } from "@/utils/auth/auth";
+import "@/styles/common.css";
+import { onAuthChange } from "@/api/auth";
 import { useEffect, useRef } from "react"; // useRef : 값을 저장해 두었다가 나중에 다시 사용할 수 있도록 해주는 기능
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "@/store/authStore";
 
 
 export default function Layout() {
@@ -17,14 +17,9 @@ export default function Layout() {
   const { user, loading, setAuth } = useAuthStore();
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setAuth(session);
-      }
-    );
-    return () => subscription.unsubscribe();
+    // 로그인 상태가 바뀔 때마다 store 에 알려줘요 (Supabase 요청은 api/auth.js)
+    const stop = onAuthChange((session) => setAuth(session));
+    return stop; // 화면이 사라지면 그만 들어요
 
   }, [setAuth]);
 

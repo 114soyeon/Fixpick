@@ -2,7 +2,6 @@
  * 지출 리포트 — 연간 화면 (pages/Report.jsx에서 "연간"일 때 보여줘요)
  * 올해 1월 ~ 이번 달에 실제로 나간 금액 (매년 결제는 결제한 달에 전액)
  */
-import { paymentsInMonth } from "../../utils/items";
 import {
   byCategory,
   byItem,
@@ -10,18 +9,19 @@ import {
   endDateOf,
   endedInYear,
   paymentsInYear,
-  perMonth,
   sumValue,
-} from "../../utils/report";
-import { scheduleText, signedWon, won } from "../../utils/format";
-import { categoryStyle } from "../../constants/categories";
-import StatCard from "../common/StatCard";
-import DiffValue from "./DiffValue";
-import CategoryCard from "./CategoryCard";
-import TrendCard from "./TrendCard";
-import ChangeCard from "./ChangeCard";
+} from "@/utils/report/report";
+import { monthAmount, paymentsInMonth } from "@/utils/common/payment"; // monthAmount: 한 달 금액 (매년 ÷12, 나머지는 이번 달 실제 횟수)
+import { scheduleText, signedWon, won } from "@/utils/common/format";
+import { useCategoryOf } from "@/hooks/useCategoryOf";
+import StatCard from "@/components/common/StatCard";
+import DiffValue from "@/components/report/DiffValue";
+import CategoryCard from "@/components/report/CategoryCard";
+import TrendCard from "@/components/report/TrendCard";
+import ChangeCard from "@/components/report/ChangeCard";
 
 const YearlyReport = ({ items, year, month, today }) => {
+  const catOf = useCategoryOf(); // DB 카테고리 이름
   // 올해 1월 ~ 이번 달 / 작년 같은 기간
   const thisYear = paymentsInYear(items, year, month);
   const lastYear = paymentsInYear(items, year - 1, month);
@@ -44,7 +44,7 @@ const YearlyReport = ({ items, year, month, today }) => {
   const catDiffs = categoryChanges(thisYear, lastYear).map((c) => ({
     ...c,
     category: c.key,
-    name: categoryStyle(c.key).name,
+    name: catOf(c.key).name,
     sub: c.endedName
       ? `${c.endedName} 해지로 줄었어요`
       : c.change > 0
@@ -68,7 +68,7 @@ const YearlyReport = ({ items, year, month, today }) => {
           name: it.name,
           sub:
             i === 0
-              ? `${categoryStyle(it.category).name}에서 가장 커요`
+              ? `${catOf(it.category).name}에서 가장 커요`
               : it.amountType === "variable"
                 ? "달마다 금액이 달라져요"
                 : it.cycle === "매년"
@@ -85,7 +85,7 @@ const YearlyReport = ({ items, year, month, today }) => {
     category: it.category,
     name: it.name,
     sub: `${endDateOf(it).getMonth() + 1}월에 해지했어요`,
-    amount: `${signedWon(-perMonth(it))}/월`,
+    amount: `${signedWon(-monthAmount(it, year, month))}/월`,
     amountTone: "down",
   }));
 
@@ -140,7 +140,7 @@ const YearlyReport = ({ items, year, month, today }) => {
           />
           <ChangeCard
             label="가장 많이 쓴 카테고리"
-            value={topCat ? `${categoryStyle(topCat.key).name} ${won(topCat.value)}` : "없음"}
+            value={topCat ? `${catOf(topCat.key).name} ${won(topCat.value)}` : "없음"}
             rows={topItems}
             empty="등록한 고정지출이 없어요"
           />

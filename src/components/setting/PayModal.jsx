@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-import { BANKS, CARD_COMPANIES } from "../../constants/setting";
-import CardIcon from "../add-item/CardIcon";
+import { BANKS, CARD_COMPANIES } from "@/constants/setting";
+import CardIcon from "@/components/add-item/CardIcon";
 
 const onlyNum = (text) => text.replace(/[^0-9]/g, "");
 

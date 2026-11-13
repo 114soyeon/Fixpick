@@ -1,71 +1,14 @@
-import { useSyncExternalStore } from "react";
-import { getUser, useUser } from "./auth";
-import { dateKey, todayKey } from "./date";
+import { dateKey, getToday, todayKey } from "@/utils/common/date";
 
 /*
- * 사람마다 등록한 고정지출 항목을 브라우저에 따로 저장해요.
- * 저장 위치: localStorage "gk-items:<이메일>" (로그인해야 등록할 수 있어요)
- * 항목 모양: { id, category, name, amount, amountType("fixed"|"variable"), cycle, day, month, weekday, every, unit, start, payMethod, remind }
+ * 결제 날짜·금액 계산 (모든 페이지 공통)
+ * - 항목 규칙("매달 25일" 같은)을 실제 날짜·금액으로 바꿔요
+ * - 입력값만 보고 계산해요 (브라우저 저장소·화면은 건드리지 않아요)
+ * - 항목 모양: { id, category, name, amount, amountType, cycle, day, month, weekday, every, unit, start, endDate }
  *   cycle: "매일" | "매주"(weekday) | "매달"(day) | "매년"(month, day) | "사용자화"(every + unit, unit에 맞는 weekday/day/month)
- *   start: 등록한 날("2026-11-09") — 2주마다·3개월마다처럼 건너뛰는 주기의 기준
+ *   start: 시작일("2026-11-09") — 2주마다·3개월마다처럼 건너뛰는 주기의 기준
+ *   DB 데이터는 utils/dbItem.js fromDbRow 로 이 모양으로 바꿔서 넣어요
  */
-const EVENT = "gk-items-change";
-const EMPTY = [];
-const cache = new Map();
-const GUEST = "guest";
-const keyOf = (email) => `gk-items:${(email || GUEST).toLowerCase()}`;
-
-// 로그인·로그아웃하면 저장된 목록을 다시 읽어요
-window.addEventListener("gk-auth-change", () => { cache.clear(); window.dispatchEvent(new Event(EVENT)); });
-
-function readItems(email) {
-  const key = keyOf(email);
-  if (!cache.has(key)) {
-    try { cache.set(key, JSON.parse(localStorage.getItem(key) || "[]")); } catch { cache.set(key, []); }
-  }
-  return cache.get(key); 
-}
-
-function writeItems(email, list) {
-  const key = keyOf(email);
-  try { localStorage.setItem(key, JSON.stringify(list)); } catch { /* 저장 실패는 무시 */ }
-  cache.set(key, list);
-  window.dispatchEvent(new Event(EVENT));
-}
-
-const owner = () => getUser()?.email || GUEST;
-
-/** 항목 추가 (로그인해야 할 수 있어요) */
-export function addItem(item) {
-  if (!getUser()) return false; // 로그인 안 했으면 저장하지 않아요
-  const now = new Date();
-  const next = [...readItems(owner()), { id: Date.now(), month: now.getMonth() + 1, amountType: "fixed", ...item }];
-  writeItems(owner(), next);
-  return true;
-}
-
-/** 항목 고치기 (예: 변동 금액을 결제 후 실제 금액으로) */
-export function updateItem(id, changes) {
-  writeItems(owner(), readItems(owner()).map((it) => (it.id === id ? { ...it, ...changes } : it)));
-}
-
-/** 항목 지우기 */
-export function removeItem(id) {
-  writeItems(owner(), readItems(owner()).filter((it) => it.id !== id));
-}
-
-/** 지금 로그인한 사람의 항목 목록 (로그인 안 했으면 빈 목록) */
-export function useItems() {
-  const user = useUser();
-  return useSyncExternalStore(
-    (cb) => {
-      window.addEventListener(EVENT, cb);
-      return () => window.removeEventListener(EVENT, cb);
-    },
-    () => (user ? readItems(user.email) : EMPTY), // 로그인 안 했으면 빈 목록
-    () => EMPTY
-  );
-}
 
 const daysIn = (y, m) => new Date(y, m, 0).getDate(); // m: 1~12
 
@@ -125,6 +68,15 @@ export const paysIn = (item, y, m) => payDaysIn(item, y, m).length > 0;
 /** 그 달에 나가는 돈 (매일·매주는 횟수만큼) */
 export const amountIn = (item, y, m) => item.amount * payDaysIn(item, y, m).length;
 
+/**
+ * 한 달 금액 (월 환산) — 모든 페이지 공통
+ * - 매년: 1년 금액 ÷ 12 (시안: "연납·세금은 월 평균으로 넣었어요")
+ * - 매달·매주·매일·사용자화: 그 달에 실제로 결제하는 횟수 × 금액
+ *   (예: 매주 월요일 1만원 → 11월은 월요일 5번이라 5만원 / 2개월마다 6만원 → 결제하는 달만 6만원)
+ */
+export const monthAmount = (item, y, m) =>
+  item.cycle === "매년" ? Math.round(item.amount / 12) : amountIn(item, y, m);
+
 const WEEK = ["일", "월", "화", "수", "목", "금", "토"];
 /** "매주 월요일", "2개월마다 10일" 같은 결제 주기 글자 */
 export function cycleText(item) {
@@ -142,7 +94,7 @@ export function cycleText(item) {
   return item.cycle === "매일" ? "매일" : `${item.cycle} ${when}`;
 }
 
-/** 오늘 이후로 가장 가까운 결제 count개 */
+/** 오늘(포함) 이후로 가장 가까운 결제 count개 (만기일 지난 항목은 빠져요) */
 export function nextPayments(items, today, count = 3) {
   const start = new Date(today.year, today.month - 1, today.day);
   const list = items.map((it) => {
@@ -152,6 +104,7 @@ export function nextPayments(items, today, count = 3) {
       const d = payDaysIn(it, y, m).find((day) => new Date(y, m - 1, day) >= start);
       if (d) {
         const date = new Date(y, m - 1, d);
+        if (isEnded(it, date)) return null; // 만기일이 지나면 다음 결제 없음
         return { ...it, date, month: m, payDay: d, dday: Math.round((date - start) / DAY_MS) };
       }
       m += 1;
@@ -161,6 +114,9 @@ export function nextPayments(items, today, count = 3) {
   }).filter(Boolean);
   return list.sort((a, b) => a.date - b.date).slice(0, count);
 }
+
+/** 다음 결제일 하나 → Date (오늘이 결제일이면 오늘, 만기일이 지났으면 null) */
+export const nextPayDate = (item, today = getToday()) => nextPayments([item], today, 1)[0]?.date ?? null;
 
 /** 만기일(endDate)이 지난 결제인지 (리포트에서도 써요) */
 export const isEnded = (item, date) => {
@@ -199,20 +155,9 @@ export function bigPayments(items, today, count = 4) {
     .slice(0, count);
 }
 
-/** 사이드바·대시보드에서 "항목 추가" 창을 열고 싶을 때 (로그인 안 했으면 사이드바가 로그인 페이지로 보내요) */
-export const openAddItem = () => window.dispatchEvent(new Event("gk-open-add"));
-
-/* 로그인 페이지로 보낼 때 이유를 잠깐 기억해 둬요 → 로그인하면 바로 항목 추가 창을 열어요 */
-const REASON_KEY = "gk-login-reason";
-export const setLoginReason = (why) => { try { sessionStorage.setItem(REASON_KEY, why); } catch { /* 무시 */ } };
-export const takeLoginReason = () => {
-  try { const v = sessionStorage.getItem(REASON_KEY) || ""; sessionStorage.removeItem(REASON_KEY); return v; } catch { return ""; }
-};
-
 /** 첫 결제일 키 ("2026-11-20"): 오늘부터 고른 결제일·요일·월에 맞는 가장 가까운 날 (DB start_date로 저장해요) */
 export function firstPayKey(item) {
-  const t = new Date();
-  const today = { year: t.getFullYear(), month: t.getMonth() + 1, day: t.getDate() };
+  const today = getToday();
   const start = todayKey();
   const first = nextPayments([{ ...item, start }], today, 1)[0];
   return first ? dateKey(first.date) : start;

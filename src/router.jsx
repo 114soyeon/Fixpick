@@ -1,13 +1,13 @@
 import { createBrowserRouter } from "react-router-dom";
-import Layout from "./components/Layout";
-import Dashboard from "./pages/Dashboard";
-import Fix from "./pages/Fix";
-import Calendar from "./pages/Calendar";
-import Report from "./pages/Report";
-import Setting from "./pages/Setting";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import FixDetail from "./pages/FixDetail";
+import Layout from "@/components/Layout";
+import Dashboard from "@/pages/Dashboard";
+import Fix from "@/pages/Fix";
+import Calendar from "@/pages/Calendar";
+import Report from "@/pages/Report";
+import Setting from "@/pages/Setting";
+import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
+import FixDetail from "@/pages/FixDetail";
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },

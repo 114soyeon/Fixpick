@@ -4,10 +4,10 @@
  * 줄 순서: 결제일 알림 → 알림 시간 → 나머지 알림
  */
 import { Bell } from "lucide-react";
-import { saveSetting } from "../../utils/setting";
-import { ALERTS, TIMES } from "../../constants/setting";
-import CardHead from "./CardHead";
-import Switch from "./Switch";
+import { saveSetting } from "@/utils/setting/setting";
+import { ALERTS, TIMES } from "@/constants/setting";
+import CardHead from "@/components/setting/CardHead";
+import Switch from "@/components/setting/Switch";
 
 const AlertCard = ({ setting }) => {
   const setAlert = (key, on) => saveSetting({ alerts: { ...setting.alerts, [key]: on } });

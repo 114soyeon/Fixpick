@@ -7,30 +7,7 @@
  *
  * 계산 결과 목록의 한 줄 모양: { ...항목, value: 금액 }
  */
-import { isEnded, payDaysIn, paymentsInMonth } from "./items";
-import { categoryKeyOf } from "./category";
-
-/**
- * DB 한 줄(subscriptions, useMySub 결과) → 리포트 계산용 항목
- * 컬럼 이름이 달라서 바꿔 줘요 (예: expiry_date → endDate, week → weekday)
- */
-export const fromDbRow = (row) => ({
-  id: Number(row.id),
-  // DB 카테고리의 key("home", "sub" ...)를 그대로 써요
-  // (이름은 "주거·공과"처럼 화면 이름과 달라서 이름으로 찾으면 "기타"가 돼요. key가 없을 때만 이름으로 찾아요)
-  category: row.categories?.key || categoryKeyOf(row.categories?.name),
-  name: row.name,
-  amount: row.amount,
-  amountType: row.amount_type === "변동" ? "variable" : "fixed",
-  cycle: row.cycle,          // 매일 / 매주 / 매달 / 매년 / 사용자화
-  day: row.day,              // 매달·매년 며칠
-  month: row.month,          // 매년 몇 월
-  weekday: row.week,         // 매주 요일 (0=일 ~ 6=토)
-  every: row.custom_number,  // 사용자화: 몇 번마다
-  unit: row.custom_text,     // 사용자화: day | week | month | year
-  start: row.start_date,     // "YYYY-MM-DD"
-  endDate: row.expiry_date,  // 만기일 (리포트에선 "해지")
-});
+import { isEnded, payDaysIn, paymentsInMonth } from "@/utils/common/payment";
 
 /** 지난달 [년, 월] (1월이면 작년 12월) */
 export const prevMonthOf = (year, month) => (month === 1 ? [year - 1, 12] : [year, month - 1]);
@@ -96,9 +73,6 @@ export function byItem(list) {
   });
   return [...map.values()].sort((a, b) => b.value - a.value);
 }
-
-/** 한 달에 나가는 금액으로 바꾸기 (매년 결제는 ÷ 12) */
-export const perMonth = (item) => (item.cycle === "매년" ? Math.round(item.amount / 12) : item.amount);
 
 /** 만기일(endDate) 문자열 → Date (없으면 null) */
 export const endDateOf = (item) => {

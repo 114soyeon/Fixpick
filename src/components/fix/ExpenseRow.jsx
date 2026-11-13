@@ -1,6 +1,8 @@
-import { categoryIcons } from "../../constants/categories";
-import { dateToKorean, formatWon, getMonthly } from "../../utils/fixFormat";
-import { getNextPaymentDate } from "../../utils/cycle";
+import { useCategoryOf } from "@/hooks/useCategoryOf";
+import { monthAmount, nextPayDate } from "@/utils/common/payment";
+import { fromDbRow } from "@/utils/common/dbItem";
+import { dateToKorean, getToday } from "@/utils/common/date";
+import { won } from "@/utils/common/format";
 
 const WEEK = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -26,7 +28,7 @@ const cycleLabel = (it) => {
 };
 
 const ExpenseRow = ({ item, onClick }) => {
-  const CategoryIcon = categoryIcons[item.categories.id];
+  const { icon: CategoryIcon } = useCategoryOf()(item.categories?.key); // DB 카테고리 아이콘 (모르는 key면 "기타")
 
   return (
     <div className="table-row" onClick={onClick}>
@@ -42,9 +44,9 @@ const ExpenseRow = ({ item, onClick }) => {
       </div>
       <span>{item.categories.name}</span>
       <span>{cycleLabel(item)}</span>
-      <span>{dateToKorean(getNextPaymentDate(item))}</span>
-      <strong className="amount">{formatWon(item.amount)}</strong>
-      <span className="monthly-amount">{formatWon(getMonthly(item.amount, item.cycle))}</span>
+      <span>{dateToKorean(nextPayDate(fromDbRow(item)))}</span>
+      <strong className="amount">{won(item.amount)}</strong>
+      <span className="monthly-amount">{won(monthAmount(fromDbRow(item), getToday().year, getToday().month))} {/* 이번 달 금액 (매년은 ÷12) */}</span>
     </div>
   );
 };

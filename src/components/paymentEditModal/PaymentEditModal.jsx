@@ -1,10 +1,10 @@
 import { useState } from "react";
-import "../../styles/PaymentEditModal.css";
+import "@/styles/PaymentEditModal.css";
 import { Calendar } from "lucide-react";
 import {
   AMOUNT_TYPE_OPTIONS,
   CYCLE_OPTIONS,
-} from "../../utils/fixConstants";
+} from "@/constants/fix";
 
 // 달력 아이콘 + 날짜 입력칸
 function DateInput({ value, onChange }) {

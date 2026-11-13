@@ -3,7 +3,7 @@
  * - sideLabel / sideValue: 오른쪽 위 작은 글자 (예: "11월" / "가장 많이 나간 달")
  * - points / highlight / average: 꺾은선에 넘기는 값 (ReportCharts.jsx TrendLine)
  */
-import { TrendLine } from "./ReportCharts";
+import { TrendLine } from "@/components/report/ReportCharts";
 
 const TrendCard = ({ title, desc, sideLabel, sideValue, points, highlight, average }) => (
   <section className="rpt-card rpt-chart-card">

@@ -2,9 +2,9 @@
  * 결제 캘린더 오른쪽 아래: 큰 지출 미리 보기
  * - list: 오늘부터 3개월 안 "매년" 결제 중 큰 순서 최대 4개 (utils/items.js bigPayments)
  */
-import { monthDay } from "../../utils/format";
-import { dDayText } from "../../utils/date";
-import PayItem from "./PayItem";
+import { monthDay } from "@/utils/common/format";
+import { daysUntil, ddayText } from "@/utils/common/date";
+import PayItem from "@/components/calendar/PayItem";
 
 const BigCard = ({ list }) => (
   <div className="paycal-card paycal-detail paycal-big-card">
@@ -18,7 +18,7 @@ const BigCard = ({ list }) => (
           <PayItem
             key={`${item.id}-${item.date}`}
             item={item}
-            sub={`${monthDay(item.date)} · ${dDayText(item.date)}`}
+            sub={`${monthDay(item.date)} · ${ddayText(daysUntil(item.date))}`}
           />
         ))}
       </ul>

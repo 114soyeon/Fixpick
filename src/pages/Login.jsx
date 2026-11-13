@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import { LogoMark, Wordmark } from "../components/common/Logo";
-import LoginToast from "../components/login/LoginToast";
-import ResetModal from "../components/login/ResetModal";
-import FindIdModal from "../components/login/FindIdModal";
-import { BRAND_TAGS, SOCIALS } from "../constants/login";
-import { openAddItem, takeLoginReason } from "../utils/items";
-import { loginError, readLastLogin, saveLastLogin } from "../utils/login";
-import { isValidEmail } from "../utils/validate";
-import { useAuthStore } from "../store/authStore";
-import "../styles/login.css";
+import { LogoMark, Wordmark } from "@/components/common/Logo";
+import LoginToast from "@/components/login/LoginToast";
+import ResetModal from "@/components/login/ResetModal";
+import FindIdModal from "@/components/login/FindIdModal";
+import { BRAND_TAGS, SOCIALS } from "@/constants/login";
+import { openAddItem, takeLoginReason } from "@/utils/common/addItemFlow";
+import { loginError, readLastLogin, saveLastLogin } from "@/utils/auth/login";
+import { isValidEmail } from "@/utils/common/validate";
+import { useAuthStore } from "@/store/authStore";
+import "@/styles/login.css";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -36,7 +36,7 @@ export default function Login() {
     try {
       await login(email, pw);
     } catch (err) {
-      const { field, message } = loginError(err); // 틀렸을 때 문구 (utils/login.js)
+      const { field, message } = loginError(err); // 틀렸을 때 문구 (utils/auth/login.js)
       return fail(field, message);
     }
     setError({ field: "", message: "" });

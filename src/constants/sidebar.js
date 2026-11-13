@@ -1,4 +1,4 @@
-/* 사이드바에서 쓰는 메뉴 데이터 (알림은 utils/notifications.js에서 내 고정지출로 만들어요) */
+/* 사이드바에서 쓰는 메뉴 데이터 (알림은 utils/sidebar/notifications.js에서 내 고정지출로 만들어요) */
 
 /** 메뉴 (key는 아이콘 이름과 같아요) */
 export const MENU_ITEMS = [

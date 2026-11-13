@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { CARD_LOGOS } from "../../constants/cardLogos";
-import { BADGE, BADGE_COLOR_COUNT } from "../../constants/addItem";
+import { CARD_LOGOS } from "@/constants/cardLogos";
+import { BADGE, BADGE_COLOR_COUNT } from "@/constants/addItem";
 
 const brokenLogos = new Set(); // 한 번 못 불러온 로고는 다시 시도하지 않아요
 

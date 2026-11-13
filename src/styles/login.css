@@ -1,4 +1,4 @@
-/* 로그인 페이지 스타일 (Login.jsx에서 import "../styles/login.css"로 불러와요)
+/* 로그인 페이지 스타일 (Login.jsx에서 import "@/styles/login.css"로 불러와요)
  * 모달·토스트는 사이드바에도 같은 이름이 있어서 .gk-login-page 안에서만 적용되게 묶었어요 */
 
 @keyframes gkLoginRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
