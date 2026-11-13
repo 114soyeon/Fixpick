@@ -10,5 +10,3 @@ export const signup = async ({ name, phone = "", email, password }) => {
     console.log(userError)
     return { ok: true };
 }
-
-/* 로그인 :  */

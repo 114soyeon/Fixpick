@@ -17,6 +17,18 @@ import {
   WashingMachine,
 } from "lucide-react";
 
+export const categoryIcons = {
+  1: Building2,
+  2: Smartphone,
+  3: CirclePlay,
+  4: WashingMachine,
+  5: ShieldCheck,
+  6: PiggyBank,
+  7: BusFront,
+  8: CarFront,
+  9: Shapes,
+};
+
 export const CATEGORY_STYLE = {
   home:    { name: "주거", icon: Building2,      bg: "#E1EEF9", color: "#154A7D", bar: "#4C8DF6" }, // 주거
   phone:   { name: "통신", icon: Smartphone,     bg: "#DDF3F9", color: "#0A6480", bar: "#36C2CE" }, // 통신
