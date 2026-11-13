@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { cycleText, nextPayments, openAddItem, useItems } from "../utils/items";
+import { cycleText, nextPayments } from "../utils/payment";
+import { openAddItem } from "../utils/addItemFlow";
+import { useMySub } from "../queries/subs";
+import { fromDbRow } from "../utils/dbItem";
 import { useCategoryColors, dashCatVars } from "../hooks/useCategoryColors";
 import { ddayText } from "../utils/date";
 import { MONTH, TODAY, catClass, payByDay, toCard, useDashData } from "../utils/dashboard/dashboard";
@@ -252,9 +255,9 @@ function BudgetCard({ data }) {
 }
 
 /* ───────── 5. 결제 캘린더 + 다가오는 결제 ───────── */
-function CalendarCard() {
+// items: DB에서 읽은 내 고정지출 (페이지에서 받아요)
+function CalendarCard({ items }) {
   const navigate = useNavigate();
-  const items = useItems();
   const colorOf = useCategoryColors(); // DB 색
   const [view, setView] = useState({ year: TODAY.year, month: TODAY.month });
   const [dir, setDir] = useState(null); // "next" | "prev" | null
@@ -370,7 +373,13 @@ function CalendarCard() {
 export default function Dashboard() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  const data = useDashData();
+
+  // DB에서 내 고정지출 불러오기 (리액트 쿼리) — 리포트·캘린더와 같은 방식
+  const { data: rows } = useMySub();
+  // DB 한 줄 → 계산용 항목 (rows가 바뀔 때만 다시 바꿔요)
+  const items = useMemo(() => (rows ?? []).map(fromDbRow), [rows]);
+
+  const data = useDashData(items);
   return (
     <main className="gk-dash-main">
       <div className="gk-rise gk-dash-head">
@@ -398,7 +407,7 @@ export default function Dashboard() {
 
         {/* 오른쪽 */}
         <div className="gk-dash-right">
-          <CalendarCard />
+          <CalendarCard items={items} />
         </div>
       </div>
 

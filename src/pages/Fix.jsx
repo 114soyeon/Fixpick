@@ -9,7 +9,8 @@ import { calculateFixedExpense, calculateMonthlySavings, getUpcomingExpense } fr
 import { useMySub } from "../queries/subs";
 import { ALL_CATEGORY, CATEGORY_NAMES, DEFAULT_SORT, FIX_CATEGORIES, SORT_OPTIONS } from "../constants/fix";
 import { categoryKeyOf } from "../utils/category";
-import { getNextPaymentDate } from "../utils/cycle";
+import { nextPayDate } from "../utils/payment";
+import { fromDbRow } from "../utils/dbItem";
 import { won } from "../utils/format";
 
 const Fix = () => {
@@ -25,7 +26,7 @@ const Fix = () => {
   const rawItems = useRawFixItems();
 
   // 다음 결제일을 숫자로 (계산 안 되면 0 → 목록 맨 뒤로)
-  const nextValue = (row) => getNextPaymentDate(row)?.getTime() ?? 0;
+  const nextValue = (row) => nextPayDate(fromDbRow(row))?.getTime() ?? 0; // 다음 결제일 (정렬용)
   // 등록 시각을 숫자로 (거의 동시에 등록한 건 id로 순서 고정)
   const createdValue = (row) => Date.parse(row.created_at) || 0;
 

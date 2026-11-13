@@ -16,7 +16,8 @@ import "@fullcalendar/react/themes/monarch/theme.css";
 import "@fullcalendar/react/themes/monarch/palettes/purple.css";
 import "../styles/calendar.css"; // 이 페이지 전용 스타일 (class는 모두 paycal- 로 시작)
 
-import { bigPayments, isEnded, payDaysIn, paymentsInMonth, useItems } from "../utils/items";
+import { bigPayments, isEnded, payDaysIn, paymentsInMonth } from "../utils/payment";
+import { useItems } from "../utils/items";
 import { useMySub } from "../queries/subs";
 import { fromDbRow } from "../utils/dbItem";
 import { useCategoryColors } from "../hooks/useCategoryColors";

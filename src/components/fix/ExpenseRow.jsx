@@ -1,9 +1,8 @@
 import { categoryIcons } from "../../constants/categories";
-import { monthAmount } from "../../utils/items";
+import { monthAmount, nextPayDate } from "../../utils/payment";
 import { fromDbRow } from "../../utils/dbItem";
 import { dateToKorean, getToday } from "../../utils/date";
 import { won } from "../../utils/format";
-import { getNextPaymentDate } from "../../utils/cycle";
 
 const WEEK = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -45,7 +44,7 @@ const ExpenseRow = ({ item, onClick }) => {
       </div>
       <span>{item.categories.name}</span>
       <span>{cycleLabel(item)}</span>
-      <span>{dateToKorean(getNextPaymentDate(item))}</span>
+      <span>{dateToKorean(nextPayDate(fromDbRow(item)))}</span>
       <strong className="amount">{won(item.amount)}</strong>
       <span className="monthly-amount">{won(monthAmount(fromDbRow(item), getToday().year, getToday().month))} {/* 이번 달 금액 (매년은 ÷12) */}</span>
     </div>

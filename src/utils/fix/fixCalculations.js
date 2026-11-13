@@ -1,4 +1,4 @@
-import { bigPayments } from "../items";
+import { bigPayments } from "../payment";
 import { SAVING_CATEGORY } from "../../constants/fix";
 import { getToday, toDate } from "../date";
 

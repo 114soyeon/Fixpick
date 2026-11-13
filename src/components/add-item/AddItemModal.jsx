@@ -9,7 +9,7 @@ import {
   UNIT_OPTIONS,
   WEEKDAY_OPTIONS,
 } from "../../constants/addItem";
-import { firstPayKey } from "../../utils/items";
+import { firstPayKey } from "../../utils/payment";
 import { categoryKeyOf } from "../../utils/category";
 import { useAuthStore } from "../../store/authStore";
 import DatePicker from "./DatePicker";

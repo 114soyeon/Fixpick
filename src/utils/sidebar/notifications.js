@@ -1,6 +1,6 @@
 import { loadBudget } from "../setting/budget";
 import { monthDay, won } from "../format";
-import { amountIn, isEnded, payDaysIn } from "../items";
+import { amountIn, isEnded, payDaysIn } from "../payment";
 
 /* 사이드바 알림: 내가 등록한 고정지출로 만들어요 (등록한 게 없으면 알림도 없어요) */
 

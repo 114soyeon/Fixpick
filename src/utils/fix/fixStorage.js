@@ -1,5 +1,5 @@
 import { removeItem } from "../items";
-import { monthAmount } from "../items";
+import { monthAmount } from "../payment";
 import { getToday, keyToDate, prettyDate } from "../date";
 
 /*

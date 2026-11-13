@@ -1,6 +1,6 @@
 import { BIG, CATEGORIES } from "../../constants/dashboard";
 import { comma } from "../format";
-import { amountIn, cycleText, payDaysIn, paysIn, useItems } from "../items";
+import { amountIn, cycleText, payDaysIn, paysIn } from "../payment";
 import { getToday } from "../date";
 
 /* 메인(대시보드) 계산 */
@@ -23,9 +23,9 @@ const monthlyRows = (values) => values.map((value, i) => ({
  * 메인 화면에 보여줄 숫자 (로그인해야 등록할 수 있어요)
  * - 등록한 게 없음: 0원 (등록 전 화면)
  * - 등록함: 내가 등록한 항목으로 계산
+ * items: DB에서 읽은 내 고정지출 (pages/Dashboard.jsx 가 useMySub 로 읽어서 넘겨줘요)
  */
-export function useDashData() {
-  const items = useItems();
+export function useDashData(items) {
   const thisMonth = items.filter((it) => paysIn(it, TODAY.year, MONTH)); // 매년·몇 달마다 항목은 결제하는 달에만 들어가요
   const cats = CATEGORIES.map((c) => {
     const mine = thisMonth.filter((it) => it.category === c.key);

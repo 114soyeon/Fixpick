@@ -1,4 +1,4 @@
-import { monthAmount, nextPayments } from "../items";
+import { monthAmount, nextPayments } from "../payment";
 import { CATEGORY_NAMES } from "../../constants/fix";
 import { dateToKorean, getToday, keyToDate } from "../date";
 import { loadEdits } from "./fixStorage";

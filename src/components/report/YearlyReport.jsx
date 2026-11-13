@@ -2,7 +2,6 @@
  * 지출 리포트 — 연간 화면 (pages/Report.jsx에서 "연간"일 때 보여줘요)
  * 올해 1월 ~ 이번 달에 실제로 나간 금액 (매년 결제는 결제한 달에 전액)
  */
-import { paymentsInMonth } from "../../utils/items";
 import {
   byCategory,
   byItem,
@@ -12,7 +11,7 @@ import {
   paymentsInYear,
   sumValue,
 } from "../../utils/report/report";
-import { monthAmount } from "../../utils/items"; // 한 달 금액 (매년 ÷12, 나머지는 이번 달 실제 횟수)
+import { monthAmount, paymentsInMonth } from "../../utils/payment"; // monthAmount: 한 달 금액 (매년 ÷12, 나머지는 이번 달 실제 횟수)
 import { scheduleText, signedWon, won } from "../../utils/format";
 import { categoryStyle } from "../../constants/categories";
 import StatCard from "../common/StatCard";

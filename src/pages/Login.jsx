@@ -6,7 +6,7 @@ import LoginToast from "../components/login/LoginToast";
 import ResetModal from "../components/login/ResetModal";
 import FindIdModal from "../components/login/FindIdModal";
 import { BRAND_TAGS, SOCIALS } from "../constants/login";
-import { openAddItem, takeLoginReason } from "../utils/items";
+import { openAddItem, takeLoginReason } from "../utils/addItemFlow";
 import { loginError, readLastLogin, saveLastLogin } from "../utils/auth/login";
 import { isValidEmail } from "../utils/validate";
 import { useAuthStore } from "../store/authStore";
