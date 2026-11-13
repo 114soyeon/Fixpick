@@ -2,37 +2,15 @@ import { nextPayments } from "./items";
 import { CATEGORY_NAMES } from "./fixConstants";
 import { dateToKorean, getMonthly, getToday, keyToDate } from "./fixFormat";
 import { loadEdits } from "./fixStorage";
-import { categoryKeyOf } from "./category";
+import { fromDbRow } from "./dbItem";
 import { useMySub } from "../queries/subs";
 
 /* 내 고정지출 목록(Fix)과 상세(FixDetail)가 같이 쓰는 데이터 */
 
-/** DB 행(subscriptions) → 항목 추가 창이 저장하는 폼 */
-const fromDb = (row) => {
-  const cat = row.categories; // select 의 categories ( id, name )
-  return {
-    id: Number(row.id),
-    category: categoryKeyOf(cat?.name), // "구독 서비스" → "sub"
-    name: row.name,
-    amount: row.amount,
-    amountType: row.amount_type === "변동" ? "variable" : "fixed",
-    cycle: row.cycle,
-    day: row.day,        // 매달 며칠 / 매년 며칠
-    month: row.month,    // 매년 결제월
-    weekday: row.week,           // 0~6 (일~토)
-    every: row.custom_number,    // 사용자화 간격
-    unit: row.custom_text,       // 사용자화 단위 ("day" | "week" | "month" | "year")
-    start: row.start_date,   // "YYYY-MM-DD"
-    endDate: row.expiry_date,
-    payMethod: row.pay_method,
-    remind: row.remind,
-  };
-};
-
 /** DB 에서 내 고정지출 "원본" 목록 (다가오는 결제 카드가 써요) */
 export const useRawFixItems = () => {
   const { data: rows } = useMySub();
-  return (rows ?? []).map(fromDb);
+  return (rows ?? []).map(fromDbRow); // DB 한 줄 → 항목 (utils/dbItem.js)
 };
 
 /** 항목 추가 창에서 저장한 항목 → 목록 페이지에서 쓰는 모양으로 바꾸기 */

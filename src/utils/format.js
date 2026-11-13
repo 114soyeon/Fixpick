@@ -3,8 +3,8 @@
  * 여러 페이지가 같이 써요 → 표시 방법을 바꿀 땐 여기만 고치면 돼요
  */
 
-/** 1300000 → "1,300,000" (소수는 반올림) */
-export const comma = (n) => Math.round(n).toLocaleString("ko-KR");
+/** 1300000 → "1,300,000" (소수는 반올림, 숫자가 아니면 "0") */
+export const comma = (n) => Math.round(Number(n) || 0).toLocaleString("ko-KR");
 
 /** 1426211 → "1,426,211원" */
 export const won = (n) => `${comma(n)}원`;

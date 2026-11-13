@@ -58,12 +58,6 @@ export const getDday = (text) => {
   return diff >= 0 ? `D-${diff}` : "지남";
 };
 
-// 12345 → "12,345"
-export const formatMoney = (number) => (Number(number) || 0).toLocaleString("ko-KR");
-
-// 12345 → "12,345원"
-export const formatWon = (number) => `${formatMoney(number)}원`;
-
 // 주기에 따라 "한 달로 환산한 금액" 계산
 export const getMonthly = (amount, cycle) => {
   if (cycle === "매년") return Math.round(amount / 12);

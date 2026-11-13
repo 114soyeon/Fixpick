@@ -4,7 +4,7 @@
  *   PayCalendar(왼쪽 달력) / SummaryCard(요약) / DayCard(선택한 날) / BigCard(큰 지출)
  * - class는 다른 페이지와 겹치지 않게 모두 "paycal-" 로 시작 (styles/calendar.css)
  * - 데이터: 왼쪽 달력만 리액트 쿼리 useMySub(queries/subs.js)로 DB의 내 고정지출을 읽어요
- *   → utils/report.js fromDbRow 로 계산하기 좋은 모양으로 바꿔요 (리포트 페이지와 같은 방식)
+ *   → utils/dbItem.js fromDbRow 로 계산하기 좋은 모양으로 바꿔요 (리포트 페이지와 같은 방식)
  *   오른쪽 카드들(요약·선택한 날·큰 지출)은 아직 예전 데이터(useItems)예요
  */
 import { useMemo, useState } from "react";
@@ -18,7 +18,7 @@ import "../styles/calendar.css"; // 이 페이지 전용 스타일 (class는 모
 
 import { bigPayments, isEnded, payDaysIn, paymentsInMonth, useItems } from "../utils/items";
 import { useMySub } from "../queries/subs";
-import { fromDbRow } from "../utils/report";
+import { fromDbRow } from "../utils/dbItem";
 import { useCategoryColors } from "../hooks/useCategoryColors";
 import { dateKey, isSameDay } from "../utils/date";
 import { categoryStyle } from "../constants/categories";

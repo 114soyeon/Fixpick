@@ -10,7 +10,7 @@ import { useMySub } from "../queries/subs";
 import { ALL_CATEGORY, CATEGORY_NAMES, DEFAULT_SORT, FIX_CATEGORIES, SORT_OPTIONS } from "../utils/fixConstants";
 import { categoryKeyOf } from "../utils/category";
 import { getNextPaymentDate } from "../utils/cycle";
-import { formatWon } from "../utils/fixFormat";
+import { won } from "../utils/format";
 
 const Fix = () => {
   const navigate = useNavigate();
@@ -65,18 +65,18 @@ const Fix = () => {
         <StatCard
           highlight
           label="한 달 고정지출 (월 환산)"
-          value={formatWon(calculateFixedExpense(allItems))}
+          value={won(calculateFixedExpense(allItems))}
         />
         <StatCard
           label="자동으로 빠지는 저축 (별도)"
-          value={formatWon(calculateMonthlySavings(allItems))}
+          value={won(calculateMonthlySavings(allItems))}
         />
         <StatCard
           className="is-compact"
           label="다가오는 큰 지출"
           value={
             upcomingExpense
-              ? `${upcomingExpense.title} ${formatWon(upcomingExpense.amount)}`
+              ? `${upcomingExpense.title} ${won(upcomingExpense.amount)}`
               : "자동차세 130,000원"
           }
           badge={upcomingExpense?.month}

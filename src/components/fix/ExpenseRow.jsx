@@ -1,5 +1,6 @@
 import { categoryIcons } from "../../constants/categories";
-import { dateToKorean, formatWon, getMonthly } from "../../utils/fixFormat";
+import { dateToKorean, getMonthly } from "../../utils/fixFormat";
+import { won } from "../../utils/format";
 import { getNextPaymentDate } from "../../utils/cycle";
 
 const WEEK = ["일", "월", "화", "수", "목", "금", "토"];
@@ -43,8 +44,8 @@ const ExpenseRow = ({ item, onClick }) => {
       <span>{item.categories.name}</span>
       <span>{cycleLabel(item)}</span>
       <span>{dateToKorean(getNextPaymentDate(item))}</span>
-      <strong className="amount">{formatWon(item.amount)}</strong>
-      <span className="monthly-amount">{formatWon(getMonthly(item.amount, item.cycle))}</span>
+      <strong className="amount">{won(item.amount)}</strong>
+      <span className="monthly-amount">{won(getMonthly(item.amount, item.cycle))}</span>
     </div>
   );
 };
