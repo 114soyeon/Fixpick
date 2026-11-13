@@ -4,9 +4,11 @@ import "../styles/Fix.css";
 import SummaryCards from "../components/fix/SummaryCards";
 import ExpenseRow from "../components/fix/ExpenseRow";
 import { useFixItems, useRawFixItems } from "../utils/fixItems";
-import { ALL_CATEGORY, DEFAULT_SORT, FIX_CATEGORIES, SORT_OPTIONS } from "../utils/fixConstants";
-import { calculateFixedExpense, calculateMonthlySavings, filterByCategory, getUpcomingExpense, sortExpenses } from "../utils/fixCalculations";
+import { calculateFixedExpense, calculateMonthlySavings, getUpcomingExpense } from "../utils/fixCalculations";
 import { useMySub } from "../queries/subs";
+import { ALL_CATEGORY, CATEGORY_NAMES, DEFAULT_SORT, FIX_CATEGORIES, SORT_OPTIONS } from "../utils/fixConstants";
+import { categoryKeyOf } from "../utils/category";
+import { getNextPaymentDate } from "../utils/cycle";
 
 const Fix = () => {
   const navigate = useNavigate();
@@ -20,10 +22,25 @@ const Fix = () => {
   const { data: subs } = useMySub();
   const rawItems = useRawFixItems();
 
-  const filteredExpenses = sortExpenses(
-    filterByCategory(allItems, selectedCategory),
-    sortOrder,
-  );
+  // 다음 결제일을 숫자로 (계산 안 되면 0 → 목록 맨 뒤로)
+  const nextValue = (row) => getNextPaymentDate(row)?.getTime() ?? 0;
+
+  // 카테고리 필터 + 정렬
+  const visibleRows = (subs ?? [])
+    .filter((row) => {
+      if (selectedCategory === ALL_CATEGORY) return true;
+      const key = row.categories?.key ?? categoryKeyOf(row.categories?.name);
+      return CATEGORY_NAMES[key] === selectedCategory;
+    })
+    .sort((a, b) => {
+      switch (sortOrder) {
+        case "high":   return Number(b.amount) - Number(a.amount); // 금액 높은순
+        case "low":    return Number(a.amount) - Number(b.amount); // 금액 낮은순
+        case "latest": return nextValue(b) - nextValue(a);         // 최신순
+        case "oldest": return nextValue(a) - nextValue(b);         // 과거순
+        default:       return 0;
+      }
+    });
 
   return (
     <div className="expenses-page">
@@ -84,7 +101,7 @@ const Fix = () => {
           <span>월 환산</span>
         </div>
 
-        {subs?.map((item) => (
+        {visibleRows.map((item) => (
           <ExpenseRow
             key={item.id}
             item={item}
@@ -92,7 +109,7 @@ const Fix = () => {
           />
         ))}
 
-        {filteredExpenses.length === 0 && (
+        {visibleRows.length === 0 && (
           <p className="empty-message">등록된 고정지출이 없습니다.</p>
         )}
       </section>
