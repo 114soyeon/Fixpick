@@ -5,11 +5,13 @@
  */
 import { percent, won } from "../../utils/format";
 import { categoryStyle } from "../../constants/categories";
+import { useCategoryColors } from "../../hooks/useCategoryColors";
 import { CategoryDonut } from "./ReportCharts";
 import CatIcon from "./CatIcon";
 
 const CategoryCard = ({ title, cats, total }) => {
   const top = cats[0];
+  const colorOf = useCategoryColors(); // DB 색
   return (
     <section className="rpt-card rpt-chart-card">
       <div className="rpt-card-head">
@@ -34,7 +36,7 @@ const CategoryCard = ({ title, cats, total }) => {
           <ul className="rpt-legend">
             {cats.map((c) => (
               <li key={c.key} className="rpt-legend-row">
-                <span className="rpt-legend-dot" style={{ background: categoryStyle(c.key).bar }} />
+                <span className="rpt-legend-dot" style={{ background: colorOf(c.key).chart }} />
                 <CatIcon category={c.key} size={24} />
                 <span className="rpt-legend-name">{categoryStyle(c.key).name}</span>
                 <strong className="rpt-legend-pct">{percent(c.value, total)}</strong>

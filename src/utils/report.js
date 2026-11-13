@@ -16,7 +16,9 @@ import { categoryKeyOf } from "./category";
  */
 export const fromDbRow = (row) => ({
   id: Number(row.id),
-  category: categoryKeyOf(row.categories?.name), // "구독 서비스" → "sub"
+  // DB 카테고리의 key("home", "sub" ...)를 그대로 써요
+  // (이름은 "주거·공과"처럼 화면 이름과 달라서 이름으로 찾으면 "기타"가 돼요. key가 없을 때만 이름으로 찾아요)
+  category: row.categories?.key || categoryKeyOf(row.categories?.name),
   name: row.name,
   amount: row.amount,
   amountType: row.amount_type === "변동" ? "variable" : "fixed",

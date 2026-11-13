@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 import { Doughnut, Line } from "react-chartjs-2";
 import { categoryStyle } from "../../constants/categories";
+import { useCategoryColors } from "../../hooks/useCategoryColors";
 
 // 쓰는 부품만 등록해요
 ChartJS.register(ArcElement, LineElement, PointElement, CategoryScale, LinearScale);
@@ -30,27 +31,30 @@ const GRID = "#E3EAF0";
 
 /* ═════════ 도넛 ═════════ */
 // cats: [{ key, value }] (큰 순서)
-export const CategoryDonut = ({ cats }) => (
-  <Doughnut
-    data={{
-      labels: cats.map((c) => categoryStyle(c.key).name),
-      datasets: [
-        {
-          data: cats.map((c) => c.value),
-          backgroundColor: cats.map((c) => categoryStyle(c.key).bar),
-          borderColor: "#fff", // 조각 사이 흰 틈
-          borderWidth: 2,
-        },
-      ],
-    }}
-    options={{
-      cutout: "65%", // 시안: 바깥 반지름 126 / 안쪽 82
-      events: [],
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { enabled: false } },
-    }}
-  />
-);
+export const CategoryDonut = ({ cats }) => {
+  const colorOf = useCategoryColors(); // DB 색
+  return (
+    <Doughnut
+      data={{
+        labels: cats.map((c) => categoryStyle(c.key).name),
+        datasets: [
+          {
+            data: cats.map((c) => c.value),
+            backgroundColor: cats.map((c) => colorOf(c.key).chart),
+            borderColor: "#fff", // 조각 사이 흰 틈
+            borderWidth: 2,
+          },
+        ],
+      }}
+      options={{
+        cutout: "65%", // 시안: 바깥 반지름 126 / 안쪽 82
+        events: [],
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      }}
+    />
+  );
+};
 
 /* ═════════ 꺾은선 ═════════ */
 

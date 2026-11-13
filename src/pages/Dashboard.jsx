@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cycleText, nextPayments, openAddItem, useItems } from "../utils/items";
+import { useCategoryColors, dashCatVars } from "../hooks/useCategoryColors";
 import { MONTH, TODAY, catClass, ddayText, payByDay, toCard, useDashData } from "../utils/dashboard";
-import { useCountUp } from "../utils/useCountUp";
+import { useCountUp } from "../hooks/useCountUp";
 import { loadBudget } from "../utils/budget";
 import { comma as won } from "../utils/format";
 import { LINE_ICON as line, MAX_CARDS, MAX_LINES } from "../constants/dashboard";
@@ -17,6 +18,7 @@ import "../styles/dashboard.css";
 function TotalCard({ data }) {
   const { mode, cats, total, count } = data;
   const shown = useCountUp(total);
+  const colorOf = useCategoryColors(); // DB 색
   const filled = cats.filter((c) => c.amount > 0);
   return (
     <section className="gk-rise gk-dash-total">
@@ -51,12 +53,12 @@ function TotalCard({ data }) {
               <div role="img" aria-label={filled.map((c) => `${c.name} ${won(c.amount)}원`).join(", ")} className="gk-reveal gk-dash-stack">
                 {filled.map((c) => (
                   // 막대 길이는 금액 비율이라 CSS 변수(--grow)로만 넘겨요
-                  <span key={c.key} title={`${c.name} ${won(c.amount)}원 · ${Math.round((c.amount / total) * 100)}%`} className={`gk-dash-stack__part ${catClass(c.key)}`} style={{ "--grow": c.amount }} />
+                  <span key={c.key} title={`${c.name} ${won(c.amount)}원 · ${Math.round((c.amount / total) * 100)}%`} className={`gk-dash-stack__part ${catClass(c.key)}`} style={{ "--grow": c.amount, ...dashCatVars(colorOf(c.key)) }} />
                 ))}
               </div>
               <div className="gk-fade gk-dash-legend">
                 {filled.map((c) => (
-                  <span key={c.key} className={`gk-dash-legend__item ${catClass(c.key)}`}>
+                  <span key={c.key} className={`gk-dash-legend__item ${catClass(c.key)}`} style={dashCatVars(colorOf(c.key))}>
                     <span className="gk-dash-legend__dot" />
                     {c.name}
                   </span>
@@ -75,8 +77,9 @@ function CategoryCard({ c, total, onOpen }) {
   const pct = total ? Math.round((c.amount / total) * 100) : 0;
   const shown = c.list.slice(0, MAX_LINES);
   const rest = c.list.length - shown.length;
+  const colorOf = useCategoryColors(); // DB 색
   return (
-    <div className={`gk-rise gk-cat-card ${catClass(c.key)}`} role="button" tabIndex={0} onClick={onOpen} onKeyDown={(e) => e.key === "Enter" && onOpen()}>
+    <div className={`gk-rise gk-cat-card ${catClass(c.key)}`} style={dashCatVars(colorOf(c.key))} role="button" tabIndex={0} onClick={onOpen} onKeyDown={(e) => e.key === "Enter" && onOpen()}>
       <div className="gk-cat-card__head">
         <span className="gk-cat-card__icon">
           <Icon name={c.icon} />
@@ -251,6 +254,7 @@ function BudgetCard({ data }) {
 function CalendarCard() {
   const navigate = useNavigate();
   const items = useItems();
+  const colorOf = useCategoryColors(); // DB 색
   const [view, setView] = useState({ year: TODAY.year, month: TODAY.month });
   const [dir, setDir] = useState(null); // "next" | "prev" | null
 
@@ -344,7 +348,7 @@ function CalendarCard() {
           </div>
         )}
         {upcoming.map((u) => (
-          <a key={u.key ?? u.day} href="/calendar" onClick={(e) => { e.preventDefault(); navigate("/calendar", { state: { year: TODAY.year, month: u.month, day: u.payDay } }); }} className={`gk-rise gk-cal-up ${catClass(u.cat.key)}`}>
+          <a key={u.key ?? u.day} href="/calendar" onClick={(e) => { e.preventDefault(); navigate("/calendar", { state: { year: TODAY.year, month: u.month, day: u.payDay } }); }} className={`gk-rise gk-cal-up ${catClass(u.cat.key)}`} style={dashCatVars(colorOf(u.cat.key))}>
             <span className="gk-cal-up__date">
               <span className="gk-cal-up__month">{u.month}월</span>
               <b className="gk-cal-up__day">{u.payDay}</b>
