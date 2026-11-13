@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { getUser, useUser } from "./auth";
-import { dateKey, todayKey } from "./date";
+import { dateKey, getToday, todayKey } from "./date";
 
 /*
  * 사람마다 등록한 고정지출 항목을 브라우저에 따로 저장해요.
@@ -211,8 +211,7 @@ export const takeLoginReason = () => {
 
 /** 첫 결제일 키 ("2026-11-20"): 오늘부터 고른 결제일·요일·월에 맞는 가장 가까운 날 (DB start_date로 저장해요) */
 export function firstPayKey(item) {
-  const t = new Date();
-  const today = { year: t.getFullYear(), month: t.getMonth() + 1, day: t.getDate() };
+  const today = getToday();
   const start = todayKey();
   const first = nextPayments([{ ...item, start }], today, 1)[0];
   return first ? dateKey(first.date) : start;

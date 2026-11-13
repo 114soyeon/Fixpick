@@ -1,11 +1,5 @@
 /* 내 고정지출(Fix)·상세(FixDetail)에서 쓰는 날짜·금액 변환 함수 */
 
-// 오늘 날짜 → { year, month(1~12), day } (utils/items.js 함수들이 받는 모양)
-export const getToday = () => {
-  const t = new Date();
-  return { year: t.getFullYear(), month: t.getMonth() + 1, day: t.getDate() };
-};
-
 // "11월 5일" 또는 "2027년 3월 4일" → Date
 export const toDate = (text) => {
   if (!text) return null;

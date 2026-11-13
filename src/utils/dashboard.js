@@ -1,12 +1,12 @@
 import { BIG, CATEGORIES } from "../constants/dashboard";
 import { comma } from "./format";
 import { amountIn, cycleText, payDaysIn, paysIn, useItems } from "./items";
+import { getToday } from "./date";
 
 /* 메인(대시보드) 계산 */
 
 /* 이번 달 (실제 날짜로 자동) */
-const now = new Date();
-export const TODAY = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+export const TODAY = getToday(); // 페이지 파일을 처음 불러올 때 한 번 정해져요
 export const MONTH = TODAY.month;
 const monthAgo = (n) => ((MONTH - n - 1 + 120) % 12) + 1; // n달 전이 몇 월인지
 

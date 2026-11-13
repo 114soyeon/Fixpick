@@ -20,7 +20,7 @@ import { bigPayments, isEnded, payDaysIn, paymentsInMonth, useItems } from "../u
 import { useMySub } from "../queries/subs";
 import { fromDbRow } from "../utils/dbItem";
 import { useCategoryColors } from "../hooks/useCategoryColors";
-import { dateKey, isSameDay } from "../utils/date";
+import { dateKey, getToday, isSameDay } from "../utils/date";
 import { categoryStyle } from "../constants/categories";
 import PayCalendar from "../components/calendar/PayCalendar";
 import SummaryCard from "../components/calendar/SummaryCard";
@@ -57,7 +57,7 @@ const Calendar = () => {
   // 오늘 (시간 0시 기준)
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const today = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+  const today = getToday();
 
   // ① 지금 보이는 달에 실제로 나가는 결제 (규칙 → 실제 날짜)
   const monthPayments = paymentsInMonth(items, viewYear, viewMonth);

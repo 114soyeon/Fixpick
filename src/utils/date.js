@@ -1,5 +1,11 @@
 /* 날짜 키("2026-11-09") 만들기·보여주기 */
 
+/** 오늘 → { year, month(1~12), day } (utils/items.js 함수들이 받는 모양). 부를 때마다 새로 계산해요 */
+export const getToday = () => {
+  const t = new Date();
+  return { year: t.getFullYear(), month: t.getMonth() + 1, day: t.getDate() };
+};
+
 export const pad2 = (n) => String(n).padStart(2, "0");
 
 /** m: 1~12 */
