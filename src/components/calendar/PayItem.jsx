@@ -1,13 +1,15 @@
 /*
  * 결제 캘린더 오른쪽 목록의 결제 한 줄
  * [아이콘 박스] 이름(+보조 문구) ....... 금액
- * 아이콘·색은 카테고리(constants/categories.js)에서 가져와요
+ * 아이콘은 constants/categories.js, 색(bg, color)은 DB categories(hooks/useCategoryColors.js)에서 가져와요
  */
 import { amountText } from "../../utils/format";
 import { categoryStyle } from "../../constants/categories";
+import { useCategoryColors } from "../../hooks/useCategoryColors";
 
 const PayItem = ({ item, sub }) => {
-  const { icon: Icon, color, bg } = categoryStyle(item.category);
+  const { icon: Icon } = categoryStyle(item.category);
+  const { color, bg } = useCategoryColors()(item.category); // DB 색
   return (
     <li className="paycal-item">
       <span className="paycal-item-icon" style={{ background: bg }}>

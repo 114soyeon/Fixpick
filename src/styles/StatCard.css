@@ -1,0 +1,77 @@
+/* =========================================================
+   요약 카드 (components/common/StatCard.jsx)
+   - 기본 모양은 지출 리포트 맨 위 카드 그대로예요
+   - 화면마다 크기가 다르면 그 화면 CSS에서 덮어써요
+     (예: Fix.css → .summary-cards .stat-card)
+   ========================================================= */
+.stat-card {
+  display: flex;
+  align-items: flex-start; /* 왼쪽 글자 묶음 + 오른쪽 배지 */
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px 22px;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid #e3eaf0;
+  border-radius: 18px;
+  color: #0b2a45;
+}
+
+/* 강조 카드: 연한 파랑, 테두리도 같은 색 */
+.stat-card.is-highlight {
+  background: #dceffd;
+  border-color: #dceffd;
+}
+
+/* 왼쪽 글자 묶음 (소제목 / 값 / 설명) */
+.stat-card-body {
+  flex: 1;
+  min-width: 0; /* 값이 길면 ... 으로 줄이려고 */
+}
+
+.stat-card-label {
+  font-size: 16px;
+  color: #52637a;
+}
+/* 소제목 오른쪽 비교 기간: "작년보다 (2025년 1~11월)" */
+.stat-card-period {
+  margin-left: 6px;
+  font-size: 12px;
+}
+
+.stat-card-value {
+  margin-top: 2px;
+  font-size: 26px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 줄어든 금액 (초록) */
+.stat-card-value.is-down {
+  color: #067647;
+}
+
+.stat-card-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #52637a;
+}
+
+/* 강조 카드 안의 작은 글자는 조금 진하게 */
+.stat-card.is-highlight .stat-card-label,
+.stat-card.is-highlight .stat-card-sub {
+  color: #3b4d63;
+}
+
+/* 오른쪽 배지 (예: "1월") */
+.stat-card-badge {
+  flex-shrink: 0;
+  background-color: #102f4b;
+  color: #fff;
+  border-radius: 20px;
+  padding: 7px 20px;
+  font-size: 12px;
+  font-weight: 600;
+}

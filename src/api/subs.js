@@ -2,7 +2,7 @@ import { supabase } from "../lib/supabase";
 
 // 카테고리를 가져와야 함
 export const getCategories = async () => {
-    const {data} = await supabase.from("categories").select("id, name, color, tint").order("id", { ascending: true });
+    const {data} = await supabase.from("categories").select("*").order("id", { ascending: true });
     return data;
 }
 
@@ -27,7 +27,7 @@ export const getMySubs = async () => {
         id, user_id, category_id, name, amount, cycle, amount_type,
         day, month, week, custom_number, custom_text,
         start_date, expiry_date, pay_method, memo, remind,
-        categories ( id, name, icon, color, tint, key, bg )
+        categories ( id, name, icon, color, chart, key, bg )
     `).order("created_at", { ascending: false });
     if (error) {
         console.error("내 고정지출 조회 실패:", error);
