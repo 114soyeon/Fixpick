@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { getUser } from "./auth";
+import { getUser } from "../auth/auth";
 
 /*
  * 설정(알림·예산·결제 수단)을 사람마다 브라우저에 저장해요.

@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
-import { useAuthStore } from "../store/authStore";
-import { signOut } from "../api/auth";
+import { useAuthStore } from "../../store/authStore";
+import { signOut } from "../../api/auth";
 
 /*
  * 로그인 정보를 저장하는 도구예요.

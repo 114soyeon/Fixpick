@@ -8,17 +8,17 @@ import PaymentInfoCard from "../components/fix-detail/PaymentInfoCard.jsx";
 import HeroCard from "../components/fix-detail/HeroCard.jsx";
 import MemoCard from "../components/fix-detail/MemoCard.jsx";
 import EndDateCard from "../components/fix-detail/EndDateCard.jsx";
-import { DEFAULT_AMOUNT_TYPE } from "../utils/fixConstants";
-import { toInputDate } from "../utils/fixFormat";
-import { getAmountHistory, getPayMethods } from "../utils/fixCalculations";
-import { useFixItems } from "../utils/fixItems";
+import { DEFAULT_AMOUNT_TYPE } from "../constants/fix";
+import { toInputDate } from "../utils/date";
+import { getAmountHistory, getPayMethods } from "../utils/fix/fixCalculations";
+import { useFixItems } from "../utils/fix/fixItems";
 import { useMySub } from "../queries/subs";
 import {
   deleteFixItem,
   saveEdit,
   saveMemo,
   toEditedFields,
-} from "../utils/fixStorage";
+} from "../utils/fix/fixStorage";
 
 const FixDetail = () => {
   const navigate = useNavigate();

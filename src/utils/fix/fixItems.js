@@ -1,10 +1,9 @@
-import { monthAmount, nextPayments } from "./items";
-import { CATEGORY_NAMES } from "./fixConstants";
-import { dateToKorean, keyToDate } from "./fixFormat";
-import { getToday } from "./date";
+import { monthAmount, nextPayments } from "../items";
+import { CATEGORY_NAMES } from "../../constants/fix";
+import { dateToKorean, getToday, keyToDate } from "../date";
 import { loadEdits } from "./fixStorage";
-import { fromDbRow } from "./dbItem";
-import { useMySub } from "../queries/subs";
+import { fromDbRow } from "../dbItem";
+import { useMySub } from "../../queries/subs";
 
 /* 내 고정지출 목록(Fix)과 상세(FixDetail)가 같이 쓰는 데이터 */
 

@@ -7,9 +7,9 @@
 import { useState } from "react";
 import "../styles/setting.css";
 
-import { useUser } from "../utils/auth";
+import { useUser } from "../utils/auth/auth";
 import { useItems } from "../utils/items";
-import { addMethod, useSetting } from "../utils/setting";
+import { addMethod, useSetting } from "../utils/setting/setting";
 import ProfileCard from "../components/setting/ProfileCard";
 import AlertCard from "../components/setting/AlertCard";
 import BudgetCard from "../components/setting/BudgetCard";

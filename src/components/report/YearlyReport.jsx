@@ -11,7 +11,7 @@ import {
   endedInYear,
   paymentsInYear,
   sumValue,
-} from "../../utils/report";
+} from "../../utils/report/report";
 import { monthAmount } from "../../utils/items"; // 한 달 금액 (매년 ÷12, 나머지는 이번 달 실제 횟수)
 import { scheduleText, signedWon, won } from "../../utils/format";
 import { categoryStyle } from "../../constants/categories";

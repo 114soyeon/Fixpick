@@ -1,6 +1,6 @@
 /*
  * 지출 리포트: 카테고리 비율 카드 (왼쪽 도넛 + 오른쪽 목록) — 월간·연간 같이 써요
- * - cats: 카테고리별 합계, 큰 순서 [{ key, value }] (utils/report.js byCategory)
+ * - cats: 카테고리별 합계, 큰 순서 [{ key, value }] (utils/report/report.js byCategory)
  * - total: 전체 합계 (비율 계산용)
  */
 import { percent, won } from "../../utils/format";

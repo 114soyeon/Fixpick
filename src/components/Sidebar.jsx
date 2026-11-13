@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { initialOf } from "../utils/auth";
+import { initialOf } from "../utils/auth/auth";
 import { setLoginReason, useItems } from "../utils/items";
-import { buildNotifications, loadRead, saveRead } from "../utils/notifications";
+import { buildNotifications, loadRead, saveRead } from "../utils/sidebar/notifications";
 import { useAuthStore } from "../store/authStore";
 import { MENU_ITEMS } from "../constants/sidebar";
 import { LogoMark, Wordmark } from "./common/Logo";

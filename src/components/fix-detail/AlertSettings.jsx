@@ -3,7 +3,7 @@ import {
   ALERT_OPTIONS,
   DEFAULT_END_ALERT,
   DEFAULT_PAY_ALERT,
-} from "../../utils/fixConstants";
+} from "../../constants/fix";
 
 // 버튼 한 줄 (label: 왼쪽 글자, value: 선택된 값, onChange: 고를 때 실행)
 const AlertRow = ({ label, value, onChange }) => (

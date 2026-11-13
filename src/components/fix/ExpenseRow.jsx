@@ -1,8 +1,7 @@
 import { categoryIcons } from "../../constants/categories";
-import { dateToKorean } from "../../utils/fixFormat";
 import { monthAmount } from "../../utils/items";
 import { fromDbRow } from "../../utils/dbItem";
-import { getToday } from "../../utils/date";
+import { dateToKorean, getToday } from "../../utils/date";
 import { won } from "../../utils/format";
 import { getNextPaymentDate } from "../../utils/cycle";
 

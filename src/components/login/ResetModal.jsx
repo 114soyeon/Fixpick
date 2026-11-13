@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { emailExists } from "../../utils/auth";
+import { emailExists } from "../../utils/auth/auth";
 import { isValidEmail } from "../../utils/validate";
 
 /** 비밀번호 찾기 창 */

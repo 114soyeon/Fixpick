@@ -1,8 +1,8 @@
 /*
  * 지출 리포트 — 월간 화면 (pages/Report.jsx에서 "월간"일 때 보여줘요)
- * 매년 결제는 ÷12 해서 넣어요 (utils/report.js monthShare)
+ * 매년 결제는 ÷12 해서 넣어요 (utils/report/report.js monthShare)
  */
-import { byCategory, byItem, monthShare, monthsAgo, prevMonthOf, sumValue } from "../../utils/report";
+import { byCategory, byItem, monthShare, monthsAgo, prevMonthOf, sumValue } from "../../utils/report/report";
 import { scheduleText, signedWon, won } from "../../utils/format";
 import { categoryStyle } from "../../constants/categories";
 import StatCard from "../common/StatCard";

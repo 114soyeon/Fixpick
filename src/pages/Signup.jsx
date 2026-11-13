@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, ChevronRight, Eye, EyeOff } from "lucide-react";
 import { LogoMark, Wordmark } from "../components/common/Logo";
-import { emailExists } from "../utils/auth";
+import { emailExists } from "../utils/auth/auth";
 import { signup } from "../api/auth";
 import { DEMO_CODE, STEPS, STRENGTH, TERMS } from "../constants/signup";
 import { formatPhone, isValidEmail, isValidPhone, strengthOf } from "../utils/validate";

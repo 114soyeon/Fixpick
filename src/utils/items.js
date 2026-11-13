@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { getUser, useUser } from "./auth";
+import { getUser, useUser } from "./auth/auth";
 import { dateKey, getToday, todayKey } from "./date";
 
 /*

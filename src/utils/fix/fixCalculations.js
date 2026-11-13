@@ -1,7 +1,6 @@
-import { bigPayments } from "./items";
-import { SAVING_CATEGORY } from "./fixConstants";
-import { toDate } from "./fixFormat";
-import { getToday } from "./date";
+import { bigPayments } from "../items";
+import { SAVING_CATEGORY } from "../../constants/fix";
+import { getToday, toDate } from "../date";
 
 /** 한 달 고정지출 합계 (금융·저축 카테고리는 제외) */
 export const calculateFixedExpense = (items) =>

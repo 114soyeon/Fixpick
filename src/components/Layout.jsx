@@ -1,7 +1,7 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { PATHS } from "../constants/routes";
-import { logout } from "../utils/auth";
+import { logout } from "../utils/auth/auth";
 import "../styles/common.css";
 import { onAuthChange } from "../api/auth";
 import { useEffect, useRef } from "react"; // useRef : 값을 저장해 두었다가 나중에 다시 사용할 수 있도록 해주는 기능

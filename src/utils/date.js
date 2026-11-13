@@ -53,3 +53,34 @@ export const leftText = (key) => {
   const months = (y - t.getFullYear()) * 12 + (m - 1 - t.getMonth()) - (d < t.getDate() ? 1 : 0);
   return months >= 12 ? `${Math.floor(months / 12)}년${months % 12 ? ` ${months % 12}개월` : ""} 남음` : `${months}개월 남음`;
 };
+
+/* ── 아래는 utils/fixFormat.js 에서 옮겨 왔어요 (내 고정지출·상세에서 사용) ── */
+
+/** "11월 5일" 또는 "2027년 3월 4일" → Date (못 읽으면 null) */
+export const toDate = (text) => {
+  if (!text) return null;
+  const match = text.match(/(?:(\d{4})년 )?(\d{1,2})월 (\d{1,2})일/);
+  if (!match) return null;
+  const year = Number(match[1] || new Date().getFullYear());
+  return new Date(year, Number(match[2]) - 1, Number(match[3]));
+};
+
+/** "2027-03-04" → Date (비어 있으면 null) */
+export const keyToDate = (key) => {
+  if (!key) return null;
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
+/** Date → "11월 5일" (올해) / "2027년 3월 4일" (다른 해) */
+export const dateToKorean = (date) => {
+  if (!date) return "";
+  const md = `${date.getMonth() + 1}월 ${date.getDate()}일`;
+  return date.getFullYear() === new Date().getFullYear() ? md : `${date.getFullYear()}년 ${md}`;
+};
+
+/** "2027년 3월 4일" → "2027-03-04" (수정 팝업의 날짜 칸용) */
+export const toInputDate = (text) => {
+  const date = toDate(text);
+  return date ? dateKey(date) : "";
+};

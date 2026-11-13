@@ -1,7 +1,7 @@
 import {
   getDaysUntilEnd,
   getEndProgressLevel,
-} from "../../utils/fixCalculations";
+} from "../../utils/fix/fixCalculations";
 
 // startDate: 시작일, endDate: 만기일 ("2027년 3월 4일" 형태 글자)
 // 진행 막대 길이는 FixDetail.css 의 .end-progress-fill--<0~10> 클래스로 정해요

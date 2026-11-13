@@ -1,7 +1,7 @@
-import { BIG, CATEGORIES } from "../constants/dashboard";
-import { comma } from "./format";
-import { amountIn, cycleText, payDaysIn, paysIn, useItems } from "./items";
-import { getToday } from "./date";
+import { BIG, CATEGORIES } from "../../constants/dashboard";
+import { comma } from "../format";
+import { amountIn, cycleText, payDaysIn, paysIn, useItems } from "../items";
+import { getToday } from "../date";
 
 /* 메인(대시보드) 계산 */
 

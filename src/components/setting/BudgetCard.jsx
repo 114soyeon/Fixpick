@@ -7,7 +7,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { Wallet } from "lucide-react";
-import { saveSetting } from "../../utils/setting";
+import { saveSetting } from "../../utils/setting/setting";
 import { comma } from "../../utils/format";
 import { BUDGETS } from "../../constants/setting";
 import CardHead from "./CardHead";
