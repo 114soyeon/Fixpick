@@ -119,12 +119,27 @@
   border: 0;
 }
 
+/* 표 배경·모서리 (FullCalendar 테마를 빼서 직접 넣어요) */
+.paycal-calendar .paycal-table {
+  background: #fff;
+  overflow: hidden;
+}
+
 /* 요일 (일 월 화 ...) */
 .paycal-calendar .paycal-dayhead {
   padding: 4px 0 12px;
   font-size: 14px;
   font-weight: 600;
   color: var(--paycal-gray);
+  /* 글자를 칸 가운데에 (테마를 빼서 직접 넣어요)
+     이 칸은 세로 방향 flex라서 가로 가운데는 align-items예요
+     FullCalendar 기본 CSS(skeleton.css)가 align-items: flex-start !important라서 여기도 !important 필요 */
+  align-items: center !important;
+  line-height: 21px;
+}
+/* 요일 글자를 감싼 요소: 위 여백 8px (테마를 빼서 직접 넣어요) */
+.paycal-calendar .paycal-dayhead > * {
+  padding: 8px 8px 0;
 }
 
 /* ───── 달력 날짜 칸 (dayCellClass로 붙인 class) ─────
@@ -142,6 +157,7 @@
 /* 날짜 숫자 왼쪽 위 (FullCalendar 기본은 오른쪽 위)
    칸 모서리에서 6px → 칩 왼쪽 끝(좌우 margin 6px)과 세로줄이 맞아요 */
 .paycal-calendar .paycal-day-top {
+  display: flex;
   justify-content: flex-start;
   text-align: left;
   padding: 6px 6px 6px;
@@ -149,8 +165,14 @@
   margin-bottom: -4px;
   flex-shrink: 0; /* 창이 낮아 칸이 좁아져도 숫자 자리는 눌리지 않게 (줄어드는 건 칩 영역만) */
 }
-/* 테마가 숫자를 감싼 요소: 바깥 여백(6px)을 없애고 → 위 padding만으로 위치를 정해요
-   칸이 작아지면 테마가 이 요소를 20px로 줄여서 24px 숫자가 위로 삐져나와요 → 높이 고정 */
+/* FullCalendar가 숫자를 감싼 요소: 바깥 여백을 없애고 → 위 padding만으로 위치를 정해요 (높이는 숫자 크기대로)
+   줄 높이는 PayCalendar.jsx의 dayCellTopInnerClass로 붙여요 (칸이 좁으면 줄여요, 테마를 빼서 직접 넣어요) */
+.paycal-calendar .paycal-day-top-inner {
+  line-height: 1.4286;
+}
+.paycal-calendar .paycal-day-top-inner-narrow {
+  line-height: 1.0909;
+}
 .paycal-calendar .paycal-day-top > * {
   margin: 0;
   height: auto;
@@ -175,11 +197,8 @@
   color: #fff;
   border-radius: 50%;
 }
-/* 선택한 날짜: 파란 테두리 + 연한 배경 */
-.paycal-calendar .paycal-day-selected {
-  box-shadow: inset 0 0 0 2px var(--paycal-blue);
-  border-radius: 13px;
-}
+/* 선택한 날짜: 파란 테두리 → components/calendar/PayCalendar.jsx 의 <style>에 있어요
+   (선택한 날짜에 따라 바뀌어서 JSX에서 그려요) */
 
 /* 칸에 다 안 들어가도 "+n개"는 숨겨요 (날짜를 누르면 오른쪽 카드에 전부 나와요) */
 .paycal-calendar .paycal-more {
@@ -208,6 +227,17 @@
   font-size: 13px;
   font-weight: 500;
   overflow: hidden;
+}
+/* 칩을 감싼 요소: 위아래 여백 + 줄 높이 (PayCalendar.jsx의 rowEventInnerClass로 붙여요)
+   테마를 빼서 직접 넣어요. 칸이 좁으면(FullCalendar가 isNarrow로 알려줘요) 여백을 줄여요
+   넓은 칸: 위아래 2px → 칩 사이 간격 8px (useChipsPerDay.js의 row 33px) */
+.paycal-calendar .paycal-event-inner {
+  padding-block: 2px;
+  line-height: 1.3333;
+}
+.paycal-calendar .paycal-event-inner-narrow {
+  padding-block: 1px;
+  line-height: 1.0909;
 }
 .paycal-event-icon {
   flex-shrink: 0;
