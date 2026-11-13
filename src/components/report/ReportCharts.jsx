@@ -14,8 +14,7 @@ import {
   LinearScale,
 } from "chart.js";
 import { Doughnut, Line } from "react-chartjs-2";
-import { categoryStyle } from "@/constants/categories";
-import { useCategoryColors } from "@/hooks/useCategoryColors";
+import { useCategoryOf } from "@/hooks/useCategoryOf";
 
 // 쓰는 부품만 등록해요
 ChartJS.register(ArcElement, LineElement, PointElement, CategoryScale, LinearScale);
@@ -32,15 +31,15 @@ const GRID = "#E3EAF0";
 /* ═════════ 도넛 ═════════ */
 // cats: [{ key, value }] (큰 순서)
 export const CategoryDonut = ({ cats }) => {
-  const colorOf = useCategoryColors(); // DB 색
+  const catOf = useCategoryOf(); // DB 이름·색
   return (
     <Doughnut
       data={{
-        labels: cats.map((c) => categoryStyle(c.key).name),
+        labels: cats.map((c) => catOf(c.key).name),
         datasets: [
           {
             data: cats.map((c) => c.value),
-            backgroundColor: cats.map((c) => colorOf(c.key).chart),
+            backgroundColor: cats.map((c) => catOf(c.key).chart),
             borderColor: "#fff", // 조각 사이 흰 틈
             borderWidth: 2,
           },

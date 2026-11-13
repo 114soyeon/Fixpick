@@ -4,7 +4,7 @@ import { cycleText, nextPayments } from "@/utils/common/payment";
 import { openAddItem } from "@/utils/common/addItemFlow";
 import { useMySub } from "@/queries/subs";
 import { fromDbRow } from "@/utils/common/dbItem";
-import { useCategoryColors, dashCatVars } from "@/hooks/useCategoryColors";
+import { useCategoryOf, dashCatVars } from "@/hooks/useCategoryOf";
 import { ddayText } from "@/utils/common/date";
 import { MONTH, TODAY, catClass, dashData, payByDay, toCard } from "@/utils/dashboard/dashboard";
 import { useCountUp } from "@/hooks/useCountUp";
@@ -22,7 +22,7 @@ import "@/styles/dashboard.css";
 function TotalCard({ data }) {
   const { mode, cats, total, count } = data;
   const shown = useCountUp(total);
-  const colorOf = useCategoryColors(); // DB 색
+  const colorOf = useCategoryOf(); // DB 색
   const filled = cats.filter((c) => c.amount > 0);
   return (
     <section className="gk-rise gk-dash-total">
@@ -81,7 +81,7 @@ function CategoryCard({ c, total, onOpen }) {
   const pct = total ? Math.round((c.amount / total) * 100) : 0;
   const shown = c.list.slice(0, MAX_LINES);
   const rest = c.list.length - shown.length;
-  const colorOf = useCategoryColors(); // DB 색
+  const colorOf = useCategoryOf(); // DB 색
   return (
     <div className={`gk-rise gk-cat-card ${catClass(c.key)}`} style={dashCatVars(colorOf(c.key))} role="button" tabIndex={0} onClick={onOpen} onKeyDown={(e) => e.key === "Enter" && onOpen()}>
       <div className="gk-cat-card__head">
@@ -258,7 +258,7 @@ function BudgetCard({ data }) {
 // items: DB에서 읽은 내 고정지출 (페이지에서 받아요)
 function CalendarCard({ items }) {
   const navigate = useNavigate();
-  const colorOf = useCategoryColors(); // DB 색
+  const colorOf = useCategoryOf(); // DB 색
   const [view, setView] = useState({ year: TODAY.year, month: TODAY.month });
   const [dir, setDir] = useState(null); // "next" | "prev" | null
 

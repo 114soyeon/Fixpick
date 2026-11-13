@@ -4,7 +4,7 @@
  */
 import { byCategory, byItem, monthShare, monthsAgo, prevMonthOf, sumValue } from "@/utils/report/report";
 import { scheduleText, signedWon, won } from "@/utils/common/format";
-import { categoryStyle } from "@/constants/categories";
+import { useCategoryOf } from "@/hooks/useCategoryOf";
 import StatCard from "@/components/common/StatCard";
 import DiffValue from "@/components/report/DiffValue";
 import CategoryCard from "@/components/report/CategoryCard";
@@ -13,6 +13,7 @@ import CatIcon from "@/components/report/CatIcon";
 
 // loading: DB에서 아직 불러오는 중이면 true → 금액 대신 "-" (0원이 잠깐 보이지 않게)
 const MonthlyReport = ({ items, year, month, loading }) => {
+  const catOf = useCategoryOf(); // DB 카테고리 이름
   const [py, pm] = prevMonthOf(year, month);
 
   // 이번 달·지난달 금액 (매년 결제는 ÷12 해서 넣어요)
@@ -107,7 +108,7 @@ const MonthlyReport = ({ items, year, month, loading }) => {
                     <td className="rpt-col-cat">
                       <span className="rpt-table-cat">
                         <CatIcon category={r.key} size={26} />
-                        {categoryStyle(r.key).name}
+                        {catOf(r.key).name}
                       </span>
                     </td>
                     <td className="rpt-col-num rpt-muted">{won(r.before)}</td>

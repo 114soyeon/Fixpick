@@ -6,9 +6,8 @@ import StatCard from "@/components/common/StatCard";
 import ExpenseRow from "@/components/fix/ExpenseRow";
 import { useFixItems, useRawFixItems } from "@/hooks/useFixItems";
 import { calculateFixedExpense, calculateMonthlySavings, getUpcomingExpense } from "@/utils/fix/fixCalculations";
-import { useMySub } from "@/queries/subs";
-import { ALL_CATEGORY, CATEGORY_NAMES, DEFAULT_SORT, FIX_CATEGORIES, SORT_OPTIONS } from "@/constants/fix";
-import { categoryKeyOf } from "@/utils/common/category";
+import { useCategories, useMySub } from "@/queries/subs";
+import { ALL_CATEGORY, DEFAULT_SORT, SORT_OPTIONS } from "@/constants/fix";
 import { nextPayDate } from "@/utils/common/payment";
 import { fromDbRow } from "@/utils/common/dbItem";
 import { won } from "@/utils/common/format";
@@ -23,6 +22,9 @@ const Fix = () => {
   const allItems = useFixItems();
 
   const { data: subs } = useMySub();
+  // 카테고리 필터 버튼: "전체" + DB 카테고리 이름들
+  const { data: categories } = useCategories();
+  const filterNames = [ALL_CATEGORY, ...(categories ?? []).map((c) => c.name)];
   const rawItems = useRawFixItems();
 
   // 다음 결제일을 숫자로 (계산 안 되면 0 → 목록 맨 뒤로)
@@ -34,8 +36,7 @@ const Fix = () => {
   const visibleRows = (subs ?? [])
     .filter((row) => {
       if (selectedCategory === ALL_CATEGORY) return true;
-      const key = row.categories?.key ?? categoryKeyOf(row.categories?.name);
-      return CATEGORY_NAMES[key] === selectedCategory;
+      return row.categories?.name === selectedCategory; // DB 카테고리 이름으로 비교
     })
     .sort((a, b) => {
       switch (sortOrder) {
@@ -87,7 +88,7 @@ const Fix = () => {
       {/* 카테고리 및 정렬 */}
       <section className="filter-area">
         <div className="category-list">
-          {FIX_CATEGORIES.map((category) => (
+          {filterNames.map((category) => (
             <button
               key={category}
               className={

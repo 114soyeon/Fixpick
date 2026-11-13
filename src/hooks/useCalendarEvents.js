@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { isEnded, payDaysIn } from "@/utils/common/payment";
 import { dateKey } from "@/utils/common/date";
-import { categoryStyle } from "@/constants/categories";
 
 /*
  * 결제 캘린더 달력에 그릴 일정 (FullCalendar 형식)
@@ -11,9 +10,9 @@ import { categoryStyle } from "@/constants/categories";
  * - useMemo: 데이터·보이는 달·색이 바뀔 때만 다시 만들어요
  *   (날짜를 클릭할 때마다 새로 만들면 FullCalendar가 칩을 전부 다시 그려서 느려져요)
  *
- * 사용법: const events = useCalendarEvents(dbItems, 2026, 11, colorOf);
+ * 사용법: const events = useCalendarEvents(dbItems, 2026, 11, catOf);  (catOf: hooks/useCategoryOf.js)
  */
-export function useCalendarEvents(dbItems, viewYear, viewMonth, colorOf) {
+export function useCalendarEvents(dbItems, viewYear, viewMonth, catOf) {
   return useMemo(
     () =>
       [-1, 0, 1]
@@ -28,17 +27,16 @@ export function useCalendarEvents(dbItems, viewYear, viewMonth, colorOf) {
           );
         })
         .map((p) => {
-          const style = categoryStyle(p.category);
-          const c = colorOf(p.category); // 이 카테고리 색 { chart, color, bg }
+          const c = catOf(p.category); // 이 카테고리 정보 (DB: 아이콘·색)
           const date = dateKey(p.date); // "2026-11-25"
           return {
             id: `${p.id}-${date}`, // 같은 항목이 여러 날에 나와서 날짜까지 붙여요
             title: p.name,
             date,
             allDay: true,
-            extendedProps: { icon: style.icon, color: c.color, bg: c.bg },
+            extendedProps: { icon: c.icon, color: c.color, bg: c.bg },
           };
         }),
-    [dbItems, viewYear, viewMonth, colorOf],
+    [dbItems, viewYear, viewMonth, catOf],
   );
 }

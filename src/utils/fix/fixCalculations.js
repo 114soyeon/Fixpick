@@ -1,17 +1,19 @@
 import { bigPayments } from "@/utils/common/payment";
-import { SAVING_CATEGORY } from "@/constants/fix";
 import { getToday, toDate } from "@/utils/common/date";
+
+// 저축으로 따로 계산하는 카테고리 (DB categories.key)
+const SAVING_KEY = "saving";
 
 /** 한 달 고정지출 합계 (금융·저축 카테고리는 제외) */
 export const calculateFixedExpense = (items) =>
   items
-    .filter((item) => item.category !== SAVING_CATEGORY)
+    .filter((item) => item.categoryKey !== SAVING_KEY)
     .reduce((total, item) => total + (Number(item.monthly) || 0), 0);
 
 /** 자동이체 저축 합계 (금융·저축 카테고리만) */
 export const calculateMonthlySavings = (items) =>
   items
-    .filter((item) => item.category === SAVING_CATEGORY)
+    .filter((item) => item.categoryKey === SAVING_KEY)
     .reduce((total, item) => total + (Number(item.monthly) || 0), 0);
 
 /**

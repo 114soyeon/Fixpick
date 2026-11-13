@@ -1,4 +1,4 @@
-import { categoryIcons } from "@/constants/categories";
+import { useCategoryOf } from "@/hooks/useCategoryOf";
 import { monthAmount, nextPayDate } from "@/utils/common/payment";
 import { fromDbRow } from "@/utils/common/dbItem";
 import { dateToKorean, getToday } from "@/utils/common/date";
@@ -28,7 +28,7 @@ const cycleLabel = (it) => {
 };
 
 const ExpenseRow = ({ item, onClick }) => {
-  const CategoryIcon = categoryIcons[item.categories.id];
+  const { icon: CategoryIcon } = useCategoryOf()(item.categories?.key); // DB 카테고리 아이콘 (모르는 key면 "기타")
 
   return (
     <div className="table-row" onClick={onClick}>

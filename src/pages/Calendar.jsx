@@ -19,7 +19,7 @@ import { bigPayments, paymentsInMonth } from "@/utils/common/payment";
 import { useItems } from "@/hooks/useItems";
 import { useMySub } from "@/queries/subs";
 import { fromDbRow } from "@/utils/common/dbItem";
-import { useCategoryColors } from "@/hooks/useCategoryColors";
+import { useCategoryOf } from "@/hooks/useCategoryOf";
 import { getToday, isSameDay } from "@/utils/common/date";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import PayCalendar from "@/components/calendar/PayCalendar";
@@ -52,7 +52,7 @@ const Calendar = () => {
   const { data: rows } = useMySub();
   // DB 한 줄 → 계산용 항목 (rows가 바뀔 때만 다시 바꿔요)
   const dbItems = useMemo(() => (rows ?? []).map(fromDbRow), [rows]);
-  const colorOf = useCategoryColors(); // 칩 아이콘 색 (DB categories)
+  const catOf = useCategoryOf(); // 칩 아이콘·색 (DB categories)
 
   // 오늘 (시간 0시 기준)
   const now = new Date();
@@ -64,7 +64,7 @@ const Calendar = () => {
 
   // ② 달력에 그릴 일정 (FullCalendar 형식, 앞뒤 달 포함) — hooks/useCalendarEvents.js
   //    데이터·보이는 달이 바뀔 때만 다시 만들어요 (날짜 클릭 때는 그대로 → 빨라요)
-  const events = useCalendarEvents(dbItems, viewYear, viewMonth, colorOf);
+  const events = useCalendarEvents(dbItems, viewYear, viewMonth, catOf);
 
   // ③ 선택한 날짜의 결제 목록 (선택한 날짜가 속한 달 기준으로 계산)
   const dayPayments = paymentsInMonth(items, selectedDate.getFullYear(), selectedDate.getMonth() + 1)

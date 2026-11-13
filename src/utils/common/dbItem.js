@@ -1,5 +1,3 @@
-import { categoryKeyOf } from "@/utils/common/category";
-
 /*
  * DB 한 줄(subscriptions, useMySub 결과) → 화면·계산에서 쓰는 항목 모양
  * 리포트·캘린더·내 고정지출이 같이 써요
@@ -7,9 +5,9 @@ import { categoryKeyOf } from "@/utils/common/category";
  */
 export const fromDbRow = (row) => ({
   id: Number(row.id),
-  // DB 카테고리의 key("home", "sub" ...)를 그대로 써요
-  // (이름은 "주거·공과"처럼 화면 이름과 달라서 이름으로 찾으면 "기타"가 돼요. key가 없을 때만 이름으로 찾아요)
-  category: row.categories?.key || categoryKeyOf(row.categories?.name),
+  // DB 카테고리 key("home", "sub" ...) — 아이콘·색·이름은 이 key로 찾아요 (hooks/useCategoryOf.js)
+  category: row.categories?.key ?? "etc",
+  categoryName: row.categories?.name ?? "", // DB 카테고리 이름 ("주거·공과" ...)
   name: row.name,
   amount: row.amount,
   amountType: row.amount_type === "변동" ? "variable" : "fixed",
