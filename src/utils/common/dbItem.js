@@ -23,4 +23,5 @@ export const fromDbRow = (row) => ({
   endDate: row.expiry_date,  // 만기일 (리포트에선 "해지")
   payMethod: row.pay_method, // 결제 수단 이름
   remind: row.remind,        // 결제 알림 받기
+  memo: row.memo,     // 메모
 });

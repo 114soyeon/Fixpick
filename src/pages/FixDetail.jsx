@@ -13,7 +13,6 @@ import { toInputDate } from "@/utils/common/date";
 import { getAmountHistory, getPayMethods } from "@/utils/fix/fixCalculations";
 import { useFixItems } from "@/hooks/useFixItems";
 import { useMySub, useUpdateSub, useDeleteSub } from "@/queries/subs";
-import { saveMemo } from "@/utils/fix/fixStorage";
 
 const FixDetail = () => {
   const navigate = useNavigate();
@@ -30,10 +29,13 @@ const FixDetail = () => {
   const { isLoading } = useMySub(); // 아직 불러오는 중인지
   const found = allItems.find((e) => e.id === Number(id));
 
-  // 메모는 브라우저에 "memo-<id>" 로 저장돼 있어요 (저장은 fixStorage.js saveMemo)
-  const [memo, setMemo] = useState(() => {
-    try { return localStorage.getItem(`memo-${id}`) ?? ""; } catch { return ""; }
-  });
+  // 메모: 기본값은 DB(found.memo), 입력 중에는 draft 사용
+  const [memoDraft, setMemoDraft] = useState(null);
+  const [prevId, setPrevId] = useState(id);
+  if (prevId !== id) { // 다른 항목으로 이동하면 원래 값으로
+    setPrevId(id);
+    setMemoDraft(null);
+  }
 
   // 불러오는 중
   if (isLoading) {
@@ -57,7 +59,7 @@ const FixDetail = () => {
   }
 
   // 화면에 보여줄 항목 = DB 항목 + 메모
-  const item = { ...found, memo };
+  const item = { ...found, memo: memoDraft ?? found.memo ?? "" };
 
   // 팝업에서 "저장"을 눌렀을 때 → DB에 저장
   const handleSave = (newInfo) => {
@@ -89,10 +91,14 @@ const FixDetail = () => {
   };
 
   // 메모 칸에 글자를 칠 때마다
-  const handleMemoChange = (e) => {
-    const newMemo = e.target.value;
-    setMemo(newMemo);
-    saveMemo(id, newMemo);
+  const handleMemoChange = (e) => setMemoDraft(e.target.value);
+
+  const handleMemoBlur = () => {
+    if (memoDraft == null || memoDraft === (found.memo ?? "")) return; // 안 바뀌었으면 스킵
+    updateSub.mutate(
+      { id: Number(id), data: { memo: memoDraft } },
+      { onError: () => window.alert("메모를 저장하지 못했어요. 다시 시도해 주세요") },
+    );
   };
 
   return (
@@ -119,7 +125,7 @@ const FixDetail = () => {
 
           <PaymentInfoCard item={item} onEdit={() => setIsModalOpen(true)} />
 
-          <MemoCard memo={item.memo} onChange={handleMemoChange} />
+          <MemoCard memo={item.memo} onChange={handleMemoChange} onBlur={handleMemoBlur} />
         </div>
 
         {/* 오른쪽 */}
