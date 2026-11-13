@@ -24,6 +24,8 @@ export function toFixItem(item) {
     method: item.payMethod || "",
     startDate: dateToKorean(keyToDate(item.start) || new Date(item.id)),
     endDate: dateToKorean(keyToDate(item.endDate)),
+    payAlertDays: item.payAlertDays,
+    endAlertDays: item.endAlertDays,
     memo: item.memo ?? "",
   };
 }

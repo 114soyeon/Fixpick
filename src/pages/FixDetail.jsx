@@ -132,7 +132,16 @@ const FixDetail = () => {
         <div className="detail-right">
           <AmountChart history={getAmountHistory(item)} />
 
-          <AlertSettings />
+          <AlertSettings
+            payDays={item.payAlertDays}
+            endDays={item.endAlertDays}
+            onChange={(patch) =>
+              updateSub.mutate(
+                { id: Number(id), data: patch },
+                { onError: () => window.alert("알림 설정을 저장하지 못했어요. 다시 시도해 주세요") },
+              )
+            }
+          />
 
           <EndDateCard startDate={item.startDate} endDate={item.endDate} />
         </div>
