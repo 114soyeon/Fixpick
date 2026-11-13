@@ -36,11 +36,3 @@ export const toInputDate = (text) => {
   const day = String(date.getDate()).padStart(2, "0");
   return `${date.getFullYear()}-${month}-${day}`;
 };
-
-// 주기에 따라 "한 달로 환산한 금액" 계산
-export const getMonthly = (amount, cycle) => {
-  if (cycle === "매년") return Math.round(amount / 12);
-  if (cycle === "매주") return Math.round((amount * 52) / 12);
-  if (cycle === "매일") return amount * 30;
-  return amount; // 매월(매달)
-};

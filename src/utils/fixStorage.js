@@ -1,6 +1,7 @@
 import { removeItem } from "./items";
-import { getMonthly } from "./fixFormat";
-import { prettyDate } from "./date";
+import { monthAmount } from "./items";
+import { keyToDate } from "./fixFormat";
+import { getToday, prettyDate } from "./date";
 
 /*
  * 상세 페이지에서 바꾼 내용을 브라우저(localStorage)에 저장해요.
@@ -24,11 +25,15 @@ export const loadEdits = () => readJson(EDITS_KEY, {});
 /** 수정 모달에서 받은 값 → 저장할 필드만 골라서 화면용 모양으로 */
 export const toEditedFields = (newInfo) => {
   const amount = Number(newInfo.amount);
+  // 한 달 금액 계산용: 다음 결제일("2026-11-25")에서 날짜·요일·월을 꺼내요
+  const next = keyToDate(newInfo.nextDate);
+  const rule = { amount, cycle: newInfo.cycle, day: next?.getDate(), weekday: next?.getDay(), month: next ? next.getMonth() + 1 : undefined };
+  const today = getToday();
   return {
     period: newInfo.cycle,
     amountType: newInfo.amountType,
     amount,
-    monthly: getMonthly(amount, newInfo.cycle),
+    monthly: monthAmount(rule, today.year, today.month), // 이번 달 금액 (매년은 ÷12)
     method: newInfo.method,
     startDate: prettyDate(newInfo.startDate),
     endDate: prettyDate(newInfo.endDate),

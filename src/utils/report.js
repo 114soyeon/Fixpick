@@ -74,9 +74,6 @@ export function byItem(list) {
   return [...map.values()].sort((a, b) => b.value - a.value);
 }
 
-/** 한 달에 나가는 금액으로 바꾸기 (매년 결제는 ÷ 12) */
-export const perMonth = (item) => (item.cycle === "매년" ? Math.round(item.amount / 12) : item.amount);
-
 /** 만기일(endDate) 문자열 → Date (없으면 null) */
 export const endDateOf = (item) => {
   if (!item.endDate) return null;

@@ -1,6 +1,6 @@
-import { nextPayments } from "./items";
+import { monthAmount, nextPayments } from "./items";
 import { CATEGORY_NAMES } from "./fixConstants";
-import { dateToKorean, getMonthly, keyToDate } from "./fixFormat";
+import { dateToKorean, keyToDate } from "./fixFormat";
 import { getToday } from "./date";
 import { loadEdits } from "./fixStorage";
 import { fromDbRow } from "./dbItem";
@@ -27,7 +27,7 @@ function toFixItem(item) {
     period: item.cycle === "매달" ? "매월" : item.cycle,
     date: next ? dateToKorean(next.date) : "",
     amount: item.amount,
-    monthly: getMonthly(item.amount, item.cycle),
+    monthly: monthAmount(item, getToday().year, getToday().month), // 이번 달 금액 (매년은 ÷12)
     amountType: item.amountType === "variable" ? "변동" : "고정",
     expected: item.amountType === "variable",
     method: item.payMethod || "",

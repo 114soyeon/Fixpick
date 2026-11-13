@@ -125,6 +125,15 @@ export const paysIn = (item, y, m) => payDaysIn(item, y, m).length > 0;
 /** 그 달에 나가는 돈 (매일·매주는 횟수만큼) */
 export const amountIn = (item, y, m) => item.amount * payDaysIn(item, y, m).length;
 
+/**
+ * 한 달 금액 (월 환산) — 모든 페이지 공통
+ * - 매년: 1년 금액 ÷ 12 (시안: "연납·세금은 월 평균으로 넣었어요")
+ * - 매달·매주·매일·사용자화: 그 달에 실제로 결제하는 횟수 × 금액
+ *   (예: 매주 월요일 1만원 → 11월은 월요일 5번이라 5만원 / 2개월마다 6만원 → 결제하는 달만 6만원)
+ */
+export const monthAmount = (item, y, m) =>
+  item.cycle === "매년" ? Math.round(item.amount / 12) : amountIn(item, y, m);
+
 const WEEK = ["일", "월", "화", "수", "목", "금", "토"];
 /** "매주 월요일", "2개월마다 10일" 같은 결제 주기 글자 */
 export function cycleText(item) {

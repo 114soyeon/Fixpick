@@ -10,9 +10,9 @@ import {
   endDateOf,
   endedInYear,
   paymentsInYear,
-  perMonth,
   sumValue,
 } from "../../utils/report";
+import { monthAmount } from "../../utils/items"; // 한 달 금액 (매년 ÷12, 나머지는 이번 달 실제 횟수)
 import { scheduleText, signedWon, won } from "../../utils/format";
 import { categoryStyle } from "../../constants/categories";
 import StatCard from "../common/StatCard";
@@ -85,7 +85,7 @@ const YearlyReport = ({ items, year, month, today }) => {
     category: it.category,
     name: it.name,
     sub: `${endDateOf(it).getMonth() + 1}월에 해지했어요`,
-    amount: `${signedWon(-perMonth(it))}/월`,
+    amount: `${signedWon(-monthAmount(it, year, month))}/월`,
     amountTone: "down",
   }));
 
