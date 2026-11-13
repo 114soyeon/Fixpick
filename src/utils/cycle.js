@@ -1,161 +1,88 @@
-
+/*
+ * getNextPaymentDate(data) 가 읽는 subscriptions 컬럼
+ *
+ *   cycle          결제 주기 ("매일" | "매주" | "매달" | "매년" | "사용자화")
+ *   week           매주: 결제 요일 (0~6, 0=일요일 ~ 6=토요일)
+ *   day            매달/매년: 결제일 (1~31)
+ *   month          매년: 결제 월 (1~12)
+ *   custom_number  사용자화: 반복 간격 숫자 (1 이상의 정수)
+ *   custom_text    사용자화: 반복 단위 ("day" | "week" | "month" | "year")
+ *   start_date     사용자화: 반복을 세기 시작하는 날 ("YYYY-MM-DD", 등록한 날)
+ *   expiry_date    만기일 ("YYYY-MM-DD", 없으면 null). 다음 결제일이 만기 뒤면 null
+ *
+ * 반환값: Date (계산할 수 없거나 만기가 지났으면 null)
+ */
 export function getNextPaymentDate(data) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const y = today.getFullYear();
+  const m = today.getMonth() + 1;
+  const d = today.getDate();
 
-  const cycle = data.cycle;
+  const inRange = (v, min, max) => Number.isInteger(v) && v >= min && v <= max;
+  const addDays = (n) => new Date(y, m - 1, d + n);
+  // 월말 보정 (31일이 없는 달이면 그 달 마지막 날), month가 13이어도 다음 해로 넘어가요
+  const validDate = (year, month, day) =>
+    new Date(year, month - 1, Math.min(day, new Date(year, month, 0).getDate()));
+  // "YYYY-MM-DD" → [년, 월, 일]
+  const parse = (s) => String(s).split("-").map(Number);
 
-  // 날짜 생성 시 월의 마지막 날짜 보정
-  function createValidDate(year, month, day) {
-    const lastDay = new Date(year, month, 0).getDate();
-    return new Date(year, month - 1, Math.min(day, lastDay));
-  }
+  const next = (() => {
+    switch (data.cycle) {
+      case "매일":
+        return addDays(1);
 
-  // 매일
-  if (cycle === "매일") {
-    const result = new Date(today);
-    result.setDate(result.getDate() + 1);
-    return result;
-  }
-
-  // 매주
-  if (cycle === "매주") {
-    const weekMap = {
-      "일요일": 0,
-      "월요일": 1,
-      "화요일": 2,
-      "수요일": 3,
-      "목요일": 4,
-      "금요일": 5,
-      "토요일": 6
-    };
-
-    const targetDay = weekMap[data.week];
-
-    if (targetDay === undefined) return null;
-
-    let diff = (targetDay - today.getDay() + 7) % 7;
-
-    // 오늘이 설정한 요일이면 다음 주
-    if (diff === 0) diff = 7;
-
-    const result = new Date(today);
-    result.setDate(result.getDate() + diff);
-
-    return result;
-  }
-
-  // 매달
-  if (cycle === "매달") {
-    const day = Number(data.day);
-
-    if (!Number.isInteger(day) || day < 1 || day > 31) {
-      return null;
-    }
-
-    let year = today.getFullYear();
-    let month = today.getMonth() + 1;
-
-    let result = createValidDate(year, month, day);
-
-    if (result <= today) {
-      month++;
-
-      if (month > 12) {
-        month = 1;
-        year++;
+      case "매주": {
+        const week = Number(data.week);
+        if (!inRange(week, 0, 6)) return null;
+        return addDays((week - today.getDay() + 7) % 7 || 7); // 오늘이면 다음 주
       }
 
-      result = createValidDate(year, month, day);
-    }
+      case "매달": {
+        const day = Number(data.day);
+        if (!inRange(day, 1, 31)) return null;
+        const result = validDate(y, m, day);
+        return result > today ? result : validDate(y, m + 1, day);
+      }
 
-    return result;
+      case "매년": {
+        const month = Number(data.month);
+        const day = Number(data.day);
+        if (!inRange(month, 1, 12) || !inRange(day, 1, 31)) return null;
+        const result = validDate(y, month, day);
+        return result > today ? result : validDate(y + 1, month, day);
+      }
+
+      case "사용자화": {
+        const n = Number(data.custom_number);
+        if (!inRange(n, 1, Infinity)) return null;
+
+        // 시작일에서 n 단위씩 k번 더한 날 (시작일이 없으면 오늘부터 센다)
+        const [sy, sm, sd] = data.start_date ? parse(data.start_date) : [y, m, d];
+        const nth = {
+          day: (k) => new Date(sy, sm - 1, sd + k * n),
+          week: (k) => new Date(sy, sm - 1, sd + k * n * 7),
+          month: (k) => validDate(sy, sm + k * n, sd),
+          year: (k) => validDate(sy + k * n, sm, sd),
+        }[data.custom_text];
+        if (!nth) return null;
+
+        // 시작일 다음 반복부터 세서, 오늘보다 뒤인 첫 날
+        let k = 1;
+        while (nth(k) <= today) k++;
+        return nth(k);
+      }
+
+      default:
+        return null;
+    }
+  })();
+
+  // 만기일이 지난 결제는 없는 것으로
+  if (next && data.expiry_date) {
+    const [ey, em, ed] = parse(data.expiry_date);
+    if (next > new Date(ey, em - 1, ed)) return null;
   }
 
-  // 매년
-  if (cycle === "매년") {
-    const month = Number(data.month);
-    const day = Number(data.day);
-
-    if (
-      !Number.isInteger(month) || month < 1 || month > 12 ||
-      !Number.isInteger(day) || day < 1 || day > 31
-    ) {
-      return null;
-    }
-
-    let year = today.getFullYear();
-    let result = createValidDate(year, month, day);
-
-    if (result <= today) {
-      year++;
-      result = createValidDate(year, month, day);
-    }
-
-    return result;
-  }
-
-  // 사용자화
-  if (cycle === "사용자화") {
-    const number = Number(data["custom-number"]);
-    const unit = data["custom-text"];
-
-    if (!Number.isInteger(number) || number <= 0) {
-      return null;
-    }
-
-    const result = new Date(today);
-
-    // 일 단위
-    if (unit === "일") {
-      result.setDate(result.getDate() + number);
-    }
-
-    // 주 단위
-    else if (unit === "주") {
-      result.setDate(result.getDate() + number * 7);
-    }
-
-    // 개월 단위
-    else if (unit === "개월") {
-      const originalDay = result.getDate();
-
-      result.setDate(1);
-      result.setMonth(result.getMonth() + number);
-
-      const lastDay = new Date(
-        result.getFullYear(),
-        result.getMonth() + 1,
-        0
-      ).getDate();
-
-      result.setDate(Math.min(originalDay, lastDay));
-    }
-
-    // 년 단위
-    else if (unit === "년") {
-      const originalMonth = result.getMonth();
-      const originalDay = result.getDate();
-
-      result.setDate(1);
-      result.setFullYear(result.getFullYear() + number);
-      result.setMonth(originalMonth);
-
-      const lastDay = new Date(
-        result.getFullYear(),
-        originalMonth + 1,
-        0
-      ).getDate();
-
-      result.setDate(Math.min(originalDay, lastDay));
-    }
-
-    else {
-      return null;
-    }
-
-    return result.toLocaleDateString("ko-KR");
-  }
-
-  return null;
+  return next;
 }
