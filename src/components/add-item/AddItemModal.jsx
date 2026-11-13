@@ -9,7 +9,7 @@ import {
   UNIT_OPTIONS,
   WEEKDAY_OPTIONS,
 } from "../../constants/addItem";
-import { todayKey } from "../../utils/date";
+import { firstPayKey } from "../../utils/items";
 import { categoryKeyOf } from "../../utils/category";
 import { useAuthStore } from "../../store/authStore";
 import DatePicker from "./DatePicker";
@@ -117,6 +117,16 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
     e.preventDefault();
     if (!valid) return;
 
+    // 첫 결제일: 오늘이 아니라 고른 결제일(요일·월)에 맞는 가장 가까운 날
+    const startDate = firstPayKey({
+      cycle: form.cycle,
+      day: dayNum,
+      month: Number(form.month),
+      weekday: Number(form.week),
+      every: customNumberNum,
+      unit,
+    });
+
     addSub.mutate(
       {
         user_id: user.id,
@@ -129,7 +139,7 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
 
         payment_method_id: null,
 
-        start_date: todayKey(),
+        start_date: startDate,
         expiry_date: form.endDate || null,
         memo: null,
 
