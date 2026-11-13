@@ -50,8 +50,6 @@ export function useDashData() {
   };
 }
 
-export const ddayText = (d) => (d > 0 ? `D-${d}` : d === 0 ? "D-DAY" : "결제 완료");
-
 /** 내가 등록한 항목 → 다가오는 결제 카드 모양으로 */
 export const toCard = (p) => ({
   key: p.id,

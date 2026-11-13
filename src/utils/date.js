@@ -26,13 +26,21 @@ export const dateKey = (date) => toKey(date.getFullYear(), date.getMonth() + 1, 
 export const isSameDay = (a, b) =>
   a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
-/** 오늘부터 며칠 남았는지 → "D-3" (오늘이면 "D-day") */
-export const dDayText = (date) => {
+/** 오늘부터 그 날짜까지 며칠 남았는지 (시간은 무시, 지났으면 음수, 날짜가 없으면 null) */
+export const daysUntil = (date) => {
+  if (!date) return null;
   const t = new Date();
   const today = new Date(t.getFullYear(), t.getMonth(), t.getDate());
   const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const days = Math.round((target - today) / 86400000);
-  return days === 0 ? "D-day" : `D-${days}`;
+  return Math.round((target - today) / 86400000);
+};
+
+/** 남은 날 수 → D-day 글자 (모든 페이지 공통)
+ *  3 → "D-3" / 0 → "D-DAY" / 지났으면 "결제 완료" / 없으면 "" */
+export const ddayText = (days) => {
+  if (days == null) return "";
+  if (days > 0) return `D-${days}`;
+  return days === 0 ? "D-DAY" : "결제 완료";
 };
 
 /** 만기까지 남은 기간 ("3개월 남음", "1년 2개월 남음") */

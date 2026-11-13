@@ -1,11 +1,12 @@
-import { getDday } from "../../utils/fixFormat";
+import { toDate } from "../../utils/fixFormat";
+import { daysUntil, ddayText } from "../../utils/date";
 import { comma } from "../../utils/format";
 
 // item: 항목 정보 (다음 결제일, 금액, 주기 등)
 const HeroCard = ({ item }) => {
   return (
     <section className="card hero-card">
-      <span className="dday-badge">{getDday(item.date)}</span>
+      <span className="dday-badge">{ddayText(daysUntil(toDate(item.date)))}</span>
       <p>다음 결제 · {item.date}</p>
       <h2>
         {comma(item.amount)} <small>원</small>

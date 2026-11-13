@@ -37,14 +37,6 @@ export const toInputDate = (text) => {
   return `${date.getFullYear()}-${month}-${day}`;
 };
 
-// 오늘부터 결제일까지 남은 날짜
-export const getDday = (text) => {
-  const target = toDate(text);
-  if (!target) return "";
-  const diff = Math.ceil((target - new Date()) / (1000 * 60 * 60 * 24));
-  return diff >= 0 ? `D-${diff}` : "지남";
-};
-
 // 주기에 따라 "한 달로 환산한 금액" 계산
 export const getMonthly = (amount, cycle) => {
   if (cycle === "매년") return Math.round(amount / 12);
