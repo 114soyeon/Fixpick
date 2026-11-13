@@ -10,15 +10,15 @@ import {
   endedInYear,
   paymentsInYear,
   sumValue,
-} from "../../utils/report/report";
-import { monthAmount, paymentsInMonth } from "../../utils/payment"; // monthAmount: 한 달 금액 (매년 ÷12, 나머지는 이번 달 실제 횟수)
-import { scheduleText, signedWon, won } from "../../utils/format";
-import { categoryStyle } from "../../constants/categories";
-import StatCard from "../common/StatCard";
-import DiffValue from "./DiffValue";
-import CategoryCard from "./CategoryCard";
-import TrendCard from "./TrendCard";
-import ChangeCard from "./ChangeCard";
+} from "@/utils/report/report";
+import { monthAmount, paymentsInMonth } from "@/utils/common/payment"; // monthAmount: 한 달 금액 (매년 ÷12, 나머지는 이번 달 실제 횟수)
+import { scheduleText, signedWon, won } from "@/utils/common/format";
+import { categoryStyle } from "@/constants/categories";
+import StatCard from "@/components/common/StatCard";
+import DiffValue from "@/components/report/DiffValue";
+import CategoryCard from "@/components/report/CategoryCard";
+import TrendCard from "@/components/report/TrendCard";
+import ChangeCard from "@/components/report/ChangeCard";
 
 const YearlyReport = ({ items, year, month, today }) => {
   // 올해 1월 ~ 이번 달 / 작년 같은 기간

@@ -1,5 +1,5 @@
-import { daysUntil, ddayText, toDate } from "../../utils/date";
-import { comma } from "../../utils/format";
+import { daysUntil, ddayText, toDate } from "@/utils/common/date";
+import { comma } from "@/utils/common/format";
 
 // item: 항목 정보 (다음 결제일, 금액, 주기 등)
 const HeroCard = ({ item }) => {

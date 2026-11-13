@@ -3,8 +3,8 @@
  * - 로그인했으면 [로그아웃] [회원 탈퇴], 안 했으면 [로그인]
  */
 import { useNavigate } from "react-router-dom";
-import { deleteAccount } from "../../utils/auth/auth";
-import { useAuthStore } from "../../store/authStore"; 
+import { deleteAccount } from "@/utils/auth/auth";
+import { useAuthStore } from "@/store/authStore"; 
 
 const AccountCard = ({ user }) => {
   const navigate = useNavigate();

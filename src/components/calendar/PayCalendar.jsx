@@ -12,8 +12,8 @@ import dayGridPlugin from "@fullcalendar/react/daygrid"; // 월간 달력
 import interactionPlugin from "@fullcalendar/react/interaction"; // 날짜 클릭(dateClick)에 필요
 // 스타일(FullCalendar CSS + calendar.css)은 pages/Calendar.jsx에서 순서대로 불러와요
 
-import { isSameDay } from "../../utils/date";
-import useChipsPerDay from "../../hooks/useChipsPerDay";
+import { isSameDay } from "@/utils/common/date";
+import useChipsPerDay from "@/hooks/useChipsPerDay";
 
 const WEEK_DAYS = ["일", "월", "화", "수", "목", "금", "토"];
 

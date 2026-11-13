@@ -5,8 +5,8 @@
  * - onAddClick: "+ 결제 수단 추가" 버튼 (추가 창은 페이지에서 띄워요)
  */
 import { CreditCard } from "lucide-react";
-import CardIcon from "../add-item/CardIcon"; // 카드사 로고 (없으면 첫 글자 배지)
-import CardHead from "./CardHead";
+import CardIcon from "@/components/add-item/CardIcon"; // 카드사 로고 (없으면 첫 글자 배지)
+import CardHead from "@/components/setting/CardHead";
 
 const PayMethodCard = ({ methods, items, onAddClick }) => {
   // 이 결제 수단을 쓰는 고정지출 개수

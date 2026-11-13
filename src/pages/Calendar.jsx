@@ -5,7 +5,7 @@
  * - class는 다른 페이지와 겹치지 않게 모두 "paycal-" 로 시작 (styles/calendar.css)
  * - 데이터: 왼쪽 달력만 리액트 쿼리 useMySub(queries/subs.js)로 DB의 내 고정지출을 읽어요
  *   → utils/dbItem.js fromDbRow 로 계산하기 좋은 모양으로 바꿔요 (리포트 페이지와 같은 방식)
- *   오른쪽 카드들(요약·선택한 날·큰 지출)은 아직 예전 데이터(useItems)예요
+ *   오른쪽 카드들(요약·선택한 날·큰 지출)은 아직 예전 데이터(hooks/useItems)예요
  */
 import { useMemo, useState } from "react";
 import { useCalendarController } from "@fullcalendar/react";
@@ -14,19 +14,19 @@ import { useCalendarController } from "@fullcalendar/react";
 import "@fullcalendar/react/skeleton.css"; // 항상 필요
 import "@fullcalendar/react/themes/monarch/theme.css";
 import "@fullcalendar/react/themes/monarch/palettes/purple.css";
-import "../styles/calendar.css"; // 이 페이지 전용 스타일 (class는 모두 paycal- 로 시작)
+import "@/styles/calendar.css"; // 이 페이지 전용 스타일 (class는 모두 paycal- 로 시작)
 
-import { bigPayments, isEnded, payDaysIn, paymentsInMonth } from "../utils/payment";
-import { useItems } from "../utils/items";
-import { useMySub } from "../queries/subs";
-import { fromDbRow } from "../utils/dbItem";
-import { useCategoryColors } from "../hooks/useCategoryColors";
-import { dateKey, getToday, isSameDay } from "../utils/date";
-import { categoryStyle } from "../constants/categories";
-import PayCalendar from "../components/calendar/PayCalendar";
-import SummaryCard from "../components/calendar/SummaryCard";
-import DayCard from "../components/calendar/DayCard";
-import BigCard from "../components/calendar/BigCard";
+import { bigPayments, isEnded, payDaysIn, paymentsInMonth } from "@/utils/common/payment";
+import { useItems } from "@/hooks/useItems";
+import { useMySub } from "@/queries/subs";
+import { fromDbRow } from "@/utils/common/dbItem";
+import { useCategoryColors } from "@/hooks/useCategoryColors";
+import { dateKey, getToday, isSameDay } from "@/utils/common/date";
+import { categoryStyle } from "@/constants/categories";
+import PayCalendar from "@/components/calendar/PayCalendar";
+import SummaryCard from "@/components/calendar/SummaryCard";
+import DayCard from "@/components/calendar/DayCard";
+import BigCard from "@/components/calendar/BigCard";
 
 const Calendar = () => {
   // 달력을 밖(직접 만든 버튼)에서 움직이게 해주는 컨트롤러

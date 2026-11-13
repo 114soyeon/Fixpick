@@ -7,10 +7,10 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { Wallet } from "lucide-react";
-import { saveSetting } from "../../utils/setting/setting";
-import { comma } from "../../utils/format";
-import { BUDGETS } from "../../constants/setting";
-import CardHead from "./CardHead";
+import { saveSetting } from "@/utils/setting/setting";
+import { comma } from "@/utils/common/format";
+import { BUDGETS } from "@/constants/setting";
+import CardHead from "@/components/setting/CardHead";
 
 const BudgetCard = ({ initial }) => {
   const [budget, setBudget] = useState(initial);

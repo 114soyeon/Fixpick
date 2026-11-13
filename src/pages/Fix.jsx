@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
-import "../styles/Fix.css";
-import StatCard from "../components/common/StatCard";
-import ExpenseRow from "../components/fix/ExpenseRow";
-import { useFixItems, useRawFixItems } from "../utils/fix/fixItems";
-import { calculateFixedExpense, calculateMonthlySavings, getUpcomingExpense } from "../utils/fix/fixCalculations";
-import { useMySub } from "../queries/subs";
-import { ALL_CATEGORY, CATEGORY_NAMES, DEFAULT_SORT, FIX_CATEGORIES, SORT_OPTIONS } from "../constants/fix";
-import { categoryKeyOf } from "../utils/category";
-import { nextPayDate } from "../utils/payment";
-import { fromDbRow } from "../utils/dbItem";
-import { won } from "../utils/format";
+import "@/styles/Fix.css";
+import StatCard from "@/components/common/StatCard";
+import ExpenseRow from "@/components/fix/ExpenseRow";
+import { useFixItems, useRawFixItems } from "@/hooks/useFixItems";
+import { calculateFixedExpense, calculateMonthlySavings, getUpcomingExpense } from "@/utils/fix/fixCalculations";
+import { useMySub } from "@/queries/subs";
+import { ALL_CATEGORY, CATEGORY_NAMES, DEFAULT_SORT, FIX_CATEGORIES, SORT_OPTIONS } from "@/constants/fix";
+import { categoryKeyOf } from "@/utils/common/category";
+import { nextPayDate } from "@/utils/common/payment";
+import { fromDbRow } from "@/utils/common/dbItem";
+import { won } from "@/utils/common/format";
 
 const Fix = () => {
   const navigate = useNavigate();

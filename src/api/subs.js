@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 // 카테고리를 가져와야 함
 export const getCategories = async () => {

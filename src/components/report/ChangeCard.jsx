@@ -3,7 +3,7 @@
  * - rows: 목록 줄 [{ key, category, name, sub, amount, amountTone }]
  * - empty: 목록이 비었을 때 보여줄 문구
  */
-import CatIcon from "./CatIcon";
+import CatIcon from "@/components/report/CatIcon";
 
 const ChangeCard = ({ label, value, tone, rows, empty }) => (
   <div className="rpt-change">

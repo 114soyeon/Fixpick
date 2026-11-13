@@ -5,7 +5,7 @@
  */
 import { useRef, useState } from "react";
 import { Pencil } from "lucide-react";
-import { useAuthStore } from "../../store/authStore";
+import { useAuthStore } from "@/store/authStore";
 
 // 이름 → 프로필 글자: 김민지 → 동그라미 "김", 제목 "민지님"
 const firstChar = (name) => name.trim().slice(0, 1);

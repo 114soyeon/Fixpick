@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { findEmail } from "../../utils/auth/auth";
-import { formatPhone } from "../../utils/validate";
-import { joinedText } from "../../utils/auth/login";
+import { findEmail } from "@/utils/auth/auth";
+import { formatPhone } from "@/utils/common/validate";
+import { joinedText } from "@/utils/auth/login";
 
 /** 아이디(이메일) 찾기 창 */
 export default function FindIdModal({ onClose, onFound, onReset }) {

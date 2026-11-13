@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import CardIcon from "./CardIcon";
+import CardIcon from "@/components/add-item/CardIcon";
 
 /** 결제 수단 고르기 (화살표를 누르면 내가 썼던 카드 목록) */
 export default function PayPicker({ value, onChange, recent = [] }) {

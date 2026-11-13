@@ -1,4 +1,4 @@
-import { dateKey, getToday, todayKey } from "./date";
+import { dateKey, getToday, todayKey } from "@/utils/common/date";
 
 /*
  * 결제 날짜·금액 계산 (모든 페이지 공통)

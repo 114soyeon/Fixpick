@@ -1,4 +1,4 @@
-import { getBarLevel } from "../../utils/fix/fixCalculations";
+import { getBarLevel } from "@/utils/fix/fixCalculations";
 
 // history: [{ year: 숫자, amount: 숫자 }, ...] 형태의 배열을 받아서 그리기만 해요
 // 막대 높이는 FixDetail.css 의 .chart-bar--<1~10> 클래스로 정해요

@@ -7,7 +7,7 @@
  *
  * 계산 결과 목록의 한 줄 모양: { ...항목, value: 금액 }
  */
-import { isEnded, payDaysIn, paymentsInMonth } from "../payment";
+import { isEnded, payDaysIn, paymentsInMonth } from "@/utils/common/payment";
 
 /** 지난달 [년, 월] (1월이면 작년 12월) */
 export const prevMonthOf = (year, month) => (month === 1 ? [year - 1, 12] : [year, month - 1]);

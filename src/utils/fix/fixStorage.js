@@ -1,6 +1,6 @@
-import { removeItem } from "../items";
-import { monthAmount } from "../payment";
-import { getToday, keyToDate, prettyDate } from "../date";
+import { removeItem } from "@/utils/common/items";
+import { monthAmount } from "@/utils/common/payment";
+import { getToday, keyToDate, prettyDate } from "@/utils/common/date";
 
 /*
  * 상세 페이지에서 바꾼 내용을 브라우저(localStorage)에 저장해요.

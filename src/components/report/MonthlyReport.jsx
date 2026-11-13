@@ -2,14 +2,14 @@
  * 지출 리포트 — 월간 화면 (pages/Report.jsx에서 "월간"일 때 보여줘요)
  * 매년 결제는 ÷12 해서 넣어요 (utils/report/report.js monthShare)
  */
-import { byCategory, byItem, monthShare, monthsAgo, prevMonthOf, sumValue } from "../../utils/report/report";
-import { scheduleText, signedWon, won } from "../../utils/format";
-import { categoryStyle } from "../../constants/categories";
-import StatCard from "../common/StatCard";
-import DiffValue from "./DiffValue";
-import CategoryCard from "./CategoryCard";
-import TrendCard from "./TrendCard";
-import CatIcon from "./CatIcon";
+import { byCategory, byItem, monthShare, monthsAgo, prevMonthOf, sumValue } from "@/utils/report/report";
+import { scheduleText, signedWon, won } from "@/utils/common/format";
+import { categoryStyle } from "@/constants/categories";
+import StatCard from "@/components/common/StatCard";
+import DiffValue from "@/components/report/DiffValue";
+import CategoryCard from "@/components/report/CategoryCard";
+import TrendCard from "@/components/report/TrendCard";
+import CatIcon from "@/components/report/CatIcon";
 
 // loading: DB에서 아직 불러오는 중이면 true → 금액 대신 "-" (0원이 잠깐 보이지 않게)
 const MonthlyReport = ({ items, year, month, loading }) => {

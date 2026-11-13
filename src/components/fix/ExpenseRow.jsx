@@ -1,8 +1,8 @@
-import { categoryIcons } from "../../constants/categories";
-import { monthAmount, nextPayDate } from "../../utils/payment";
-import { fromDbRow } from "../../utils/dbItem";
-import { dateToKorean, getToday } from "../../utils/date";
-import { won } from "../../utils/format";
+import { categoryIcons } from "@/constants/categories";
+import { monthAmount, nextPayDate } from "@/utils/common/payment";
+import { fromDbRow } from "@/utils/common/dbItem";
+import { dateToKorean, getToday } from "@/utils/common/date";
+import { won } from "@/utils/common/format";
 
 const WEEK = ["일", "월", "화", "수", "목", "금", "토"];
 

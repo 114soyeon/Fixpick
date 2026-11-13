@@ -8,14 +8,14 @@ import {
   NAME_HINTS,
   UNIT_OPTIONS,
   WEEKDAY_OPTIONS,
-} from "../../constants/addItem";
-import { firstPayKey } from "../../utils/payment";
-import { categoryKeyOf } from "../../utils/category";
-import { useAuthStore } from "../../store/authStore";
-import DatePicker from "./DatePicker";
-import MiniSelect from "./MiniSelect";
-import PayPicker from "./PayPicker";
-import { useCategories, useAddSub } from "../../queries/subs";
+} from "@/constants/addItem";
+import { firstPayKey } from "@/utils/common/payment";
+import { categoryKeyOf } from "@/utils/common/category";
+import { useAuthStore } from "@/store/authStore";
+import DatePicker from "@/components/add-item/DatePicker";
+import MiniSelect from "@/components/add-item/MiniSelect";
+import PayPicker from "@/components/add-item/PayPicker";
+import { useCategories, useAddSub } from "@/queries/subs";
 
 /** 고정지출 항목 추가 창 (DB에 저장해요) */
 export default function AddItemModal({ onClose, setToast, payMethods = [] }) {

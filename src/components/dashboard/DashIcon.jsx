@@ -1,5 +1,5 @@
 /* 메인(대시보드) 카테고리 아이콘 */
-import { LINE_ICON as line } from "../../constants/dashboard";
+import { LINE_ICON as line } from "@/constants/dashboard";
 const ICON_PATHS = {
   building: (<><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" /><path d="M6 11H4.5A1.5 1.5 0 0 0 3 12.5V21h3M18 9h1.5A1.5 1.5 0 0 1 21 10.5V21h-3M3 21h18M10 7h4M10 11h4M10 21v-3a2 2 0 0 1 4 0v3" /></>),
   phone: (<><rect x="6.5" y="2.5" width="11" height="19" rx="2.5" /><path d="M11 18h2" /></>),

@@ -11,7 +11,7 @@
  * - tone: "down"이면 값을 줄어든 색(초록)으로
  * - className: 이 카드만 따로 꾸밀 때 붙이는 class (예: "is-compact")
  */
-import "../../styles/StatCard.css";
+import "@/styles/StatCard.css";
 
 const StatCard = ({ label, period, value, sub, badge, highlight, tone, className }) => (
   <div className={`stat-card${highlight ? " is-highlight" : ""}${className ? ` ${className}` : ""}`}>

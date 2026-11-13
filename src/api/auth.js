@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 /*
  * 로그인·회원 관련 Supabase 요청은 모두 여기서 해요 (api/subs.js 와 같은 방식)

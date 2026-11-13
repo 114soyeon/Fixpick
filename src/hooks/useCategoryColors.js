@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { useCategories } from "../queries/subs";
-import { categoryStyle } from "../constants/categories";
+import { useCategories } from "@/queries/subs";
+import { categoryStyle } from "@/constants/categories";
 
 /*
  * 카테고리 색을 DB(categories 테이블)에서 가져와요 — 리액트 쿼리 useCategories

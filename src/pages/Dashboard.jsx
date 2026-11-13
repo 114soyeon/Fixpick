@@ -1,20 +1,20 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { cycleText, nextPayments } from "../utils/payment";
-import { openAddItem } from "../utils/addItemFlow";
-import { useMySub } from "../queries/subs";
-import { fromDbRow } from "../utils/dbItem";
-import { useCategoryColors, dashCatVars } from "../hooks/useCategoryColors";
-import { ddayText } from "../utils/date";
-import { MONTH, TODAY, catClass, payByDay, toCard, useDashData } from "../utils/dashboard/dashboard";
-import { useCountUp } from "../hooks/useCountUp";
-import { loadBudget } from "../utils/setting/budget";
-import { comma as won } from "../utils/format";
-import { LINE_ICON as line, MAX_CARDS, MAX_LINES } from "../constants/dashboard";
-import { WEEKDAYS } from "../constants/addItem";
-import { Icon } from "../components/dashboard/DashIcon";
-import { useAuthStore } from "../store/authStore";
-import "../styles/dashboard.css";
+import { cycleText, nextPayments } from "@/utils/common/payment";
+import { openAddItem } from "@/utils/common/addItemFlow";
+import { useMySub } from "@/queries/subs";
+import { fromDbRow } from "@/utils/common/dbItem";
+import { useCategoryColors, dashCatVars } from "@/hooks/useCategoryColors";
+import { ddayText } from "@/utils/common/date";
+import { MONTH, TODAY, catClass, dashData, payByDay, toCard } from "@/utils/dashboard/dashboard";
+import { useCountUp } from "@/hooks/useCountUp";
+import { loadBudget } from "@/utils/setting/budget";
+import { comma as won } from "@/utils/common/format";
+import { LINE_ICON as line, MAX_CARDS, MAX_LINES } from "@/constants/dashboard";
+import { WEEKDAYS } from "@/constants/addItem";
+import { Icon } from "@/components/dashboard/DashIcon";
+import { useAuthStore } from "@/store/authStore";
+import "@/styles/dashboard.css";
 
 // 사이드바는 components/Layout.jsx에서 그려요.
 
@@ -379,7 +379,7 @@ export default function Dashboard() {
   // DB 한 줄 → 계산용 항목 (rows가 바뀔 때만 다시 바꿔요)
   const items = useMemo(() => (rows ?? []).map(fromDbRow), [rows]);
 
-  const data = useDashData(items);
+  const data = dashData(items);
   return (
     <main className="gk-dash-main">
       <div className="gk-rise gk-dash-head">

@@ -14,8 +14,8 @@ import {
   LinearScale,
 } from "chart.js";
 import { Doughnut, Line } from "react-chartjs-2";
-import { categoryStyle } from "../../constants/categories";
-import { useCategoryColors } from "../../hooks/useCategoryColors";
+import { categoryStyle } from "@/constants/categories";
+import { useCategoryColors } from "@/hooks/useCategoryColors";
 
 // 쓰는 부품만 등록해요
 ChartJS.register(ArcElement, LineElement, PointElement, CategoryScale, LinearScale);

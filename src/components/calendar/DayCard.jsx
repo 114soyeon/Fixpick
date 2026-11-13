@@ -3,8 +3,8 @@
  * - date: 선택한 날짜
  * - payments: 그날 결제 목록 (이름순으로 정렬해서 넘겨줘요)
  */
-import { monthDay, won } from "../../utils/format";
-import PayItem from "./PayItem";
+import { monthDay, won } from "@/utils/common/format";
+import PayItem from "@/components/calendar/PayItem";
 
 const DayCard = ({ date, payments }) => {
   const total = payments.reduce((sum, item) => sum + item.amount, 0);

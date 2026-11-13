@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, ChevronRight, Eye, EyeOff } from "lucide-react";
-import { LogoMark, Wordmark } from "../components/common/Logo";
-import { emailExists } from "../utils/auth/auth";
-import { signup } from "../api/auth";
-import { DEMO_CODE, STEPS, STRENGTH, TERMS } from "../constants/signup";
-import { formatPhone, isValidEmail, isValidPhone, strengthOf } from "../utils/validate";
-import SignupComplete from "../components/signup/SignupComplete";
-import TermsModal from "../components/signup/TermsModal";
-import "../styles/signup.css"; // 이 페이지 스타일은 전부 여기 (class는 gk-sign- 로 시작)
+import { LogoMark, Wordmark } from "@/components/common/Logo";
+import { emailExists } from "@/utils/auth/auth";
+import { signup } from "@/api/auth";
+import { DEMO_CODE, STEPS, STRENGTH, TERMS } from "@/constants/signup";
+import { formatPhone, isValidEmail, isValidPhone, strengthOf } from "@/utils/common/validate";
+import SignupComplete from "@/components/signup/SignupComplete";
+import TermsModal from "@/components/signup/TermsModal";
+import "@/styles/signup.css"; // 이 페이지 스타일은 전부 여기 (class는 gk-sign- 로 시작)
 
 export default function Signup() {
   const navigate = useNavigate();

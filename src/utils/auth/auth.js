@@ -1,6 +1,5 @@
-import { useSyncExternalStore } from "react";
-import { useAuthStore } from "../../store/authStore";
-import { signOut } from "../../api/auth";
+import { useAuthStore } from "@/store/authStore";
+import { signOut } from "@/api/auth";
 
 /*
  * 로그인 정보를 저장하는 도구예요.
@@ -131,11 +130,3 @@ export function initialOf(name = "") {
   return n.slice(0, 1).toUpperCase();
 }
 
-/** 컴포넌트에서 현재 로그인한 사람 정보를 쓰는 훅 (로그아웃 상태면 null) */
-export function useUser() {
-  return useSyncExternalStore(
-    (cb) => useAuthStore.subscribe(cb), // Supabase 로그인·로그아웃하면 알려 줘요
-    getUser,
-    () => null
-  );
-}

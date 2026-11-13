@@ -4,8 +4,8 @@
  * - category: 카테고리 key, size: 박스 크기(px)
  * - 색(bg, color)은 DB categories 에서 (hooks/useCategoryColors.js)
  */
-import { categoryStyle } from "../../constants/categories";
-import { useCategoryColors } from "../../hooks/useCategoryColors";
+import { categoryStyle } from "@/constants/categories";
+import { useCategoryColors } from "@/hooks/useCategoryColors";
 
 const CatIcon = ({ category, size = 26 }) => {
   const { icon: Icon } = categoryStyle(category);

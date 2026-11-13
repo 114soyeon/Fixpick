@@ -3,11 +3,11 @@
  * - cats: 카테고리별 합계, 큰 순서 [{ key, value }] (utils/report/report.js byCategory)
  * - total: 전체 합계 (비율 계산용)
  */
-import { percent, won } from "../../utils/format";
-import { categoryStyle } from "../../constants/categories";
-import { useCategoryColors } from "../../hooks/useCategoryColors";
-import { CategoryDonut } from "./ReportCharts";
-import CatIcon from "./CatIcon";
+import { percent, won } from "@/utils/common/format";
+import { categoryStyle } from "@/constants/categories";
+import { useCategoryColors } from "@/hooks/useCategoryColors";
+import { CategoryDonut } from "@/components/report/ReportCharts";
+import CatIcon from "@/components/report/CatIcon";
 
 const CategoryCard = ({ title, cats, total }) => {
   const top = cats[0];

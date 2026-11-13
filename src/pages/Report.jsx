@@ -11,12 +11,12 @@
  * - class는 다른 페이지와 겹치지 않게 모두 "rpt-" 로 시작 (styles/report.css)
  */
 import { useMemo, useState } from "react";
-import "../styles/report.css";
+import "@/styles/report.css";
 
-import { useMySub } from "../queries/subs";
-import { fromDbRow } from "../utils/dbItem";
-import MonthlyReport from "../components/report/MonthlyReport";
-import YearlyReport from "../components/report/YearlyReport";
+import { useMySub } from "@/queries/subs";
+import { fromDbRow } from "@/utils/common/dbItem";
+import MonthlyReport from "@/components/report/MonthlyReport";
+import YearlyReport from "@/components/report/YearlyReport";
 
 const VIEWS = [
   { key: "monthly", label: "월간" },

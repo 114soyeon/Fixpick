@@ -1,4 +1,4 @@
-import { categoryKeyOf } from "./category";
+import { categoryKeyOf } from "@/utils/common/category";
 
 /*
  * DB 한 줄(subscriptions, useMySub 결과) → 화면·계산에서 쓰는 항목 모양

@@ -1,24 +1,24 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "../styles/FixDetail.css";
-import PaymentEditModal from "../components/paymentEditModal/PaymentEditModal.jsx";
-import AlertSettings from "../components/fix-detail/AlertSettings.jsx";
-import AmountChart from "../components/fix-detail/AmountChart.jsx";
-import PaymentInfoCard from "../components/fix-detail/PaymentInfoCard.jsx";
-import HeroCard from "../components/fix-detail/HeroCard.jsx";
-import MemoCard from "../components/fix-detail/MemoCard.jsx";
-import EndDateCard from "../components/fix-detail/EndDateCard.jsx";
-import { DEFAULT_AMOUNT_TYPE } from "../constants/fix";
-import { toInputDate } from "../utils/date";
-import { getAmountHistory, getPayMethods } from "../utils/fix/fixCalculations";
-import { useFixItems } from "../utils/fix/fixItems";
-import { useMySub } from "../queries/subs";
+import "@/styles/FixDetail.css";
+import PaymentEditModal from "@/components/paymentEditModal/PaymentEditModal.jsx";
+import AlertSettings from "@/components/fix-detail/AlertSettings.jsx";
+import AmountChart from "@/components/fix-detail/AmountChart.jsx";
+import PaymentInfoCard from "@/components/fix-detail/PaymentInfoCard.jsx";
+import HeroCard from "@/components/fix-detail/HeroCard.jsx";
+import MemoCard from "@/components/fix-detail/MemoCard.jsx";
+import EndDateCard from "@/components/fix-detail/EndDateCard.jsx";
+import { DEFAULT_AMOUNT_TYPE } from "@/constants/fix";
+import { toInputDate } from "@/utils/common/date";
+import { getAmountHistory, getPayMethods } from "@/utils/fix/fixCalculations";
+import { useFixItems } from "@/hooks/useFixItems";
+import { useMySub } from "@/queries/subs";
 import {
   deleteFixItem,
   saveEdit,
   saveMemo,
   toEditedFields,
-} from "../utils/fix/fixStorage";
+} from "@/utils/fix/fixStorage";
 
 const FixDetail = () => {
   const navigate = useNavigate();

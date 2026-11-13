@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import * as authApi from "../api/auth"; // Supabase 요청은 api/auth.js 에서 해요
+import * as authApi from "@/api/auth"; // Supabase 요청은 api/auth.js 에서 해요
 
 /*
  * 로그인 상태 저장소 — "누가 로그인했는지"만 들고 있어요
