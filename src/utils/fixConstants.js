@@ -23,12 +23,13 @@ export const SAVING_CATEGORY = CATEGORY_NAMES.saving;
 
 // 정렬 셀렉트 옵션
 export const SORT_OPTIONS = [
-  { value: "latest", label: "최신순" },
-  { value: "oldest", label: "과거순" },
+  { value: "created", label: "등록순" },
+  { value: "latest", label: "결제일 느린순" },
+  { value: "oldest", label: "결제일 빠른순" },
   { value: "high", label: "금액 높은순" },
   { value: "low", label: "금액 낮은순" },
 ];
-export const DEFAULT_SORT = "high";
+export const DEFAULT_SORT = "created";
 
 // 목록에서 처음에 보여줄 개수
 export const PAGE_SIZE = 8;

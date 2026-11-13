@@ -9,6 +9,7 @@ import { useMySub } from "../queries/subs";
 import { ALL_CATEGORY, CATEGORY_NAMES, DEFAULT_SORT, FIX_CATEGORIES, SORT_OPTIONS } from "../utils/fixConstants";
 import { categoryKeyOf } from "../utils/category";
 import { getNextPaymentDate } from "../utils/cycle";
+import { formatWon } from "../utils/fixFormat";
 
 const Fix = () => {
   const navigate = useNavigate();
@@ -24,6 +25,8 @@ const Fix = () => {
 
   // 다음 결제일을 숫자로 (계산 안 되면 0 → 목록 맨 뒤로)
   const nextValue = (row) => getNextPaymentDate(row)?.getTime() ?? 0;
+  // 등록 시각을 숫자로 (거의 동시에 등록한 건 id로 순서 고정)
+  const createdValue = (row) => Date.parse(row.created_at) || 0;
 
   // 카테고리 필터 + 정렬
   const visibleRows = (subs ?? [])
@@ -34,6 +37,7 @@ const Fix = () => {
     })
     .sort((a, b) => {
       switch (sortOrder) {
+        case "created": return createdValue(b) - createdValue(a) || b.id - a.id; // 최신 등록순
         case "high":   return Number(b.amount) - Number(a.amount); // 금액 높은순
         case "low":    return Number(a.amount) - Number(b.amount); // 금액 낮은순
         case "latest": return nextValue(b) - nextValue(a);         // 최신순
