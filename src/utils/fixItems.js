@@ -19,9 +19,9 @@ const fromDb = (row) => {
     cycle: row.cycle,
     day: row.day,        // 매달 며칠 / 매년 며칠
     month: row.month,    // 매년 결제월
-    weekday: row.weekday,
-    every: row.every,
-    unit: row.unit,
+    weekday: row.week,           // 0~6 (일~토)
+    every: row.custom_number,    // 사용자화 간격
+    unit: row.custom_text,       // 사용자화 단위 ("day" | "week" | "month" | "year")
     start: row.start_date,   // "YYYY-MM-DD"
     endDate: row.expiry_date,
     payMethod: row.pay_method,
