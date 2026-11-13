@@ -5,9 +5,14 @@
 import { byCategory, byItem, monthShare, monthsAgo, prevMonthOf, sumValue } from "../../utils/report";
 import { scheduleText, signedWon, won } from "../../utils/format";
 import { categoryStyle } from "../../constants/categories";
-import { CatIcon, CategoryCard, DiffValue, StatCard, TrendCard } from "./ReportCards";
+import StatCard from "../common/StatCard";
+import DiffValue from "./DiffValue";
+import CategoryCard from "./CategoryCard";
+import TrendCard from "./TrendCard";
+import CatIcon from "./CatIcon";
 
-const MonthlyReport = ({ items, year, month }) => {
+// loading: DB에서 아직 불러오는 중이면 true → 금액 대신 "-" (0원이 잠깐 보이지 않게)
+const MonthlyReport = ({ items, year, month, loading }) => {
   const [py, pm] = prevMonthOf(year, month);
 
   // 이번 달·지난달 금액 (매년 결제는 ÷12 해서 넣어요)
@@ -51,7 +56,7 @@ const MonthlyReport = ({ items, year, month }) => {
     <>
       {/* ── 요약 카드 3개 ── */}
       <div className="rpt-stats">
-        <StatCard highlight label={`${month}월 고정지출`} value={won(total)} sub="연납·세금은 월 평균으로 넣었어요" />
+        <StatCard highlight label={`${month}월 고정지출`} value={loading ? "-" : won(total)} sub="연납·세금은 월 평균으로 넣었어요" />
         <StatCard
           label={`${pm}월보다`}
           value={<DiffValue diff={diff} />}

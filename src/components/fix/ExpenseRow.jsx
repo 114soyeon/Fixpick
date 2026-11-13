@@ -31,7 +31,10 @@ const ExpenseRow = ({ item, onClick }) => {
   return (
     <div className="table-row" onClick={onClick}>
       <div className="expense-name">
-        <div className={`expense-icon expense-icon--${item.categories.key}`}>
+        <div
+          className={`expense-icon expense-icon--${item.categories.key}`}
+          style={{ background: item.categories.bg, color: item.categories.color }} // DB 색
+        >
           <CategoryIcon size={20} strokeWidth={2} aria-hidden="true" />
         </div>
         <strong>{item.name}</strong>

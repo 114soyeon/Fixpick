@@ -224,6 +224,7 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
                 key={c.id}
                 type="button"
                 className={`gk-chip is-${categoryKeyOf(c.name)}`}
+                style={{ "--chip-color": c.chart, "--chip-tint": c.bg }} // DB 색 (sidebar.css 의 칩 색을 덮어써요)
                 aria-pressed={form.category === c.id}
                 onClick={() => set("category", c.id)}
               >

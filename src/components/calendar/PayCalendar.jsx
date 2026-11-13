@@ -13,7 +13,7 @@ import interactionPlugin from "@fullcalendar/react/interaction"; // 날짜 클�
 // 스타일(FullCalendar CSS + calendar.css)은 pages/Calendar.jsx에서 순서대로 불러와요
 
 import { isSameDay } from "../../utils/date";
-import useChipsPerDay from "./useChipsPerDay";
+import useChipsPerDay from "../../hooks/useChipsPerDay";
 
 const WEEK_DAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -29,7 +29,7 @@ const renderEvent = (arg) => {
 };
 
 const PayCalendar = ({ controller, title, events, selectedDate, onSelect, onToday }) => {
-  // 한 칸에 들어가는 칩 개수 (창 높이에 따라 바뀜, useChipsPerDay.js 설명 참고)
+  // 한 칸에 들어가는 칩 개수 (창 높이에 따라 바뀜, hooks/useChipsPerDay.js 설명 참고)
   const boxRef = useRef(null);
   const chipsPerDay = useChipsPerDay(boxRef, controller.getDate() ?? new Date());
 

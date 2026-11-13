@@ -15,7 +15,11 @@ import {
 } from "../../utils/report";
 import { scheduleText, signedWon, won } from "../../utils/format";
 import { categoryStyle } from "../../constants/categories";
-import { CategoryCard, ChangeCard, DiffValue, StatCard, TrendCard } from "./ReportCards";
+import StatCard from "../common/StatCard";
+import DiffValue from "./DiffValue";
+import CategoryCard from "./CategoryCard";
+import TrendCard from "./TrendCard";
+import ChangeCard from "./ChangeCard";
 
 const YearlyReport = ({ items, year, month, today }) => {
   // 올해 1월 ~ 이번 달 / 작년 같은 기간

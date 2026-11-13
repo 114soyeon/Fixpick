@@ -1,7 +1,7 @@
 /*
- * 지출 리포트 차트 (react-chartjs-2) — pages/Report.jsx에서 사용
- * - CategoryDonut: 카테고리 비율 도넛
- * - TrendLine: 꺾은선 (최근 6개월 / 월별 흐름)
+ * 지출 리포트 차트 (react-chartjs-2)
+ * - CategoryDonut: 카테고리 비율 도넛 → CategoryCard.jsx 안에서 사용
+ * - TrendLine: 꺾은선 (최근 6개월 / 월별 흐름) → TrendCard.jsx 안에서 사용
  * 모양(색·굵기·점 크기)은 시안 SVG 값 그대로예요.
  * 시안에 없는 마우스 효과(툴팁·확대)는 넣지 않았어요 → events: []
  */
@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 import { Doughnut, Line } from "react-chartjs-2";
 import { categoryStyle } from "../../constants/categories";
+import { useCategoryColors } from "../../hooks/useCategoryColors";
 
 // 쓰는 부품만 등록해요
 ChartJS.register(ArcElement, LineElement, PointElement, CategoryScale, LinearScale);
@@ -30,27 +31,30 @@ const GRID = "#E3EAF0";
 
 /* ═════════ 도넛 ═════════ */
 // cats: [{ key, value }] (큰 순서)
-export const CategoryDonut = ({ cats }) => (
-  <Doughnut
-    data={{
-      labels: cats.map((c) => categoryStyle(c.key).name),
-      datasets: [
-        {
-          data: cats.map((c) => c.value),
-          backgroundColor: cats.map((c) => categoryStyle(c.key).bar),
-          borderColor: "#fff", // 조각 사이 흰 틈
-          borderWidth: 2,
-        },
-      ],
-    }}
-    options={{
-      cutout: "65%", // 시안: 바깥 반지름 126 / 안쪽 82
-      events: [],
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { enabled: false } },
-    }}
-  />
-);
+export const CategoryDonut = ({ cats }) => {
+  const colorOf = useCategoryColors(); // DB 색
+  return (
+    <Doughnut
+      data={{
+        labels: cats.map((c) => categoryStyle(c.key).name),
+        datasets: [
+          {
+            data: cats.map((c) => c.value),
+            backgroundColor: cats.map((c) => colorOf(c.key).chart),
+            borderColor: "#fff", // 조각 사이 흰 틈
+            borderWidth: 2,
+          },
+        ],
+      }}
+      options={{
+        cutout: "65%", // 시안: 바깥 반지름 126 / 안쪽 82
+        events: [],
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      }}
+    />
+  );
+};
 
 /* ═════════ 꺾은선 ═════════ */
 
