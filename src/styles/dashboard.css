@@ -129,14 +129,9 @@
   flex-direction: column;
 }
 .gk-dash-footer {
-  margin-top: -10px;
   text-align: center;
   font-size: 13px;
   color: #8A9098;
-}
-.gk-dash-copy {
-  position: relative;
-  left: -124px;
 }
 
 /* 카드 공통 */
