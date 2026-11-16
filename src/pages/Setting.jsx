@@ -13,6 +13,7 @@ import { useMySub } from "@/queries/subs";
 import { fromDbRow } from "@/utils/common/dbItem";
 import { usePayMethods, useAddPayMethod } from "@/queries/payment";
 import { useSetting } from "@/hooks/useSetting";
+import { useBudget } from "@/queries/budgets";
 import ProfileCard from "@/components/setting/ProfileCard";
 import AlertCard from "@/components/setting/AlertCard";
 import BudgetCard from "@/components/setting/BudgetCard";
@@ -30,6 +31,9 @@ const Setting = () => {
   // 등록한 결제 수단 — DB(리액트 쿼리)
   const { data: methods = [] } = usePayMethods();
   const addPay = useAddPayMethod();
+  
+  // 예산
+  const { data: dbBudget } = useBudget();
 
   // 결제 수단 추가 창
   const [modal, setModal] = useState(false);
@@ -61,8 +65,7 @@ const Setting = () => {
 
         {/* ───── 오른쪽: 예산 + 결제 수단 ───── */}
         <div className="set-side">
-          {/* key: 사람이 바뀌면 예산 카드를 새로 만들어요 (BudgetCard.jsx 설명 참고) */}
-          <BudgetCard key={user?.email ?? "guest"} initial={setting.budget} />
+          <BudgetCard key={user?.email ?? "guest"} initial={dbBudget ?? setting.budget} />
           <PayMethodCard methods={methods} items={items} onAddClick={() => setModal(true)} />
         </div>
       </div>

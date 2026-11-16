@@ -17,8 +17,3 @@ export const DEFAULT_SORT = "created";
 export const ALERT_OPTIONS = ["30일 전", "7일 전", "3일 전", "1일 전"];
 export const DEFAULT_PAY_ALERT = "1일 전";
 export const DEFAULT_END_ALERT = "7일 전";
-
-// 결제 정보 수정 모달 토글
-export const CYCLE_OPTIONS = ["매년", "매월", "매주"];
-export const AMOUNT_TYPE_OPTIONS = ["고정", "변동"];
-export const DEFAULT_AMOUNT_TYPE = "고정";

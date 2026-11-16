@@ -6,11 +6,11 @@ import { useCategories, useMySub } from "@/queries/subs";
 import { fromDbRow } from "@/utils/common/dbItem";
 import { useCategoryOf, dashCatVars } from "@/hooks/useCategoryOf";
 import { ddayText } from "@/utils/common/date";
-import { MONTH, TODAY, catClass, dashData, payByDay, toCard } from "@/utils/dashboard/dashboard";
+import { MONTH, TODAY, catClass, dashData, itemsByDay, toCard } from "@/utils/dashboard/dashboard";
 import { useCountUp } from "@/hooks/useCountUp";
-import { loadBudget } from "@/utils/setting/budget";
+import { useBudget } from "@/queries/budgets";
 import { comma as won } from "@/utils/common/format";
-import { LINE_ICON as line, MAX_CARDS, MAX_LINES } from "@/constants/dashboard";
+import { LINE_ICON as line, MAX_CARDS, MAX_LINES, MAX_PILLS } from "@/constants/dashboard";
 import { WEEKDAYS } from "@/constants/addItem";
 import { useAuthStore } from "@/store/authStore";
 import "@/styles/dashboard.css";
@@ -224,8 +224,8 @@ function MonthlyChart({ data }) {
 /* ───────── 4. 이번 달 예산 ───────── */
 function BudgetCard({ data }) {
   const navigate = useNavigate();
-  const [limit] = useState(loadBudget);
-  const BUDGET = { limit, used: data.total };
+  const { data: dbBudget } = useBudget();
+  const BUDGET = { limit: dbBudget ?? 1300000, used: data.total };
   const pct = Math.round((BUDGET.used / BUDGET.limit) * 100);
   const over = BUDGET.used > BUDGET.limit;
   return (
@@ -280,7 +280,7 @@ function CalendarCard({ items }) {
   ];
   const viewKey = view.year * 100 + view.month;
   const todayKey = TODAY.year * 100 + TODAY.month;
-  const isPast = (day) => viewKey < todayKey || (viewKey === todayKey && day < TODAY.day);
+  const isPast = () => viewKey < todayKey; // 지난 달만 흐리게 (이번 달은 지난 날도 진하게)
   const isToday = (day) => viewKey === todayKey && day === TODAY.day;
   const title = view.year === TODAY.year ? `${view.month}월 결제일` : `${view.year}년 ${view.month}월 결제일`;
 
@@ -288,7 +288,7 @@ function CalendarCard({ items }) {
   const goCalendar = (day = null) => navigate("/calendar", { state: { year: view.year, month: view.month, day } });
 
   // 내가 등록한 항목으로 달력·다가오는 결제를 채워요
-  const PAY = payByDay(items, view.year, view.month);
+  const DAYS = itemsByDay(items, view.year, view.month);
   const upcoming = nextPayments(items, TODAY).map(toCard);
 
   return (
@@ -318,26 +318,26 @@ function CalendarCard({ items }) {
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goCalendar(); } }}>
         {cells.map((day, i) => {
           if (!day) return <span key={`e${i}`} />;
-          const pay = PAY[day];
-          const past = isPast(day) ? "is-past" : "";
-          if (isToday(day)) {
-            return (
-              <span key={day} data-day={day} className={`gk-cal-day is-today ${past}`}>
-                <span className="gk-cal-day__today-num">{day}</span>
-                <span className="gk-cal-day__today-text">오늘</span>
-              </span>
-            );
-          }
-          if (pay) {
-            return (
-              <span key={day} data-day={day} className={`gk-cal-day is-pay ${past} ${dir ? "" : "gk-fade"}`}>
-                <b className="gk-cal-day__num">{day}</b>
-                {/* 긴 이름은 글자를 조금 줄여 최대 두 줄까지 (넘치면 …) */}
-                <span title={pay.name} className="gk-cal-day__name">{pay.name}</span>
-              </span>
-            );
-          }
-          return <span key={day} data-day={day} className={`gk-cal-day is-plain ${past}`}>{day}</span>;
+          const list = DAYS[day]; // 그날 나가는 항목 전부 → 항목마다 카테고리 색 밑줄
+          const cls = [
+            "gk-cal-day",
+            isToday(day) && "is-today", // 오늘은 테두리만
+            isPast(day) && "is-past",
+          ].filter(Boolean).join(" ");
+          // 글자 대신 마우스를 올리면 이름이 보여요
+          const tip = list?.map((it) => it.name).join(", ");
+          return (
+            <span key={day} data-day={day} className={cls} title={tip}>
+              <b className="gk-cal-day__num">{day}</b>
+              {list && (
+                <span className="gk-cal-day__daily" aria-hidden="true">
+                  {list.slice(0, MAX_PILLS).map((it) => (
+                    <i key={it.id} className="gk-cal-day__pill" style={{ "--pill": catOf(it.category).chart }} />
+                  ))}
+                </span>
+              )}
+            </span>
+          );
         })}
       </div>
 

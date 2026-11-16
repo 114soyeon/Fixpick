@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 
 /*
-  결제 수단 관련 Supabase 요청 js()
+  결제 수단 관련 Supabase 요청 js
   - payment_categories, payment_methods 같이 사용
   - payment_id 로 payment_categories를 가리킴
 */

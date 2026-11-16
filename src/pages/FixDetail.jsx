@@ -11,6 +11,7 @@ import EndDateCard from "@/components/fix-detail/EndDateCard.jsx";
 import { getAmountHistory, getPayMethods } from "@/utils/fix/fixCalculations";
 import { useFixItems } from "@/hooks/useFixItems";
 import { useMySub, useUpdateSub, useDeleteSub } from "@/queries/subs";
+import SidebarToast from "@/components/sidebar/SidebarToast";
 
 const FixDetail = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const FixDetail = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const updateSub = useUpdateSub(); // DB 수정
   const deleteSub = useDeleteSub(); // DB 삭제
+  const [toast, setToast] = useState(null); // 항목수정 토스트
 
   // DB 목록에서 이 항목 찾기
   // DB 데이터는 조금 늦게 와서, 화면을 그릴 때마다 다시 찾아요
@@ -102,7 +104,7 @@ const FixDetail = () => {
         <div className="detail-left">
           <HeroCard item={item} />
 
-          <PaymentInfoCard item={item} onEdit={() => setIsModalOpen(true)} />
+          <PaymentInfoCard item={item} onEdit={() => (rawRow ? setIsModalOpen(true) : window.alert("아직 데이터를 불러오지 못했어요"))} />
 
           <MemoCard memo={item.memo} onChange={handleMemoChange} onBlur={handleMemoBlur} />
         </div>
@@ -132,8 +134,11 @@ const FixDetail = () => {
           item={rawRow}
           payMethods={getPayMethods(allItems)}
           onClose={() => setIsModalOpen(false)}
+          setToast={setToast}
         />
       )}
+
+      {toast && <SidebarToast key={toast} text={toast} onDone={() => setToast(null)} />}
 
       <p className="copyright">
         Copyright © 2026. Fixpick All rights reserved.
