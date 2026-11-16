@@ -3,9 +3,9 @@
  * - 이 파일은 "데이터 준비 + 화면 배치"만 해요. 각 카드는 components/calendar/ 에 있어요
  *   PayCalendar(왼쪽 달력) / SummaryCard(요약) / DayCard(선택한 날) / BigCard(큰 지출)
  * - class는 다른 페이지와 겹치지 않게 모두 "paycal-" 로 시작 (styles/calendar.css)
- * - 데이터: 왼쪽 달력만 리액트 쿼리 useMySub(queries/subs.js)로 DB의 내 고정지출을 읽어요
+ * - 데이터: 리액트 쿼리 useMySub(queries/subs.js)로 DB의 내 고정지출을 읽어요
  *   → utils/dbItem.js fromDbRow 로 계산하기 좋은 모양으로 바꿔요 (리포트 페이지와 같은 방식)
- *   오른쪽 카드들(요약·선택한 날·큰 지출)은 아직 예전 데이터(hooks/useItems)예요
+ *   달력과 오른쪽 카드들(요약·선택한 날·큰 지출)이 모두 같은 DB 데이터를 써요
  */
 import { useMemo, useState } from "react";
 import { useCalendarController } from "@fullcalendar/react";
@@ -16,7 +16,6 @@ import "@fullcalendar/react/skeleton.css"; // 항상 필요
 import "@/styles/calendar.css"; // 이 페이지 전용 스타일 (class는 모두 paycal- 로 시작)
 
 import { bigPayments, paymentsInMonth } from "@/utils/common/payment";
-import { useItems } from "@/hooks/useItems";
 import { useMySub } from "@/queries/subs";
 import { fromDbRow } from "@/utils/common/dbItem";
 import { useCategoryOf } from "@/hooks/useCategoryOf";
@@ -45,12 +44,9 @@ const Calendar = () => {
   const viewYear = viewDate.getFullYear();
   const viewMonth = viewDate.getMonth() + 1;
 
-  // 사용자가 등록한 고정지출 항목 (규칙만 있음: "매달 25일" 같은)
-  const items = useItems();
-
-  // 달력에 그릴 DB 데이터 (리액트 쿼리) — 지금은 왼쪽 달력에만 써요
+  // DB의 내 고정지출 (리액트 쿼리) — 규칙만 있음: "매달 25일" 같은
   const { data: rows } = useMySub();
-  // DB 한 줄 → 계산용 항목 (rows가 바뀔 때만 다시 바꿔요)
+  // DB 한 줄 → 계산용 항목 (rows가 바뀔 때만 다시 바꿔요) — 달력·오른쪽 카드 모두 이걸 써요
   const dbItems = useMemo(() => (rows ?? []).map(fromDbRow), [rows]);
   const catOf = useCategoryOf(); // 칩 아이콘·색 (DB categories)
 
@@ -60,20 +56,20 @@ const Calendar = () => {
   const today = getToday();
 
   // ① 지금 보이는 달에 실제로 나가는 결제 (규칙 → 실제 날짜)
-  const monthPayments = paymentsInMonth(items, viewYear, viewMonth);
+  const monthPayments = paymentsInMonth(dbItems, viewYear, viewMonth);
 
   // ② 달력에 그릴 일정 (FullCalendar 형식, 앞뒤 달 포함) — hooks/useCalendarEvents.js
   //    데이터·보이는 달이 바뀔 때만 다시 만들어요 (날짜 클릭 때는 그대로 → 빨라요)
   const events = useCalendarEvents(dbItems, viewYear, viewMonth, catOf);
 
   // ③ 선택한 날짜의 결제 목록 (선택한 날짜가 속한 달 기준으로 계산)
-  const dayPayments = paymentsInMonth(items, selectedDate.getFullYear(), selectedDate.getMonth() + 1)
+  const dayPayments = paymentsInMonth(dbItems, selectedDate.getFullYear(), selectedDate.getMonth() + 1)
     .filter((p) => isSameDay(p.date, selectedDate))
     .sort((a, b) => a.name.localeCompare(b.name, "ko")); // 이름 순 (달력 칩 순서와 같게)
 
   // ④ 큰 지출 미리 보기: 오늘부터 3개월 안 "매년" 결제 중 큰 순서로 최대 4개
   //    (5개는 카드 높이를 넘쳐서 4개로 정함)
-  const bigList = bigPayments(items, today, 4);
+  const bigList = bigPayments(dbItems, today, 4);
 
   return (
     <div className="paycal-page">

@@ -3,12 +3,14 @@
  * - 이 파일은 "데이터 준비 + 화면 배치"만 해요. 각 카드는 components/setting/ 에 있어요
  *   ProfileCard(프로필) / AlertCard(알림) / BudgetCard(예산) / PayMethodCard(결제 수단) / AccountCard(계정)
  * - class는 다른 페이지와 겹치지 않게 모두 "set-" 로 시작 (styles/setting.css)
+ * - 데이터: 고정지출은 DB(useMySub), 알림·예산·결제 수단은 아직 브라우저 저장소(useSetting)
  */
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import "@/styles/setting.css";
 
 import { useUser } from "@/hooks/useUser";
-import { useItems } from "@/hooks/useItems";
+import { useMySub } from "@/queries/subs";
+import { fromDbRow } from "@/utils/common/dbItem";
 import { addMethod } from "@/utils/setting/setting";
 import { useSetting } from "@/hooks/useSetting";
 import ProfileCard from "@/components/setting/ProfileCard";
@@ -20,7 +22,9 @@ import PayModal from "@/components/setting/PayModal";
 
 const Setting = () => {
   const user = useUser(); // 로그인 안 했으면 null
-  const items = useItems(); // 내가 등록한 고정지출
+  // 내가 등록한 고정지출 — DB(리액트 쿼리 useMySub) → 계산용 모양으로 (rows가 바뀔 때만)
+  const { data: rows } = useMySub();
+  const items = useMemo(() => (rows ?? []).map(fromDbRow), [rows]);
   const setting = useSetting(); // 알림·예산·결제 수단
 
   // 결제 수단 추가 창

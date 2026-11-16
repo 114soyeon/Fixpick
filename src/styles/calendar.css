@@ -252,14 +252,15 @@
 .paycal-summary {
   background: var(--paycal-blue-light);
   border: none;
+  padding: 23px 23px 27px; /* 시안: 위·양옆 23px (카드 높이 233px) */
 }
 .paycal-summary-label {
   font-size: 14px;
   color: #3b4d63;
 }
 .paycal-summary-amount {
-  margin-top: 8px;
-  font-size: 30px;
+  margin-top: 6px;
+  font-size: 28px; /* 시안 글자 높이 기준 */
   font-weight: 700;
 }
 /* 진행 바 + 건수 한 줄 (시안: 바 오른쪽에 "1/15건") */
@@ -267,7 +268,8 @@
   display: flex;
   align-items: center;
   gap: 13px;
-  margin-top: 20px;
+  margin-top: 39px;
+  margin-bottom: 15px; /* 아래 "결제된 금액" 줄과 간격 */
 }
 .paycal-progress {
   flex: 1; /* 건수 글자를 뺀 나머지 폭 */
@@ -287,7 +289,7 @@
   white-space: nowrap; /* "2/15건"이 두 줄로 꺾이지 않게 */
 }
 .paycal-divider {
-  margin: 18px 0;
+  margin: 12px 0 14px; /* 시안: 결제된 금액과 이번 달 전체 사이 */
   border: none;
   border-top: 1px solid #bcdcf5;
 }
@@ -296,9 +298,6 @@
   justify-content: space-between;
   font-size: 14px;
   color: #3b4d63;
-}
-.paycal-summary-row + .paycal-summary-row {
-  margin-top: 10px;
 }
 .paycal-summary-row strong {
   color: var(--paycal-navy);
@@ -429,9 +428,12 @@
 .paycal-day-card .paycal-list-scroll {
   min-height: 0; /* 카드가 작아지면 목록도 같이 작아지고 스크롤 */
 }
-/* 큰 지출 카드는 항상 최대 4개라 내용 높이만큼 고정 → 남는 높이는 날짜 카드가 가져요 */
+/* 시안: 날짜 카드와 큰 지출 카드는 높이가 같아요 → 남는 높이를 둘이 반씩 나눠 가져요 (flex: 1)
+   단, 큰 지출 카드는 내용(최대 4개)보다 작아지지 않아요 (min-height: auto → 꽉 끼지 않게)
+   화면이 낮아서 높이가 모자라면 날짜 카드가 양보해요 (날짜 카드는 목록이 스크롤돼요) */
 .paycal-side > .paycal-big-card {
-  min-height: 0;
+  flex: 1;
+  min-height: auto;
 }
 
 /* 제목 위 여백: 지출 리포트(report.css)와 같게
@@ -442,9 +444,9 @@
   }
 }
 
-/* 화면 높이가 낮을 때(950px 이하): 남은 결제 카드를 줄여서 날짜 카드를 늘려요
+/* 화면 높이가 낮을 때(1000px 이하 — 1920 모니터 브라우저 높이 약 950도 포함): 남은 결제 카드를 줄여서 날짜 카드를 늘려요
    (1440×900 기준 날짜 카드에 결제 3개) */
-@media (min-width: 1440px) and (max-height: 950px) {
+@media (min-width: 1440px) and (max-height: 1000px) {
   .paycal-summary {
     padding: 15px 24px;
   }
@@ -454,12 +456,10 @@
   }
   .paycal-progress-row {
     margin-top: 12px;
+    margin-bottom: 8px; /* 결제된 금액 줄과 간격 */
   }
   .paycal-divider {
     margin: 10px 0;
-  }
-  .paycal-summary-row + .paycal-summary-row {
-    margin-top: 8px;
   }
 }
 
@@ -478,7 +478,8 @@
   .paycal-page {
     height: auto;
   }
-  .paycal-side > .paycal-day-card {
+  .paycal-side > .paycal-day-card,
+  .paycal-side > .paycal-big-card {
     flex: none;
   }
   .paycal-body {
@@ -501,6 +502,7 @@
 @media (max-width: 1279px) {
   .paycal-page {
     padding: 24px;
+    padding-bottom: 40px; /* 아래 카피라이트(바닥에서 12px)가 카드와 겹치지 않게 */
   }
   .paycal-body,
   .paycal-side {
@@ -537,6 +539,7 @@
 @media (max-width: 767px) {
   .paycal-page {
     padding: 16px;
+    padding-bottom: 40px; /* 아래 카피라이트(바닥에서 12px)가 카드와 겹치지 않게 */
   }
   .paycal-header {
     margin-bottom: 16px;
