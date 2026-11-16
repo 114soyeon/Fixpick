@@ -413,3 +413,57 @@
     font-size: 32px;
   }
 }
+
+/* ───────── 1칸 화면: "알림" + "만기일까지" 카드를 가로로 반반, 정사각형 느낌으로 ─────────
+   (금액 변화 카드는 그대로 한 줄 전체) */
+@media (max-width: 900px) {
+  .detail-page .detail-right {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .detail-page .detail-right > :first-child {
+    grid-column: 1 / -1; /* 금액 변화 카드는 두 칸 전체 */
+  }
+  .detail-page .detail-right > :not(:first-child) {
+    aspect-ratio: 1 / 1; /* 정사각형 (내용이 더 길면 그만큼 늘어나요) */
+    display: flex;
+    flex-direction: column;
+  }
+  /* 제목은 위에 두고, 나머지 내용은 카드 세로 가운데로 */
+  .detail-page .detail-right > :not(:first-child) > h3 + * {
+    margin-top: auto;
+  }
+  .detail-page .detail-right > :not(:first-child) > :last-child {
+    margin-bottom: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .detail-page .detail-right {
+    gap: 12px;
+  }
+  /* 카드가 좁아지니 알림 버튼 4개를 2×2로 */
+  .detail-page .detail-right .segment {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-radius: 16px;
+  }
+}
+
+/* ───────── "알림" 카드만 프리텐다드 (크기·굵기는 그대로, 글꼴만) ───────── */
+/* 설치돼 있으면 내 PC 글꼴, 없으면 웹에서 받아와요 */
+@font-face {
+  font-family: "Pretendard Variable";
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+  src:
+    local("Pretendard Variable"),
+    url("https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/woff2/PretendardVariable.woff2")
+      format("woff2-variations");
+}
+/* 알림 카드(.alert-row 가 들어 있는 카드) + 안의 버튼 (버튼은 글꼴을 물려받지 않아서 따로) */
+.detail-page .card:has(.alert-row),
+.detail-page .card:has(.alert-row) button {
+  font-family: "Pretendard Variable", "Pretendard", sans-serif;
+}

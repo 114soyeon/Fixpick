@@ -359,7 +359,9 @@
 
 /* 고정지출 표: 페이지 전체가 아니라 표 박스 안에서만 스크롤 (무한 스크롤) */
 .expense-table--scroll {
-  max-height: 440px; /* 약 6줄 높이, 넘치면 표 안에서 스크롤 */
+  /* 화면 아래 남는 공간까지 표를 늘려요 (창 높이 - 표 위쪽 영역·copyright 약 390px), 최소 440px(약 6줄)
+     넘치면 표 안에서 스크롤 */
+  max-height: max(440px, calc(100vh - 390px));
   overflow-y: auto;
 }
 .expense-table--scroll .table-header {
