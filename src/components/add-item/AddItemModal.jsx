@@ -14,39 +14,45 @@ import { useAuthStore } from "@/store/authStore";
 import DatePicker from "@/components/add-item/DatePicker";
 import MiniSelect from "@/components/add-item/MiniSelect";
 import PayPicker from "@/components/add-item/PayPicker";
-import { useCategories, useAddSub } from "@/queries/subs";
+import { useCategories, useAddSub, useUpdateSub } from "@/queries/subs";
 
-/** 고정지출 항목 추가 창 (DB에 저장해요) */
-export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
+/**
+ * 고정지출 항목 추가 / 수정 창 (DB에 저장해요)
+ *  - item 없이 열면 → "항목 추가" (빈 칸)
+ *  - item(DB 한 줄)을 넘기면 → "항목 수정" (저장돼 있던 값이 미리 채워져요)
+ */
+export default function AddItemModal({ onClose, setToast, payMethods = [], item = null }) {
   const { user } = useAuthStore();
   const { data: categories } = useCategories();
   const addSub = useAddSub();
+  const updateSub = useUpdateSub();
+  const isEdit = !!item; // 수정 모드인지
 
   const [closing, setClosing] = useState(false);
 
-  // form 상태
+  // form 상태 (수정 모드면 DB 값으로 시작해요)
   const [form, setForm] = useState({
-    category: null,
-    name: "",
-    amount: "",
-    amountType: "fixed",
+    category: item?.category_id ?? null,
+    name: item?.name ?? "",
+    amount: item?.amount != null ? String(item.amount) : "",
+    amountType: item?.amount_type === "변동" ? "variable" : "fixed",
 
-    cycle: "매달",
+    cycle: item?.cycle === "매월" ? "매달" : item?.cycle ?? "매달",
 
     // 매주
-    week: new Date().getDay(),
+    week: item?.week ?? new Date().getDay(),
 
     // 매달 / 매년
-    day: "",
-    month: new Date().getMonth() + 1,
+    day: item?.day != null ? String(item.day) : "",
+    month: item?.month ?? new Date().getMonth() + 1,
 
     // 사용자화
-    customNumber: "1",
-    customText: "month",
+    customNumber: item?.custom_number != null ? String(item.custom_number) : "1",
+    customText: item?.custom_text ?? "month",
 
-    payMethod: "",
-    endDate: "",
-    remind: true,
+    payMethod: item?.pay_method ?? "",
+    endDate: item?.expiry_date ?? "",
+    remind: item?.remind ?? true,
   });
 
   const nameRef = useRef(null);
@@ -111,24 +117,33 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 항목 추가
+  // 항목 추가 / 수정
   const submit = (e) => {
     e.preventDefault();
     if (!valid) return;
 
-    // 첫 결제일: 오늘이 아니라 고른 결제일(요일·월)에 맞는 가장 가까운 날
-    const startDate = firstPayKey({
-      cycle: form.cycle,
-      day: dayNum,
-      month: Number(form.month),
-      weekday: Number(form.week),
-      every: customNumberNum,
-      unit,
-    });
+    // 수정 모드에서 결제일(주기·날짜·요일·월)을 안 바꿨으면 원래 시작일을 그대로 써요
+    const scheduleChanged =
+      !isEdit ||
+      form.cycle !== (item.cycle === "매월" ? "매달" : item.cycle) ||
+      (needDay && dayNum !== Number(item.day)) ||
+      (unit === "week" && Number(form.week) !== Number(item.week)) ||
+      (unit === "year" && Number(form.month) !== Number(item.month)) ||
+      (custom && (customNumberNum !== Number(item.custom_number) || form.customText !== item.custom_text));
 
-    addSub.mutate(
-      {
-        user_id: user.id,
+    // 첫 결제일: 오늘이 아니라 고른 결제일(요일·월)에 맞는 가장 가까운 날
+    const startDate = scheduleChanged
+      ? firstPayKey({
+          cycle: form.cycle,
+          day: dayNum,
+          month: Number(form.month),
+          weekday: Number(form.week),
+          every: customNumberNum,
+          unit,
+        })
+      : item.start_date;
+
+    const data = {
         category_id: form.category,
         name: form.name.trim(),
         amount: amountNum,
@@ -136,11 +151,8 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
         cycle: form.cycle,
         amount_type: variable ? "변동" : "고정",
 
-        payment_method_id: null,
-
         start_date: startDate,
         expiry_date: form.endDate || null,
-        memo: null,
 
         // 매주 / 사용자화 주 단위일 때 요일
         week:
@@ -165,6 +177,29 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
 
         pay_method: form.payMethod,
         remind: form.remind,
+    };
+
+    // 수정: 원래 항목을 고쳐요 (메모·알림 설정 같은 다른 값은 그대로 둬요)
+    if (isEdit) {
+      updateSub.mutate(
+        { id: item.id, data },
+        {
+          onError: () =>
+            (setToast ?? window.alert)("저장하지 못했어요. 다시 시도해 주세요"),
+        }
+      );
+      setToast?.(`'${form.name.trim()}' 항목을 수정했어요`);
+      close();
+      return;
+    }
+
+    // 추가: 새 항목을 만들어요
+    addSub.mutate(
+      {
+        ...data,
+        user_id: user.id,
+        payment_method_id: null,
+        memo: null,
       },
       {
         onError: () => {
@@ -194,10 +229,12 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
         <div className="gk-add-modal__head">
           <div>
             <h2 id="gk-add-title" className="gk-add-modal__title">
-              고정지출 항목 추가
+              {isEdit ? "고정지출 항목 수정" : "고정지출 항목 추가"}
             </h2>
             <p className="gk-add-modal__desc">
-              매달 나가는 돈을 등록하면 결제일에 맞춰 알려드려요.
+              {isEdit
+                ? "바꾼 내용은 저장하면 바로 반영돼요."
+                : "매달 나가는 돈을 등록하면 결제일에 맞춰 알려드려요."}
             </p>
           </div>
 
@@ -456,7 +493,7 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
             className="gk-btn gk-btn--primary"
             disabled={!valid}
           >
-            추가하기
+            {isEdit ? "저장하기" : "추가하기"}
           </button>
         </div>
       </form>

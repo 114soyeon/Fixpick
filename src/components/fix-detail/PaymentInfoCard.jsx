@@ -12,7 +12,7 @@ const PaymentInfoCard = ({ item, onEdit }) => {
       <div className="info-grid">
         <div>
           <span>주기</span>
-          <strong>{item.period}</strong>
+          <strong>{item.period === "매월" ? "매달" : item.period}</strong>
         </div>
         <div>
           <span>금액 유형</span>

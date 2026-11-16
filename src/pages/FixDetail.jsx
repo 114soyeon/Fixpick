@@ -1,15 +1,13 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "@/styles/FixDetail.css";
-import PaymentEditModal from "@/components/paymentEditModal/PaymentEditModal.jsx";
+import AddItemModal from "@/components/add-item/AddItemModal.jsx"; // 항목 추가 창을 "수정 모드"로 재사용
 import AlertSettings from "@/components/fix-detail/AlertSettings.jsx";
 import AmountChart from "@/components/fix-detail/AmountChart.jsx";
 import PaymentInfoCard from "@/components/fix-detail/PaymentInfoCard.jsx";
 import HeroCard from "@/components/fix-detail/HeroCard.jsx";
 import MemoCard from "@/components/fix-detail/MemoCard.jsx";
 import EndDateCard from "@/components/fix-detail/EndDateCard.jsx";
-import { DEFAULT_AMOUNT_TYPE } from "@/constants/fix";
-import { toInputDate } from "@/utils/common/date";
 import { getAmountHistory, getPayMethods } from "@/utils/fix/fixCalculations";
 import { useFixItems } from "@/hooks/useFixItems";
 import { useMySub, useUpdateSub, useDeleteSub } from "@/queries/subs";
@@ -26,8 +24,9 @@ const FixDetail = () => {
   // DB 데이터는 조금 늦게 와서, 화면을 그릴 때마다 다시 찾아요
   // (저장·삭제하면 목록을 다시 불러와서 화면도 저절로 바뀌어요)
   const allItems = useFixItems();
-  const { isLoading } = useMySub(); // 아직 불러오는 중인지
+  const { data: rows, isLoading } = useMySub(); // DB 원본 목록 + 아직 불러오는 중인지
   const found = allItems.find((e) => e.id === Number(id));
+  const rawRow = rows?.find((r) => Number(r.id) === Number(id)); // 수정 창에 미리 채울 DB 원본 값
 
   // 메모: 기본값은 DB(found.memo), 입력 중에는 draft 사용
   const [memoDraft, setMemoDraft] = useState(null);
@@ -60,26 +59,6 @@ const FixDetail = () => {
 
   // 화면에 보여줄 항목 = DB 항목 + 메모
   const item = { ...found, memo: memoDraft ?? found.memo ?? "" };
-
-  // 팝업에서 "저장"을 눌렀을 때 → DB에 저장
-  const handleSave = (newInfo) => {
-    const patch = {
-      amount: Number(newInfo.amount) || 0,
-      amount_type: newInfo.amountType === "변동" ? "변동" : "고정",
-      cycle: newInfo.cycle === "매월" ? "매달" : newInfo.cycle, // DB 표기는 "매달"
-      pay_method: newInfo.method || null,
-      start_date: newInfo.startDate || null, // "YYYY-MM-DD"
-      expiry_date: newInfo.endDate || null, // "YYYY-MM-DD"
-    };
-
-    updateSub.mutate(
-      { id: Number(id), data: patch }, // mutationFn이 ({id, data}) 형태
-      {
-        onSuccess: () => setIsModalOpen(false),
-        onError: () => window.alert("저장하지 못했어요. 다시 시도해 주세요"),
-      },
-    );
-  };
 
   // "삭제"를 눌렀을 때 → DB에서 삭제
   const handleDelete = () => {
@@ -147,20 +126,12 @@ const FixDetail = () => {
         </div>
       </div>
 
-      {isModalOpen && (
-        <PaymentEditModal
-          info={{
-            cycle: item.period,
-            amountType: item.amountType || DEFAULT_AMOUNT_TYPE,
-            amount: item.amount,
-            method: item.method || "",
-            startDate: toInputDate(item.startDate),
-            endDate: toInputDate(item.endDate),
-            nextDate: toInputDate(item.date),
-          }}
+      {/* 결제 정보 수정 = 항목 추가 창을 수정 모드로 (저장된 값이 미리 채워져요) */}
+      {isModalOpen && rawRow && (
+        <AddItemModal
+          item={rawRow}
           payMethods={getPayMethods(allItems)}
           onClose={() => setIsModalOpen(false)}
-          onSave={handleSave}
         />
       )}
 

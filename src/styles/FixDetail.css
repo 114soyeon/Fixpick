@@ -35,7 +35,7 @@
   font-weight: 700;
 }
 .tag.light {
-  background: #dcefFD;
+  background: #dceffd;
   color: #0b2a45;
 }
 
@@ -81,7 +81,7 @@
 /* 큰 금액 카드 */
 .hero-card {
   position: relative;
-  background: #dcefFD;
+  background: #dceffd;
   border: none;
   padding: 36px 32px;
 }
@@ -147,23 +147,43 @@
 .chart-bar {
   width: 48px;
   border-radius: 8px;
-  background: #dcefFD;
+  background: #dceffd;
 }
 .chart-bar.current {
   background: #5cb8f2;
 }
 
 /* 막대 높이 단계 (가장 큰 금액 = 10단계 = 160px) */
-.chart-bar--1  { height: 16px; }
-.chart-bar--2  { height: 32px; }
-.chart-bar--3  { height: 48px; }
-.chart-bar--4  { height: 64px; }
-.chart-bar--5  { height: 80px; }
-.chart-bar--6  { height: 96px; }
-.chart-bar--7  { height: 112px; }
-.chart-bar--8  { height: 128px; }
-.chart-bar--9  { height: 144px; }
-.chart-bar--10 { height: 160px; }
+.chart-bar--1 {
+  height: 16px;
+}
+.chart-bar--2 {
+  height: 32px;
+}
+.chart-bar--3 {
+  height: 48px;
+}
+.chart-bar--4 {
+  height: 64px;
+}
+.chart-bar--5 {
+  height: 80px;
+}
+.chart-bar--6 {
+  height: 96px;
+}
+.chart-bar--7 {
+  height: 112px;
+}
+.chart-bar--8 {
+  height: 128px;
+}
+.chart-bar--9 {
+  height: 144px;
+}
+.chart-bar--10 {
+  height: 160px;
+}
 .chart-value,
 .chart-year {
   font-size: 12px;
@@ -199,14 +219,26 @@
   font-weight: 700;
 }
 
+@media (max-width: 1400px) {
+  .alert-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+@media (max-width: 1020px) {
+  .segment button {
+    padding: 8px 10px;
+  }
+}
+
 .memo-input {
   display: block;
   width: 100%;
   box-sizing: border-box;
   border: 0;
   outline: 0;
-  resize: none;          /* 오른쪽 아래 크기 조절 손잡이 제거 */
-  font: inherit;         /* 주변 글꼴 그대로 사용 */
+  resize: none; /* 오른쪽 아래 크기 조절 손잡이 제거 */
+  font: inherit; /* 주변 글꼴 그대로 사용 */
   color: inherit;
   line-height: 1.5;
 }
@@ -244,21 +276,140 @@
 }
 
 /* 진행 막대 길이 단계 (시작일~만기일 중 지난 정도, 10단계 = 100%) */
-.end-progress-fill--0  { width: 0; }
-.end-progress-fill--1  { width: 10%; }
-.end-progress-fill--2  { width: 20%; }
-.end-progress-fill--3  { width: 30%; }
-.end-progress-fill--4  { width: 40%; }
-.end-progress-fill--5  { width: 50%; }
-.end-progress-fill--6  { width: 60%; }
-.end-progress-fill--7  { width: 70%; }
-.end-progress-fill--8  { width: 80%; }
-.end-progress-fill--9  { width: 90%; }
-.end-progress-fill--10 { width: 100%; }
+.end-progress-fill--0 {
+  width: 0;
+}
+.end-progress-fill--1 {
+  width: 10%;
+}
+.end-progress-fill--2 {
+  width: 20%;
+}
+.end-progress-fill--3 {
+  width: 30%;
+}
+.end-progress-fill--4 {
+  width: 40%;
+}
+.end-progress-fill--5 {
+  width: 50%;
+}
+.end-progress-fill--6 {
+  width: 60%;
+}
+.end-progress-fill--7 {
+  width: 70%;
+}
+.end-progress-fill--8 {
+  width: 80%;
+}
+.end-progress-fill--9 {
+  width: 90%;
+}
+.end-progress-fill--10 {
+  width: 100%;
+}
 
 .end-caption {
   margin: 14px 0 0;
   text-align: right;
   font-size: 13px;
   color: #52637a;
+}
+
+/* ───────── 반응형 보완 (최소 375px 화면, 이 페이지 안에서만 적용) ───────── */
+@media (max-width: 1279px) {
+  .detail-page {
+    padding: 24px;
+  }
+}
+
+/* 2칸 → 1칸 (왼쪽 카드들 아래에 오른쪽 카드들) */
+@media (max-width: 900px) {
+  .detail-page .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .detail-page .detail-left,
+  .detail-page .detail-right {
+    min-width: 0; /* 안의 내용이 길어도 화면 밖으로 안 넘치게 */
+  }
+}
+
+@media (max-width: 767px) {
+  .detail-page {
+    padding: 16px;
+  }
+
+  /* 제목 + 삭제 버튼 */
+  .detail-page .detail-top {
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .detail-page .detail-title {
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+  }
+  .detail-page .detail-title h1 {
+    font-size: 24px;
+    word-break: keep-all;
+  }
+  .detail-page .outline-button {
+    flex-shrink: 0;
+    padding: 8px 18px;
+  }
+
+  /* 카드 */
+  .detail-page .card {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  /* 큰 금액 카드: 글씨를 줄이고, D-day 배지는 겹치지 않게 위로 */
+  .detail-page .hero-card {
+    padding: 24px 20px;
+  }
+  .detail-page .hero-card h2 {
+    margin: 12px 0;
+    font-size: 40px;
+  }
+  .detail-page .hero-card h2 small {
+    font-size: 18px;
+  }
+  .detail-page .dday-badge {
+    position: static;
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 6px 16px;
+    font-size: 13px;
+  }
+
+  /* 결제 정보 */
+  .detail-page .info-grid {
+    gap: 20px 16px;
+  }
+  .detail-page .info-grid strong {
+    font-size: 15px;
+    word-break: keep-all;
+  }
+
+  .detail-page .memo-box {
+    padding: 16px;
+  }
+
+  /* 알림 버튼: 한 줄 전체 너비로 4개를 똑같이 나눠요 */
+  .detail-page .alert-row {
+    align-items: stretch;
+  }
+  .detail-page .segment button {
+    flex: 1;
+    padding: 8px 4px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* 만기일 카드 */
+  .detail-page .end-days {
+    font-size: 32px;
+  }
 }
