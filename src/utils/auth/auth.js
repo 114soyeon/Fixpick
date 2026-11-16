@@ -123,10 +123,8 @@ export function deleteAccount() {
   logout();
 }
 
-/** 프로필 동그라미 안 글자: 한글 세 글자 이상이면 뒤 두 글자(홍길동 → 길동), 아니면 첫 글자 */
+/** 프로필 동그라미 안 글자: 이름 길이와 상관없이 첫 글자 */
 export function initialOf(name = "") {
   const n = name.trim();
-  if (/^[가-힣]{3,}$/.test(n)) return n.slice(-2);
   return n.slice(0, 1).toUpperCase();
 }
-

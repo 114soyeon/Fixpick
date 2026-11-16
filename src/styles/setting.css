@@ -40,8 +40,8 @@
 .set-header-desc {
   margin-top: 12px;
   line-height: 20px;
-  font-size: 16px;
-  color: var(--set-gray);
+  font-size: 14px; /* 결제 캘린더·지출 리포트 제목 설명과 같게 */
+  color: #52637a;  /* 결제 캘린더·지출 리포트와 같은 색 */
 }
 
 /* ───── 프로필 (연한 파란 띠) ───── */
@@ -61,7 +61,7 @@
   border-radius: 50%;
   background: var(--set-blue);
   color: #fff;
-  font-size: 40px;
+  font-size: 28px; /* 사이드바와 같은 비율 (원 40px : 글자 15px) → 두 글자(길동)도 원 안에 */
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -542,6 +542,13 @@
   padding: 0;
 }
 
+/* 등록 실패 안내문 (PayModal) — 이름 저장 실패(.set-name-error)와 같은 색 */
+.set-modal-error {
+  margin-top: 16px;
+  font-size: 13px;
+  color: #d9534f;
+}
+
 .set-modal-btns {
   display: flex;
   gap: 10px;
@@ -605,6 +612,7 @@
 @media (max-width: 1279px) {
   .set-page {
     padding: 24px;
+    padding-bottom: 40px; /* 아래 카피라이트(바닥에서 12px)가 카드와 겹치지 않게 */
   }
   .set-body,
   .set-side {
@@ -630,6 +638,7 @@
 @media (max-width: 767px) {
   .set-page {
     padding: 16px;
+    padding-bottom: 40px; /* 아래 카피라이트(바닥에서 12px)가 카드와 겹치지 않게 */
   }
   .set-header-title {
     font-size: 24px;
@@ -651,7 +660,7 @@
   .set-avatar {
     width: 60px;
     height: 60px;
-    font-size: 30px;
+    font-size: 22px; /* 원 60px, 사이드바와 같은 비율 */
   }
   .set-name {
     font-size: 22px;

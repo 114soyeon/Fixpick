@@ -3,13 +3,15 @@
  * - 이 파일은 "데이터 준비 + 화면 배치"만 해요. 각 카드는 components/setting/ 에 있어요
  *   ProfileCard(프로필) / AlertCard(알림) / BudgetCard(예산) / PayMethodCard(결제 수단) / AccountCard(계정)
  * - class는 다른 페이지와 겹치지 않게 모두 "set-" 로 시작 (styles/setting.css)
+ * - 데이터: 고정지출(useMySub)·결제 수단(usePayMethods)은 DB, 알림·예산은 아직 브라우저 저장소(useSetting)
  */
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import "@/styles/setting.css";
 
 import { useUser } from "@/hooks/useUser";
-import { useItems } from "@/hooks/useItems";
-import { addMethod } from "@/utils/setting/setting";
+import { useMySub } from "@/queries/subs";
+import { fromDbRow } from "@/utils/common/dbItem";
+import { usePayMethods, useAddPayMethod } from "@/queries/payment";
 import { useSetting } from "@/hooks/useSetting";
 import ProfileCard from "@/components/setting/ProfileCard";
 import AlertCard from "@/components/setting/AlertCard";
@@ -20,11 +22,23 @@ import PayModal from "@/components/setting/PayModal";
 
 const Setting = () => {
   const user = useUser(); // 로그인 안 했으면 null
-  const items = useItems(); // 내가 등록한 고정지출
-  const setting = useSetting(); // 알림·예산·결제 수단
+  // 내가 등록한 고정지출 — DB(리액트 쿼리 useMySub) → 계산용 모양으로 (rows가 바뀔 때만)
+  const { data: rows } = useMySub();
+  const items = useMemo(() => (rows ?? []).map(fromDbRow), [rows]);
+  const setting = useSetting(); // 알림·예산 (결제 수단은 DB usePayMethods)
+
+  // 등록한 결제 수단 — DB(리액트 쿼리)
+  const { data: methods = [] } = usePayMethods();
+  const addPay = useAddPayMethod();
 
   // 결제 수단 추가 창
   const [modal, setModal] = useState(false);
+  const [payError, setPayError] = useState(""); // 등록 실패 안내문
+
+  const closeModal = () => {
+    setModal(false);
+    setPayError("");
+  };
 
   return (
     <div className="set-page">
@@ -49,7 +63,7 @@ const Setting = () => {
         <div className="set-side">
           {/* key: 사람이 바뀌면 예산 카드를 새로 만들어요 (BudgetCard.jsx 설명 참고) */}
           <BudgetCard key={user?.email ?? "guest"} initial={setting.budget} />
-          <PayMethodCard methods={setting.methods} items={items} onAddClick={() => setModal(true)} />
+          <PayMethodCard methods={methods} items={items} onAddClick={() => setModal(true)} />
         </div>
       </div>
 
@@ -58,10 +72,26 @@ const Setting = () => {
 
       {modal && (
         <PayModal
-          onClose={() => setModal(false)}
-          onAdd={(m) => {
-            addMethod(m);
-            setModal(false);
+          onClose={closeModal}
+          saving={addPay.isPending}
+          error={payError}
+          onAdd={({ name, last4 }) => {
+            setPayError("");
+            addPay.mutate(
+              { name, last4 },
+              {
+                onSuccess: closeModal,
+                onError: (err) => {
+                  console.error("결제 수단 등록 실패:", err);
+                  // supabase 에러(code 있음)는 문구를 숨기고, 우리 에러 메시지는 그대로 보여요
+                  setPayError(
+                    err?.code
+                      ? "결제 수단을 등록하지 못했어요. 다시 시도해 주세요"
+                      : err?.message || "결제 수단을 등록하지 못했어요. 다시 시도해 주세요"
+                  );
+                },
+              }
+            );
           }}
         />
       )}

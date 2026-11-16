@@ -6,11 +6,10 @@
 import { useRef, useState } from "react";
 import { Pencil } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import { initialOf } from "@/utils/auth/auth";
 
-// 이름 → 프로필 글자: 김민지 → 동그라미 "김", 제목 "민지님"
-const firstChar = (name) => name.trim().slice(0, 1);
-const callName = (name) => (/^[가-힣]{3,}$/.test(name.trim()) ? name.trim().slice(1) : name.trim());
-
+// 이름 표시는 사이드바와 같아요: 홍길동 → 동그라미 "홍"(initialOf), 제목 "홍길동님"
+// 이름(user.name)은 로그인할 때 DB users 테이블에서 읽어 와요 (store/authStore.js loadProfile)
 const ProfileCard = ({ user, items }) => {
   const name = user?.name || "게스트";
   const email = user?.email || "로그인하지 않았어요";
@@ -33,7 +32,7 @@ const ProfileCard = ({ user, items }) => {
     if (editDone.current) return;
     editDone.current = true;
     setEditing(false);
-    const next = newName.trim();
+    const next = newName.replace(/[^가-힣a-zA-Z\s]/g, "").trim();
     if (!save || !next || next === name) return; // 취소했거나, 비었거나, 그대로면 저장 안 함
     const ok = await updateName(next);
     setSaveError(!ok);
@@ -41,7 +40,8 @@ const ProfileCard = ({ user, items }) => {
 
   return (
     <section className="set-profile">
-      <span className="set-avatar">{firstChar(name)}</span>
+      {/* 게스트는 예전처럼 첫 글자 "게" */}
+      <span className="set-avatar">{user ? initialOf(name) : name.slice(0, 1)}</span>
       <div className="set-profile-info">
         <div className="set-name-row">
           {editing ? (
@@ -49,7 +49,7 @@ const ProfileCard = ({ user, items }) => {
               className="set-name-input"
               autoFocus
               value={newName}
-              onChange={(e) => setNewName(e.target.value)}
+              onChange={(e) => setNewName(e.target.value.replace(/[^가-힣a-zA-Z\s]/g, ""))}
               onBlur={() => finishEdit(true)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") finishEdit(true);
@@ -57,7 +57,7 @@ const ProfileCard = ({ user, items }) => {
               }}
             />
           ) : (
-            <h2 className="set-name">{user ? `${callName(name)}님` : name}</h2>
+            <h2 className="set-name">{user ? `${name}님` : name}</h2>
           )}
           {user && !editing && (
             <button type="button" className="set-edit" aria-label="이름 바꾸기" onClick={startEdit}>

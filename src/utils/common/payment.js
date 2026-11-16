@@ -125,11 +125,14 @@ export const isEnded = (item, date) => {
   return date > new Date(y, m - 1, d);
 };
 
-/** 그 달(year, month: 1~12)에 나가는 결제 목록 → [{ ...항목, date }] */
+/**
+ * 그 달(year, month: 1~12)에 나가는 결제 목록 → [{ ...항목, date }]
+ * - 매주·매일 결제는 결제하는 날마다 한 줄씩 들어가요 (예: 매주 월요일 → 4~5줄)
+ * - 만기일 지난 날은 빼요
+ */
 export function paymentsInMonth(items, year, month) {
   return items
-    .filter((it) => paysIn(it, year, month))
-    .map((it) => ({ ...it, date: new Date(year, month - 1, payDayIn(it, year, month)) }))
+    .flatMap((it) => payDaysIn(it, year, month).map((day) => ({ ...it, date: new Date(year, month - 1, day) })))
     .filter((it) => !isEnded(it, it.date));
 }
 
