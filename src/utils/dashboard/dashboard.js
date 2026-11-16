@@ -1,6 +1,6 @@
 import { BIG } from "@/constants/dashboard";
 import { comma } from "@/utils/common/format";
-import { amountIn, cycleText, payDaysIn, paysIn } from "@/utils/common/payment";
+import { amountIn, cycleText, isEnded, payDaysIn, paysIn, ruleOf } from "@/utils/common/payment";
 import { getToday } from "@/utils/common/date";
 
 /* 메인(대시보드) 계산 */
@@ -63,16 +63,22 @@ export const toCard = (p) => ({
   catKey: p.category, // 카드 색 = 카테고리 색 (DB categories.key)
 });
 
-/** 달력 칸마다 결제 이름 모으기 { 날짜: { name, first, count, warn } } */
-export function payByDay(items, year, month) {
-  const PAY = {};
-  items.forEach((it) => {
-    payDaysIn(it, year, month).forEach((d) => { // 매주·매일 결제는 그 달에 여러 날
-      const prev = PAY[d];
-      PAY[d] = prev
-        ? { name: `${prev.first} 외 ${prev.count}`, first: prev.first, count: prev.count + 1, warn: prev.warn || it.amount >= BIG }
-        : { name: it.name, first: it.name, count: 1, warn: it.amount >= BIG };
+/** 매일 나가는 항목인지 ("매일", 사용자화 "1일마다") — 달력 밑줄 순서를 정할 때 써요 */
+export const isDaily = (it) => { const { unit, every } = ruleOf(it); return unit === "day" && every === 1; };
+
+/**
+ * 달력 칸마다 그날 나가는 항목 전부 모으기 { 날짜: [{ id, name, category }...] }
+ * 매달·매년·매주·매일 모두 (항목마다 밑줄 하나, 색은 그 항목 카테고리)
+ * 순서: 그날만 나가는 결제 먼저, 매일 나가는 결제는 뒤에
+ */
+export function itemsByDay(items, year, month) {
+  const DAYS = {};
+  const ordered = [...items.filter((it) => !isDaily(it)), ...items.filter(isDaily)];
+  ordered.forEach((it) => {
+    payDaysIn(it, year, month).forEach((d) => {
+      if (isEnded(it, new Date(year, month - 1, d))) return; // 만기 뒤엔 안 나가요
+      (DAYS[d] ??= []).push({ id: it.id, name: it.name, category: it.category });
     });
   });
-  return PAY;
+  return DAYS;
 }

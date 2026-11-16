@@ -766,105 +766,50 @@
   cursor: pointer;
 }
 
-/* 달력 날짜 칸 */
+/* 달력 날짜 칸 (글자는 날짜만, 이름은 마우스를 올리면 보여요) */
 .gk-cal-day {
   height: 66px;
   border-radius: 14px;
+  padding: 7px 8px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: flex-start;
+  gap: 5px;
+  color: #3E4247;
   transition: transform .15s, filter .15s, background-color .15s;
 }
 .gk-cal-day.is-past {
   opacity: 0.5;
 }
-.gk-cal-day.is-plain {
-  padding: 7px 8px;
-  color: #3E4247;
-}
-.gk-cal-day.is-pay {
-  padding: 7px 6px;
-  background: #DCEFFD;
-}
+/* 오늘: 테두리만 */
 .gk-cal-day.is-today {
-  padding: 5px 7px 6px;
   background: #FFFFFF;
   box-shadow: inset 0 0 0 2px #5CB8F2;
 }
 .gk-cal-day:hover {
   transform: translateY(-2px);
   filter: drop-shadow(0 6px 10px rgba(11,42,69,.12));
-}
-.gk-cal-day:not(.is-pay):hover {
   background-color: #FFFFFF;
-}
-.gk-cal-day__today-num {
-  align-self: flex-start;
-  min-width: 24px;
-  height: 24px;
-  border-radius: 999px;
-  background: #5CB8F2;
-  color: #FFFFFF;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.gk-cal-day__today-text {
-  font-size: 12px;
-  font-weight: 600;
 }
 .gk-cal-day__num {
   font-size: 14px;
+  font-weight: 400;
 }
-/* 긴 이름은 글자를 조금 줄여 최대 두 줄까지 (넘치면 …) */
-.gk-cal-day__name {
-  font-size: 11px;
-  line-height: 1.2;
-  font-weight: 600;
-  color: #0B2A45;
-  min-width: 0;
-  word-break: keep-all;
-  overflow-wrap: anywhere;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  overflow: hidden;
+/* 그날 나가는 결제: 날짜 아래 둥근 밑줄 (매달·매일 모두, 항목마다 하나, 색은 그 항목 카테고리) */
+.gk-cal-day__daily {
+  display: flex;
+  gap: 3px;
+  width: 100%;
 }
-/* 결제일 칸이 날짜 순서대로 나타나게 (500ms + 날짜 × 12ms) */
-.gk-cal-day.gk-fade[data-day="1"] { --d: 512ms; }
-.gk-cal-day.gk-fade[data-day="2"] { --d: 524ms; }
-.gk-cal-day.gk-fade[data-day="3"] { --d: 536ms; }
-.gk-cal-day.gk-fade[data-day="4"] { --d: 548ms; }
-.gk-cal-day.gk-fade[data-day="5"] { --d: 560ms; }
-.gk-cal-day.gk-fade[data-day="6"] { --d: 572ms; }
-.gk-cal-day.gk-fade[data-day="7"] { --d: 584ms; }
-.gk-cal-day.gk-fade[data-day="8"] { --d: 596ms; }
-.gk-cal-day.gk-fade[data-day="9"] { --d: 608ms; }
-.gk-cal-day.gk-fade[data-day="10"] { --d: 620ms; }
-.gk-cal-day.gk-fade[data-day="11"] { --d: 632ms; }
-.gk-cal-day.gk-fade[data-day="12"] { --d: 644ms; }
-.gk-cal-day.gk-fade[data-day="13"] { --d: 656ms; }
-.gk-cal-day.gk-fade[data-day="14"] { --d: 668ms; }
-.gk-cal-day.gk-fade[data-day="15"] { --d: 680ms; }
-.gk-cal-day.gk-fade[data-day="16"] { --d: 692ms; }
-.gk-cal-day.gk-fade[data-day="17"] { --d: 704ms; }
-.gk-cal-day.gk-fade[data-day="18"] { --d: 716ms; }
-.gk-cal-day.gk-fade[data-day="19"] { --d: 728ms; }
-.gk-cal-day.gk-fade[data-day="20"] { --d: 740ms; }
-.gk-cal-day.gk-fade[data-day="21"] { --d: 752ms; }
-.gk-cal-day.gk-fade[data-day="22"] { --d: 764ms; }
-.gk-cal-day.gk-fade[data-day="23"] { --d: 776ms; }
-.gk-cal-day.gk-fade[data-day="24"] { --d: 788ms; }
-.gk-cal-day.gk-fade[data-day="25"] { --d: 800ms; }
-.gk-cal-day.gk-fade[data-day="26"] { --d: 812ms; }
-.gk-cal-day.gk-fade[data-day="27"] { --d: 824ms; }
-.gk-cal-day.gk-fade[data-day="28"] { --d: 836ms; }
-.gk-cal-day.gk-fade[data-day="29"] { --d: 848ms; }
-.gk-cal-day.gk-fade[data-day="30"] { --d: 860ms; }
-.gk-cal-day.gk-fade[data-day="31"] { --d: 872ms; }
+/* 항목이 많아 칸이 좁으면 밑줄이 조금씩 짧아져요 (한 줄 유지) */
+.gk-cal-day__pill {
+  flex: 0 1 8px;
+  min-width: 4px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--pill);
+}
 
 /* 다가오는 결제 */
 .gk-cal-side {
