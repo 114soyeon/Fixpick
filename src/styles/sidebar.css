@@ -946,6 +946,22 @@
   color: #5B5F66;
   line-height: 1.5;
 }
+.gk-pay-empty__go {
+  margin-top: 2px;
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: #EAF6FE;
+  color: #1C8CD6;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.gk-pay-empty__go:hover {
+  background: #DCEFFC;
+}
 .gk-pay-opt {
   display: flex;
   align-items: center;

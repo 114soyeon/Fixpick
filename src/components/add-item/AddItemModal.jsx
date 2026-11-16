@@ -1,6 +1,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 import {
   AMOUNT_TYPES,
   CYCLE_OPTIONS,
@@ -21,6 +22,7 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
   const { user } = useAuthStore();
   const { data: categories } = useCategories();
   const addSub = useAddSub();
+  const navigate = useNavigate();
 
   const [closing, setClosing] = useState(false);
 
@@ -424,6 +426,7 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
             value={form.payMethod}
             onChange={(v) => set("payMethod", v)}
             recent={payMethods}
+            onRegister={() => { close(); navigate("/setting"); }}
           />
         </div>
 

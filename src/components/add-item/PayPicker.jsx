@@ -1,15 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import CardIcon from "@/components/add-item/CardIcon";
+import { useSetting } from "@/hooks/useSetting";
 
-/** 결제 수단 고르기 (화살표를 누르면 내가 썼던 카드 목록) */
-export default function PayPicker({ value, onChange, recent = [] }) {
+/**
+ * 결제 수단 고르기 (화살표를 누르면 카드 목록)
+ * - recent: 내 고정지출에 썼던 결제 수단 이름들
+ * - onRegister: 목록이 비었을 때 "설정에서 등록하기" 버튼 (설정 페이지로 이동)
+ */
+export default function PayPicker({ value, onChange, recent = [], onRegister }) {
   const [open, setOpen] = useState(false);
   const [up, setUp] = useState(false); // 아래 공간이 모자라면 위로 펼쳐요
   const boxRef = useRef(null);
   const inputRef = useRef(null);
+  const { methods } = useSetting(); // 설정 페이지에서 등록한 결제 수단
 
-  // 내가 고정지출에 썼던 카드만 보여줘요 (다른 카드 등록은 '내 고정지출' 페이지에서)
-  const list = recent;
+  // 설정에서 등록한 결제 수단 + 고정지출에 썼던 결제 수단 (중복 제거)
+  const list = [...new Set([...methods.map((m) => m.name), ...recent])];
 
   const show = () => {
     const r = boxRef.current?.getBoundingClientRect();
@@ -30,7 +36,7 @@ export default function PayPicker({ value, onChange, recent = [] }) {
 
   return (
     <div ref={boxRef} className="gk-pick">
-      <input id="gk-add-pay" ref={inputRef} className={`gk-input gk-pay-input ${value ? "is-filled" : ""}`} readOnly placeholder={list.length ? "사용한 카드에서 선택" : "등록한 카드가 없어요"}
+      <input id="gk-add-pay" ref={inputRef} className={`gk-input gk-pay-input ${value ? "is-filled" : ""}`} readOnly placeholder={list.length ? "등록한 결제 수단에서 선택" : "등록한 결제 수단이 없어요"}
         role="combobox" aria-expanded={open} aria-controls="gk-pay-list" aria-haspopup="listbox"
         value={value} onClick={() => (open ? setOpen(false) : show())}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") { e.preventDefault(); show(); } }} />
@@ -52,8 +58,13 @@ export default function PayPicker({ value, onChange, recent = [] }) {
                 <span className="gk-pay-empty__icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2.5" /><path d="M3 10h18M7 15h3" /></svg>
                 </span>
-                <span className="gk-pay-empty__title">아직 등록한 카드가 없어요</span>
-                <span className="gk-pay-empty__desc">카드는 '내 고정지출' 페이지에서 등록할 수 있어요</span>
+                <span className="gk-pay-empty__title">아직 등록한 결제 수단이 없어요</span>
+                <span className="gk-pay-empty__desc">카드·계좌는 '설정' 페이지에서 등록할 수 있어요</span>
+                {onRegister && (
+                  <button type="button" className="gk-pay-empty__go" onMouseDown={(e) => e.preventDefault()} onClick={onRegister}>
+                    설정에서 등록하기
+                  </button>
+                )}
               </div>
             )}
             {list.map((m) => {
