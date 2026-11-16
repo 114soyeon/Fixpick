@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import "@/styles/Fix.css";
@@ -12,11 +12,25 @@ import { nextPayDate } from "@/utils/common/payment";
 import { fromDbRow } from "@/utils/common/dbItem";
 import { won } from "@/utils/common/format";
 
+// 무한 스크롤: 처음에 보여줄 줄 수 / 바닥에 닿을 때마다 더 보여줄 줄 수
+const PAGE_SIZE = 10;
+
 const Fix = () => {
   const navigate = useNavigate();
 
   const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORY);
   const [sortOrder, setSortOrder] = useState(DEFAULT_SORT);
+
+  // 무한 스크롤: 지금 화면에 보여주는 줄 수
+  const [shownCount, setShownCount] = useState(PAGE_SIZE);
+  const [prevView, setPrevView] = useState(`${ALL_CATEGORY}|${DEFAULT_SORT}`);
+  const view = `${selectedCategory}|${sortOrder}`;
+  if (prevView !== view) { // 필터·정렬을 바꾸면 처음부터 다시
+    setPrevView(view);
+    setShownCount(PAGE_SIZE);
+  }
+  const loadMoreRef = useRef(null); // 목록 맨 아래 감지용
+  const tableRef = useRef(null); // 스크롤되는 표 박스 (페이지가 아니라 이 안에서 스크롤)
 
   // 사이드바에서 추가한 항목 + 상세에서 수정한 내용
   const allItems = useFixItems();
@@ -48,6 +62,24 @@ const Fix = () => {
         default:       return 0;
       }
     });
+
+  // 무한 스크롤: 지금까지 보여줄 줄만 잘라요
+  const shownRows = visibleRows.slice(0, shownCount);
+  const hasMore = shownCount < visibleRows.length;
+
+  // 표 박스 안에서 맨 아래까지 스크롤하면 다음 PAGE_SIZE 줄을 더 보여줘요
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el || !hasMore) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setShownCount((n) => n + PAGE_SIZE);
+      },
+      { root: tableRef.current, rootMargin: "120px" } // 표 박스 바닥에 닿기 조금 전에 미리 불러와요
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMore, shownCount]);
 
   // 다가오는 큰 지출: { title, amount, month } 또는 null
   const upcomingExpense = getUpcomingExpense(rawItems);
@@ -121,7 +153,7 @@ const Fix = () => {
       </section>
 
       {/* 고정지출 테이블 */}
-      <section className="expense-table">
+      <section ref={tableRef} className="expense-table expense-table--scroll">
         <div className="table-header">
           <span>항목</span>
           <span>카테고리</span>
@@ -131,13 +163,18 @@ const Fix = () => {
           <span>월 환산</span>
         </div>
 
-        {visibleRows.map((item) => (
+        {shownRows.map((item) => (
           <ExpenseRow
             key={item.id}
             item={item}
             onClick={() => navigate(`/fix/${item.id}`)}
           />
         ))}
+
+        {/* 무한 스크롤 감지용 (div가 아니라 span: .table-row:last-of-type 스타일을 안 건드리게) */}
+        {hasMore && (
+          <span ref={loadMoreRef} aria-hidden="true" style={{ display: "block", height: 1 }} />
+        )}
 
         {visibleRows.length === 0 && (
           <p className="empty-message">등록된 고정지출이 없습니다.</p>
