@@ -5,8 +5,11 @@ import CardIcon from "@/components/add-item/CardIcon";
 
 const onlyNum = (text) => text.replace(/[^0-9]/g, "");
 
-/** 결제 수단 추가 창 (카드 / 계좌 탭) */
-export default function PayModal({ onClose, onAdd }) {
+/** 결제 수단 추가 창 (카드 / 계좌 탭)
+ *  - saving: 등록 요청 중이면 버튼을 잠가요 (더블 클릭 방지)
+ *  - error : 등록 실패 안내문 (Setting.jsx 가 전달해요)
+ */
+export default function PayModal({ onClose, onAdd, saving = false, error = "" }) {
   const [type, setType] = useState("card");
   const [name, setName] = useState("");
   const [card, setCard] = useState(["", "", "", ""]); // 카드번호 4칸
@@ -42,8 +45,8 @@ export default function PayModal({ onClose, onAdd }) {
 
   const submit = (e) => {
     e.preventDefault();
-    if (!ready) return;
-    onAdd({ type, name, last4: number.slice(-4) }); // 끝 4자리만 저장
+    if (!ready || saving) return;
+    onAdd({ type, name, last4: number.slice(-4) }); // 끝 4자리만 저장 (카드사는 DB 사전에서 찾아요)
   };
 
   return (
@@ -102,9 +105,18 @@ export default function PayModal({ onClose, onAdd }) {
           />
         )}
 
+        {/* 등록 실패 안내 (Setting.jsx 가 전달) */}
+        {error && (
+          <p className="set-modal-error" role="alert">
+            {error}
+          </p>
+        )}
+
         <div className="set-modal-btns">
           <button type="button" className="set-btn-cancel" onClick={onClose}>취소</button>
-          <button type="submit" className="set-btn-add" disabled={!ready}>추가하기</button>
+          <button type="submit" className="set-btn-add" disabled={!ready || saving}>
+            {saving ? "등록 중..." : "추가하기"}
+          </button>
         </div>
       </form>
     </div>

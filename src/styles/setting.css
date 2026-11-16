@@ -542,6 +542,13 @@
   padding: 0;
 }
 
+/* 등록 실패 안내문 (PayModal) — 이름 저장 실패(.set-name-error)와 같은 색 */
+.set-modal-error {
+  margin-top: 16px;
+  font-size: 13px;
+  color: #d9534f;
+}
+
 .set-modal-btns {
   display: flex;
   gap: 10px;

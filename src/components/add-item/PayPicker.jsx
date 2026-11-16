@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import CardIcon from "@/components/add-item/CardIcon";
-import { useSetting } from "@/hooks/useSetting";
+import { usePayMethods } from "@/queries/payment";
 
 /**
  * 결제 수단 고르기 (화살표를 누르면 카드 목록)
+ * - 목록: 설정 페이지에서 등록한 결제 수단(DB usePayMethods) + 내 고정지출에 썼던 이름
  * - recent: 내 고정지출에 썼던 결제 수단 이름들
  * - onRegister: 목록이 비었을 때 "설정에서 등록하기" 버튼 (설정 페이지로 이동)
  */
@@ -12,7 +13,8 @@ export default function PayPicker({ value, onChange, recent = [], onRegister }) 
   const [up, setUp] = useState(false); // 아래 공간이 모자라면 위로 펼쳐요
   const boxRef = useRef(null);
   const inputRef = useRef(null);
-  const { methods } = useSetting(); // 설정 페이지에서 등록한 결제 수단
+  // 설정에서 등록한 결제 수단 (DB). 아직 불러오는 중이면 빈 배열 → recent 만 보여요
+  const { data: methods = [] } = usePayMethods();
 
   // 설정에서 등록한 결제 수단 + 고정지출에 썼던 결제 수단 (중복 제거)
   const list = [...new Set([...methods.map((m) => m.name), ...recent])];

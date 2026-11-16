@@ -118,10 +118,10 @@ alter table categories enable row level security;
 -- ############################################################################
 create table payment_categories (
   id bigint generated always as identity primary key,
-  type text not null default '카드'                                   -- 카드인지 계좌(이체)인지. 화면 문구 "카드 ••••" / "계좌 ••••" 구분
+  type text not null default '카드'                                   -- '카드' / '계좌'  → 설정 창의 탭 구분
        check (type in ('카드', '계좌')),
-  icon text not null,
-  name text not null                                                  -- 결제 수단 이름 (국민카드, 신한 체크카드, 카카오뱅크 ...)
+  icon text not null,                                                 -- "해당 아이콘"    → 아이콘 경로
+  name text not null                                                  -- 카드사·은행 이름 → 프론트 선택 상자 값
 );
 
 -- ############################################################################
@@ -135,10 +135,10 @@ create table payment_categories (
 --      · [내 고정지출 상세] "결제 수단: 신용카드 ···· 1234"
 -- ############################################################################
 create table payment_methods (
-  id bigint generated always as identity primary key,
+  id bigint generated always as identity primary key,                 -- 결제 수단 번호
   user_id uuid not null                                               -- 어느 회원의 카드/계좌인지 (회원 탈퇴 시 삭제)
           references users(id) on delete cascade,
-  payment_id bigint not null references payment_categories(id),
+  payment_id bigint not null references payment_categories(id),       -- payment_categories 참조 → "국민카드" 사전 연결
   last4 text not null                                                 -- 카드/계좌 뒷 4자리. 화면의 "•••• 1234" 표시용
         check (last4 ~ '^[0-9]{4}$'),                                 -- 숫자 4자리만 저장(전체 번호는 저장하지 않는다 - 보안)
   created_at  timestamptz not null default now()
@@ -276,42 +276,33 @@ alter table budgets enable row level security;
 
 
 -- 기본 카테고리 9종 시드 데이터 (회원 가입과 무관하게 앱이 공유해서 씀)
-insert into categories (name, example, icon, color) values
-  ('주거', '월세·관리비·공과금', 'Building2', '#154A7D'),
-  ('통신', '휴대폰·인터넷·IPTV', 'Smartphone', '#0A6480'),
-  ('구독','OTT·음악·웹툰', 'CirclePlay', '#9E2152'),
-  ('가전 구독', '정수기·안마의자·건조기','WashingMachine','#0C6B5E'),
-  ('보험', '실손·자동차·운전자', 'ShieldCheck', '#5B3FC4'),
-  ('금융·저축', '적금·청약·대출이자', 'PiggyBank', '#5E5300'),
-  ('교통', '교통카드·주차', 'BusFront', ' #A04508'),
-  ('자동차', '교통카드·주차', 'CarFront', '#536579'),
-  ('기타', '교통카드·주차', 'Shapes', '#4E433C'),
+insert into categories (name, example, icon, chart, color, key, bg) values
+  ('주거·공과', '월세·관리비·공과금', 'Building2', '#4C8DF6', '#154A7D', 'home', '#E1EEF9'),
+  ('통신', '휴대폰·인터넷·IPTV', 'Smartphone', '#36C2CE', '#0A6480', 'phone', '#DDF3F9'),
+  ('구독','OTT·음악·웹툰', 'CirclePlay', '#FF7EB3', '#9E2152', 'sub', '#FBE6EE'),
+  ('가전 구독', '정수기·안마의자·건조기','WashingMachine', '#5ED3A0', '#0C6B5E', 'rental', '#DCF5F1'),
+  ('보험', '실손·자동차·운전자', 'ShieldCheck', '#9B8AFB', '#5B3FC4', 'insure', '#EEE9FF'),
+  ('금융·저축', '적금·청약·대출이자', 'PiggyBank', '#FFC94D', '#5E5300', 'saving', '#F1EFCB'),
+  ('교통', '교통카드·주차', 'BusFront', '#FF9466', ' #A04508', 'transit', '#FCEADD'),
+  ('자동차', '할부·유류비·주차비', 'CarFront', '#8796AA', '#536579', 'car', '#EEF1F5'),
+  ('기타', '모임 회비·학원비·경조사비', 'Shapes', '#9A8D82', '#4E433C', 'etc', '#F0ECE8');
 
-insert into payment_categories (type, icon, name) values
-  ('계좌', '기업은행icon/image', '기업은행'),
-  ('계좌', '국민은행icon/image', '국민은행'),
-  ('계좌', '우리은행icon/image', '우리은행'),
-  ('계좌', 'NH농협은행icon/image', 'NH농협은행'),
-  ('계좌', '부산은행icon/image', '부산은행'),
+insert into payment_methods (type, icon, name) values
+  ('카드', '국민카드icon/image', '국민카드'),
+  ('카드', '신한카드icon/image', '신한카드'),
+  ('카드', '삼성카드icon/image', '삼성카드'),
+  ('카드', '현대카드icon/image', '현대카드'),
+  ('카드', '롯데카드icon/image', '롯데카드'),
+  ('카드', '우리카드icon/image', '우리카드'),
+  ('카드', '하나카드icon/image', '하나카드'),
+  ('카드', 'BC카드icon/image', 'BC카드'),
+  ('카드', 'NH농협카드icon/image', 'NH농협카드'),
+  ('계좌', 'KB국민은행icon/image', 'KB국민은행'),
   ('계좌', '신한은행icon/image', '신한은행'),
+  ('계좌', '우리은행icon/image', '우리은행'),
   ('계좌', '하나은행icon/image', '하나은행'),
-  ('계좌', '광주은행icon/image', '광주은행'),
-  ('계좌', '우체국icon/image', '우체국'),
-  ('계좌', '대구은행icon/image', '대구은행'),
-  ('계좌', '경남은행icon/image', '경남은행'),
-  ('카드', 'KB카드icon/image', 'KB카드');
-  ('카드', '신한카드icon/image', '신한카드');
-  ('카드', '현대카드icon/image', '현대카드');
-  ('카드', '삼성카드icon/image', '삼성카드');
-  ('카드', 'NH카드icon/image', 'NH카드');
-  ('카드', '카카오뱅크icon/image', '카카오뱅크');
-  ('카드', 'BC카드icon/image', 'BC카드');
-  ('카드', '하나카드icon/image', '하나카드');
-  ('카드', '우리카드icon/image', '우리카드');
-  ('카드', '롯데카드icon/image', '롯데카드');
-  ('카드', '씨티카드icon/image', '씨티카드');
-  ('카드', '광주비자icon/image', '광주비자');
-  ('카드', '전북카드icon/image', '전북카드');
-  ('카드', '수협카드icon/image', '수협카드');
-  ('카드', '신협카드icon/image', '신협카드');
-  
+  ('계좌', 'NH농협은행icon/image', 'NH농협은행'),
+  ('계좌', 'IBK기업은행icon/image', 'IBK기업은행'),
+  ('계좌', '카카오뱅크icon/image', '카카오뱅크'),
+  ('계좌', '토스뱅크icon/image', '토스뱅크'),
+  ('계좌', '케이뱅크icon/image', '케이뱅크'); 
