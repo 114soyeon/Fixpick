@@ -181,9 +181,7 @@ const Fix = () => {
         )}
       </section>
 
-      <p className="copyright">
-        Copyright © 2026. Fixpick All rights reserved.
-      </p>
+      <footer className="page-copy">Copyright © 2026. Fixpick All rights reserved.</footer>
     </div>
   );
 };

@@ -560,13 +560,3 @@
     gap: clamp(10px, calc(41px - (318px - 100cqh) * 0.35), 41px);
   }
 }
-
-.gk-rpt-copy {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 12px;
-  text-align: center;
-  font-size: 13px;
-  color: #8A9098;
-}

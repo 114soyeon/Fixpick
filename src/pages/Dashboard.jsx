@@ -412,10 +412,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* 글자만 사이드바 폭의 절반만큼 왼쪽으로 옮겨서 화면 전체의 가운데에 놓아요 */}
-      <footer className="gk-dash-footer">
-        <span className="gk-dash-copy">Copyright © 2026. Fixpick All rights reserved.</span>
-      </footer>
+      <footer className="page-copy">Copyright © 2026. Fixpick All rights reserved.</footer>
     </main>
   );
 }

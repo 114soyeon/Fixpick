@@ -1,6 +1,8 @@
 .detail-page {
   position: relative;
-  padding: 24px 32px;
+  min-height: 100vh; /* 내용이 짧아도 copyright이 화면 맨 아래에 붙게 (다른 페이지와 동일) */
+  padding: 24px 32px 40px; /* 하단 40px = copyright 자리 (common.css .page-copy) */
+  box-sizing: border-box;
   color: #0b2a45;
 }
 
@@ -249,15 +251,6 @@
   color: #a3abb5;
 }
 
-.copyright {
-  position: absolute;
-  bottom: 22px;
-  left: calc(50% - 121px);
-  padding-top: 24px;
-  text-align: center;
-  font-size: 13px;
-  color: #8a94a6;
-}
 /* 만기일 카드 */
 .end-days {
   margin: 0 0 24px;
@@ -326,6 +319,7 @@
 @media (max-width: 1279px) {
   .detail-page {
     padding: 24px;
+    padding-bottom: 40px; /* 아래 copyright(바닥에서 12px)가 카드와 겹치지 않게 */
   }
 }
 
@@ -343,6 +337,7 @@
 @media (max-width: 767px) {
   .detail-page {
     padding: 16px;
+    padding-bottom: 40px; /* 아래 copyright(바닥에서 12px)가 카드와 겹치지 않게 */
   }
 
   /* 제목 + 삭제 버튼 */
@@ -471,27 +466,4 @@
 .detail-page .card:has(.alert-row),
 .detail-page .card:has(.alert-row) button {
   font-family: "Pretendard Variable", "Pretendard", sans-serif;
-}
-
-/* ───────── 하단 copyright: 반응형에서도 화면 가운데·맨 아래에 (내용과 안 겹치게) ───────── */
-@media (max-width: 1279px) {
-  .detail-page {
-    padding-bottom: 80px; /* copyright 자리 (작은 화면 padding 이 덮어써서 다시 확보) */
-  }
-  .detail-page .copyright {
-    left: 0;
-    right: 0; /* 글자 폭과 상관없이 정확히 가운데 */
-  }
-}
-
-@media (max-width: 767px) {
-  .detail-page {
-    padding-bottom: 64px;
-  }
-  .detail-page .copyright {
-    left: 16px;
-    right: 16px; /* 좁은 화면에서도 양옆 여백 안에서 가운데 (길면 줄바꿈) */
-    bottom: 16px;
-    font-size: 12px;
-  }
 }

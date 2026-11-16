@@ -140,9 +140,7 @@ const FixDetail = () => {
 
       {toast && <SidebarToast key={toast} text={toast} onDone={() => setToast(null)} />}
 
-      <p className="copyright">
-        Copyright © 2026. Fixpick All rights reserved.
-      </p>
+      <footer className="page-copy">Copyright © 2026. Fixpick All rights reserved.</footer>
     </div>
   );
 };

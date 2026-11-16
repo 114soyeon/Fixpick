@@ -3,7 +3,7 @@
   position: relative;
   width: 100%;
   min-height: 100vh;
-  padding: 40px 40px 80px 40px;
+  padding: 40px; /* 하단 40px = copyright 자리 (common.css .page-copy), 다른 페이지와 동일 */
   box-sizing: border-box;
   background-color: #f6f8fa;
   color: #102f4b;
@@ -288,12 +288,14 @@
 @media (max-width: 1279px) {
   .expenses-page {
     padding: 24px;
+    padding-bottom: 40px; /* 아래 copyright(바닥에서 12px)가 표와 겹치지 않게 */
   }
 }
 
 @media (max-width: 767px) {
   .expenses-page {
     padding: 16px;
+    padding-bottom: 40px; /* 아래 copyright(바닥에서 12px)가 표와 겹치지 않게 */
   }
 
   .page-title {
@@ -347,25 +349,15 @@
   background: #f7f9fa;
 }
 
-.copyright {
-  position: absolute;
-  bottom: 22px;
-  left: calc(50% - 121px);
-  padding-top: 24px;
-  text-align: center;
-  font-size: 13px;
-  color: #8a94a6;
-}
-
 .summary-card h2.empty-text {
   font-size: 28px;
 }
 
 /* 고정지출 표: 페이지 전체가 아니라 표 박스 안에서만 스크롤 (무한 스크롤) */
 .expense-table--scroll {
-  /* 화면 아래 남는 공간까지 표를 늘려요 (창 높이 - 표 위쪽 영역·copyright 약 390px), 최소 440px(약 6줄)
+  /* 화면 아래 남는 공간까지 표를 늘려요 (창 높이 - 표 위쪽 영역·아래 copyright 자리 약 350px), 최소 440px(약 6줄)
      넘치면 표 안에서 스크롤 */
-  max-height: max(440px, calc(100vh - 390px));
+  max-height: max(440px, calc(100vh - 350px));
   overflow-y: auto;
 }
 .expense-table--scroll .table-header {
@@ -484,28 +476,5 @@
   /* 월 환산은 숨겨요 (위 "한 달 고정지출" 카드에 합계가 있어요) */
   .expenses-page .table-row > .monthly-amount {
     display: none;
-  }
-}
-
-/* ───────── 하단 copyright: 반응형에서도 화면 가운데·맨 아래에 (내용과 안 겹치게) ───────── */
-@media (max-width: 1279px) {
-  .expenses-page {
-    padding-bottom: 80px; /* copyright 자리 (작은 화면 padding 이 덮어써서 다시 확보) */
-  }
-  .expenses-page .copyright {
-    left: 0;
-    right: 0; /* 글자 폭과 상관없이 정확히 가운데 */
-  }
-}
-
-@media (max-width: 767px) {
-  .expenses-page {
-    padding-bottom: 64px;
-  }
-  .expenses-page .copyright {
-    left: 16px;
-    right: 16px; /* 좁은 화면에서도 양옆 여백 안에서 가운데 (길면 줄바꿈) */
-    bottom: 16px;
-    font-size: 12px;
   }
 }
