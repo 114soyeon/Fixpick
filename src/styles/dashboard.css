@@ -799,14 +799,14 @@
 /* 그날 나가는 결제: 날짜 아래 둥근 밑줄 (매달·매일 모두, 항목마다 하나, 색은 그 항목 카테고리) */
 .gk-cal-day__daily {
   display: flex;
+  flex-wrap: wrap;
   gap: 3px;
-  width: 100%;
 }
-/* 항목이 많아 칸이 좁으면 밑줄이 조금씩 짧아져요 (한 줄 유지) */
+/* 밑줄은 모두 같은 크기로 고정 (줄어들지 않아요). 한 줄에 4개, 5개째부터는 아랫줄로 */
 .gk-cal-day__pill {
-  flex: 0 1 8px;
-  min-width: 4px;
-  height: 5px;
+  flex: none;
+  width: 8px;
+  height: 6px;
   border-radius: 999px;
   background: var(--pill);
 }
