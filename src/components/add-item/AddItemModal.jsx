@@ -1,15 +1,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
-import {
-  AMOUNT_TYPES,
-  CYCLE_OPTIONS,
-  MONTH_OPTIONS,
-  NAME_HINTS,
-  UNIT_OPTIONS,
-  WEEKDAY_OPTIONS,
-} from "@/constants/addItem";
+import { AMOUNT_TYPES, CYCLE_OPTIONS, MONTH_OPTIONS, NAME_HINTS, UNIT_OPTIONS, WEEKDAY_OPTIONS } from "@/constants/addItem";
 import { firstPayKey } from "@/utils/common/payment";
 import { useAuthStore } from "@/store/authStore";
 import DatePicker from "@/components/add-item/DatePicker";
@@ -27,7 +19,6 @@ export default function AddItemModal({ onClose, setToast, payMethods = [], item 
   const { data: categories } = useCategories();
   const addSub = useAddSub();
   const updateSub = useUpdateSub();
-    const navigate = useNavigate();
   const isEdit = !!item; // 수정 모드인지
 
   const [closing, setClosing] = useState(false);

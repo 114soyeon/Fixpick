@@ -8,7 +8,7 @@ import { useCategoryOf, dashCatVars } from "@/hooks/useCategoryOf";
 import { ddayText } from "@/utils/common/date";
 import { MONTH, TODAY, catClass, dashData, payByDay, toCard } from "@/utils/dashboard/dashboard";
 import { useCountUp } from "@/hooks/useCountUp";
-import { loadBudget } from "@/utils/setting/budget";
+import { useBudget } from "@/queries/budgets";
 import { comma as won } from "@/utils/common/format";
 import { LINE_ICON as line, MAX_CARDS, MAX_LINES } from "@/constants/dashboard";
 import { WEEKDAYS } from "@/constants/addItem";
@@ -224,8 +224,8 @@ function MonthlyChart({ data }) {
 /* ───────── 4. 이번 달 예산 ───────── */
 function BudgetCard({ data }) {
   const navigate = useNavigate();
-  const [limit] = useState(loadBudget);
-  const BUDGET = { limit, used: data.total };
+  const { data: dbBudget } = useBudget();
+  const BUDGET = { limit: dbBudget ?? 1300000, used: data.total };
   const pct = Math.round((BUDGET.used / BUDGET.limit) * 100);
   const over = BUDGET.used > BUDGET.limit;
   return (

@@ -98,10 +98,13 @@ export function cycleText(item) {
 export function nextPayments(items, today, count = 3) {
   const start = new Date(today.year, today.month - 1, today.day);
   const list = items.map((it) => {
+    // "매일" 항목은 오늘 결제를 이미 지났다고 보고 내일부터 찾아요
+    // (시작일·매주·매달·매년·사용자화 계산은 그대로. dday는 오늘 기준이라 내일이면 D-1)
+    const from = it.cycle === "매일" ? new Date(start.getTime() + DAY_MS) : start;
     let y = today.year;
     let m = today.month;
     for (let i = 0; i < 1200; i++) { // 최대 100년 앞까지
-      const d = payDaysIn(it, y, m).find((day) => new Date(y, m - 1, day) >= start);
+      const d = payDaysIn(it, y, m).find((day) => new Date(y, m - 1, day) >= from);
       if (d) {
         const date = new Date(y, m - 1, d);
         if (isEnded(it, date)) return null; // 만기일이 지나면 다음 결제 없음
@@ -162,6 +165,8 @@ export function bigPayments(items, today, count = 4) {
 export function firstPayKey(item) {
   const today = getToday();
   const start = todayKey();
+  // "매일"은 시작일을 오늘으로 (첫 결제일은 nextPayments가 내일을 줘요 → 시작일 오늘 / 다음 결제일 내일)
+  if (item.cycle === "매일") return start;
   const first = nextPayments([{ ...item, start }], today, 1)[0];
   return first ? dateKey(first.date) : start;
 }

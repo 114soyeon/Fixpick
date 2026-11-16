@@ -7,7 +7,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { Wallet } from "lucide-react";
-import { saveSetting } from "@/utils/setting/setting";
+import { useSaveBudget } from "@/queries/budgets";
 import { comma } from "@/utils/common/format";
 import { BUDGETS } from "@/constants/setting";
 import CardHead from "@/components/setting/CardHead";
@@ -16,15 +16,24 @@ const BudgetCard = ({ initial }) => {
   const [budget, setBudget] = useState(initial);
   const [saved, setSaved] = useState(false);
   const timer = useRef(null);
+  const saveBudget = useSaveBudget();
 
   // 페이지를 떠나면 "저장됨" 타이머 정리
   useEffect(() => () => clearTimeout(timer.current), []);
 
   const save = (value) => {
-    saveSetting({ budget: value });
-    setSaved(true);
-    clearTimeout(timer.current); // 빠르게 여러 번 눌러도 마지막 저장 기준으로 1.5초
-    timer.current = setTimeout(() => setSaved(false), 1500);
+    if (!value || value < 0) return;
+    saveBudget.mutate(value, {
+      onSuccess: () => {
+        setSaved(true);
+        clearTimeout(timer.current);
+        timer.current = setTimeout(() => setSaved(false), 1500);
+      },
+      onError: (err) => {
+        console.error("예산 저장 실패:", err);
+        alert("예산을 저장하지 못했어요. 다시 시도해 주세요");
+      },
+    });
   };
 
   const pick = (value) => {
