@@ -449,3 +449,21 @@
     border-radius: 16px;
   }
 }
+
+/* ───────── "알림" 카드만 프리텐다드 (크기·굵기는 그대로, 글꼴만) ───────── */
+/* 설치돼 있으면 내 PC 글꼴, 없으면 웹에서 받아와요 */
+@font-face {
+  font-family: "Pretendard Variable";
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+  src:
+    local("Pretendard Variable"),
+    url("https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/woff2/PretendardVariable.woff2")
+      format("woff2-variations");
+}
+/* 알림 카드(.alert-row 가 들어 있는 카드) + 안의 버튼 (버튼은 글꼴을 물려받지 않아서 따로) */
+.detail-page .card:has(.alert-row),
+.detail-page .card:has(.alert-row) button {
+  font-family: "Pretendard Variable", "Pretendard", sans-serif;
+}
