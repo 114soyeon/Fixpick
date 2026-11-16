@@ -29,12 +29,14 @@ const SummaryCard = ({ month, payments, todayStart }) => {
         </p>
       </div>
 
-      <hr className="paycal-divider" />
-
+      {/* 시안 순서: 결제된 금액 → 구분선 → 이번 달 전체 */}
       <div className="paycal-summary-row">
         <span>결제된 금액</span>
         <strong>{won(paidAmount)}</strong>
       </div>
+
+      <hr className="paycal-divider" />
+
       <div className="paycal-summary-row">
         <span>이번 달 전체</span>
         <strong>{won(totalAmount)}</strong>

@@ -374,6 +374,7 @@
 @media (max-width: 1279px) {
   .rpt-page {
     padding: 24px;
+    padding-bottom: 40px; /* 아래 카피라이트(바닥에서 12px)가 카드와 겹치지 않게 */
   }
   .rpt-stats .stat-card-value {
     font-size: 22px;
@@ -395,6 +396,7 @@
 @media (max-width: 767px) {
   .rpt-page {
     padding: 16px;
+    padding-bottom: 40px; /* 아래 카피라이트(바닥에서 12px)가 카드와 겹치지 않게 */
   }
   .rpt-header {
     flex-direction: column;
