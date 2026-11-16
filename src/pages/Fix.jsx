@@ -111,7 +111,7 @@ const Fix = () => {
           value={
             upcomingExpense
               ? `${upcomingExpense.title} ${won(upcomingExpense.amount)}`
-              : "자동차세 130,000원"
+              : "예정된 지출이 없습니다."
           }
           badge={upcomingExpense?.month}
         />
