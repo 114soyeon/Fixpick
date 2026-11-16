@@ -15,40 +15,46 @@ import { useAuthStore } from "@/store/authStore";
 import DatePicker from "@/components/add-item/DatePicker";
 import MiniSelect from "@/components/add-item/MiniSelect";
 import PayPicker from "@/components/add-item/PayPicker";
-import { useCategories, useAddSub } from "@/queries/subs";
- 
-/** 고정지출 항목 추가 창 (DB에 저장해요) */
-export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
+import { useCategories, useAddSub, useUpdateSub } from "@/queries/subs";
+
+/**
+ * 고정지출 항목 추가 / 수정 창 (DB에 저장해요)
+ *  - item 없이 열면 → "항목 추가" (빈 칸)
+ *  - item(DB 한 줄)을 넘기면 → "항목 수정" (저장돼 있던 값이 미리 채워져요)
+ */
+export default function AddItemModal({ onClose, setToast, payMethods = [], item = null }) {
   const { user } = useAuthStore();
   const { data: categories } = useCategories();
   const addSub = useAddSub();
-  const navigate = useNavigate();
+  const updateSub = useUpdateSub();
+    const navigate = useNavigate();
+  const isEdit = !!item; // 수정 모드인지
 
   const [closing, setClosing] = useState(false);
 
-  // form 상태
+  // form 상태 (수정 모드면 DB 값으로 시작해요)
   const [form, setForm] = useState({
-    category: null,
-    name: "",
-    amount: "",
-    amountType: "fixed",
+    category: item?.category_id ?? null,
+    name: item?.name ?? "",
+    amount: item?.amount != null ? String(item.amount) : "",
+    amountType: item?.amount_type === "변동" ? "variable" : "fixed",
 
-    cycle: "매달",
+    cycle: item?.cycle === "매월" ? "매달" : item?.cycle ?? "매달",
 
     // 매주
-    week: new Date().getDay(),
+    week: item?.week ?? new Date().getDay(),
 
     // 매달 / 매년
-    day: "",
-    month: new Date().getMonth() + 1,
+    day: item?.day != null ? String(item.day) : "",
+    month: item?.month ?? new Date().getMonth() + 1,
 
     // 사용자화
-    customNumber: "1",
-    customText: "month",
+    customNumber: item?.custom_number != null ? String(item.custom_number) : "1",
+    customText: item?.custom_text ?? "month",
 
-    payMethod: "",
-    endDate: "",
-    remind: true,
+    payMethod: item?.pay_method ?? "",
+    endDate: item?.expiry_date ?? "",
+    remind: item?.remind ?? true,
   });
 
   const nameRef = useRef(null);
@@ -457,7 +463,6 @@ export default function AddItemModal({ onClose, setToast, payMethods = [] }) {
             value={form.payMethod}
             onChange={(v) => set("payMethod", v)}
             recent={payMethods}
-            onRegister={() => { close(); navigate("/setting"); }}
           />
         </div>
 
