@@ -74,10 +74,6 @@ const ProfileCard = ({ user, items }) => {
           <p className="set-stat-label">등록한 고정지출</p>
           <p className="set-stat-value">{items.length}건</p>
         </div>
-        <div className="set-stat">
-          <p className="set-stat-label">구독 서비스</p>
-          <p className="set-stat-value">{items.filter((it) => it.category === "sub").length}개</p>
-        </div>
       </div>
     </section>
   );
