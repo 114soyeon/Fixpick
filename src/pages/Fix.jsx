@@ -12,7 +12,7 @@ import { nextPayDate } from "@/utils/common/payment";
 import { fromDbRow } from "@/utils/common/dbItem";
 import { won } from "@/utils/common/format";
 
-// 무한 스크롤: 처음에 보여줄 줄 수 / 바닥에 닿을 때마다 더 보여줄 줄 수
+// 무한 스크롤
 const PAGE_SIZE = 10;
 
 const Fix = () => {
@@ -21,7 +21,7 @@ const Fix = () => {
   const [selectedCategory, setSelectedCategory] = useState(ALL_CATEGORY);
   const [sortOrder, setSortOrder] = useState(DEFAULT_SORT);
 
-  // 무한 스크롤: 지금 화면에 보여주는 줄 수
+  // 무한 스크롤
   const [shownCount, setShownCount] = useState(PAGE_SIZE);
   const [prevView, setPrevView] = useState(`${ALL_CATEGORY}|${DEFAULT_SORT}`);
   const view = `${selectedCategory}|${sortOrder}`;
@@ -63,7 +63,7 @@ const Fix = () => {
       }
     });
 
-  // 무한 스크롤: 지금까지 보여줄 줄만 잘라요
+  // 무한 스크롤
   const shownRows = visibleRows.slice(0, shownCount);
   const hasMore = shownCount < visibleRows.length;
 
