@@ -7,17 +7,17 @@ import ResetModal from "@/components/login/ResetModal";
 import FindIdModal from "@/components/login/FindIdModal";
 import { BRAND_TAGS, SOCIALS } from "@/constants/login";
 import { openAddItem, takeLoginReason } from "@/utils/common/addItemFlow";
-import { loginError, readLastLogin, saveLastLogin } from "@/utils/auth/login";
+import { loginError, readLastLogin, saveLastLogin, readSavedEmail, saveEmail, clearSavedEmail } from "@/utils/auth/login";
 import { isValidEmail } from "@/utils/common/validate";
 import { useAuthStore } from "@/store/authStore";
 import "@/styles/login.css";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(readSavedEmail);
   const [pw, setPw] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [keep, setKeep] = useState(true);
+  const [keep, setKeep] = useState(() => Boolean(readSavedEmail()));
   const [error, setError] = useState({ field: "", message: "" });
   const [resetOpen, setResetOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
@@ -40,8 +40,9 @@ export default function Login() {
       return fail(field, message);
     }
     setError({ field: "", message: "" });
-    //saveLastLogin("email");
-    navigate("/"); // 로그인 후 홈으로
+    if (keep) saveEmail(email);   // 체크돼 있으면 저장
+    else clearSavedEmail();       // 해제하고 로그인하면 지우기
+    navigate("/");                // 로그인 후 홈으로
     if (reason === "add") setTimeout(openAddItem, 400); // 하려던 항목 추가 창을 바로 열어 줘요
   };
 
@@ -123,7 +124,7 @@ export default function Login() {
           <div className="gk-login-options">
             <label className="gk-login-keep" title="끄면 브라우저를 닫을 때 로그아웃돼요">
               <input id="login-keep" type="checkbox" className="gk-login-check" checked={keep} onChange={(e) => setKeep(e.target.checked)} />
-              로그인 상태 유지
+              아이디 저장
             </label>
             <span className="gk-login-finds">
               <button type="button" className="gk-login-link" onClick={() => setFindOpen(true)}>아이디 찾기</button>

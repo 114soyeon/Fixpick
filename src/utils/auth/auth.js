@@ -1,12 +1,11 @@
 import { useAuthStore } from "@/store/authStore";
 import { signOut } from "@/api/auth";
+import { supabase } from "@/lib/supabase";
 
 /*
- * 로그인 정보를 저장하는 도구예요.
- * - 로그인 상태: Supabase (store/authStore.js) — 여기서 읽고 여기로 알려 줘요
- * - 가입한 계정 목록·아이디 찾기: localStorage "gk-accounts" (연습용)
- * ⚠️ 포트폴리오용 연습 코드예요. 실제 서비스는 서버(예: Supabase)에서 비밀번호를 관리해야 해요.
- */
+  로그인 정보를 저장하는 도구예요.
+  - 로그인 상태: Supabase (store/authStore.js) — 여기서 읽고 여기로 알려 줘요
+*/
 const USER_KEY = "gk-user";
 const ACCOUNTS_KEY = "gk-accounts";
 const EVENT = "gk-auth-change";
@@ -76,14 +75,15 @@ export function maskEmail(email = "") {
   return `${show}${"*".repeat(Math.max(3, id.length - show.length))}@${domain}`;
 }
 
-/** 아이디(이메일) 찾기: 가입할 때 넣은 이름 + 휴대폰 번호로 찾아요 */
-export function findEmail({ name = "", phone = "" }) {
-  const digits = (t) => String(t).replace(/[^0-9]/g, "");
-  const n = name.trim();
-  const ph = digits(phone);
-  const found = Object.values(read(ACCOUNTS_KEY, {})).filter((a) => a.name === n && a.phone && digits(a.phone) === ph);
-  if (!found.length) return { ok: false, message: "입력한 정보로 가입된 계정이 없어요." };
-  return { ok: true, accounts: found.map((a) => ({ email: a.email, masked: maskEmail(a.email), joined: a.joined || "" })) };
+/** 아이디(이메일) 찾기: 이름 + 휴대폰 번호로 Supabase 에서 찾아요 */
+export async function findEmail({ name = "", phone = "" }) {
+  const { data, error } = await supabase.rpc("find_email", {
+    p_name: name.trim(),
+    p_phone: phone,
+  });
+  if (error) return { ok: false, message: "조회에 실패했어요. 잠시 후 다시 시도해 주세요." };
+  if (!data?.length) return { ok: false, message: "입력한 정보로 가입된 계정이 없어요." };
+  return { ok: true, accounts: data.map((a) => ({ email: a.email, masked: maskEmail(a.email) })) };
 }
 
 /** 로그인: 가입한 이메일인지, 비밀번호가 맞는지 확인 */

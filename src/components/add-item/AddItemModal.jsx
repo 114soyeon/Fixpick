@@ -7,19 +7,26 @@ import { useAuthStore } from "@/store/authStore";
 import DatePicker from "@/components/add-item/DatePicker";
 import MiniSelect from "@/components/add-item/MiniSelect";
 import PayPicker from "@/components/add-item/PayPicker";
-import { useCategories, useAddSub, useUpdateSub } from "@/queries/subs";
+import { useCategories, useAddSub, useUpdateSub, useMySub, useUpdateAllReminds } from "@/queries/subs";
+import { isPayAlertOn } from "@/utils/setting/setting";
 
-/**
- * 고정지출 항목 추가 / 수정 창 (DB에 저장해요)
- *  - item 없이 열면 → "항목 추가" (빈 칸)
- *  - item(DB 한 줄)을 넘기면 → "항목 수정" (저장돼 있던 값이 미리 채워져요)
- */
+/*
+  고정지출 항목 추가 / 수정 창 (DB에 저장해요)
+  - item 없이 열면 → "항목 추가" (빈 칸)
+  - item(DB 한 줄)을 넘기면 → "항목 수정" (저장돼 있던 값이 미리 채워져요)
+*/
 export default function AddItemModal({ onClose, setToast, payMethods = [], item = null }) {
   const { user } = useAuthStore();
   const { data: categories } = useCategories();
   const addSub = useAddSub();
   const updateSub = useUpdateSub();
   const isEdit = !!item; // 수정 모드인지
+
+  const { data: rows } = useMySub(); // 내 고정지출
+  const payAll = useUpdateAllReminds();
+  const payOn = isPayAlertOn(rows);
+  const [payDraft, setPayDraft] = useState(null); // null = 아직 안 건드림
+  const remindOn = payDraft ?? payOn;
 
   const [closing, setClosing] = useState(false);
 
@@ -45,7 +52,6 @@ export default function AddItemModal({ onClose, setToast, payMethods = [], item 
 
     payMethod: item?.pay_method ?? "",
     endDate: item?.expiry_date ?? "",
-    remind: item?.remind ?? true,
   });
 
   const nameRef = useRef(null);
@@ -169,8 +175,11 @@ export default function AddItemModal({ onClose, setToast, payMethods = [], item 
         custom_text: custom ? form.customText : null,
 
         pay_method: form.payMethod,
-        remind: form.remind,
+        remind: remindOn,
     };
+
+    // "결제일 알림"은 전체 스위치 → 바뀌었을 때만 내 고정지출 전부를 한 번에 저장 (취소하면 실행 안 해요)
+    if (remindOn !== payOn) payAll.mutate(remindOn);
 
     // 수정: 원래 항목을 고쳐요 (메모·알림 설정 같은 다른 값은 그대로 둬요)
     if (isEdit) {
@@ -461,14 +470,14 @@ export default function AddItemModal({ onClose, setToast, payMethods = [], item 
           <span className="gk-toggle-row__text">
             <span className="gk-field-label">결제 알림 받기</span>
             <span className="gk-toggle-row__desc">
-              사이드바 알림으로 미리 알려드려요
+              끄면 모든 고정지출의 결제일 알림이 꺼져요
             </span>
           </span>
           <input
             id="gk-add-remind"
             type="checkbox"
-            checked={form.remind}
-            onChange={(e) => set("remind", e.target.checked)}
+            checked={remindOn}
+            onChange={(e) => setPayDraft(e.target.checked)}
             className="gk-switch"
           />
         </label>

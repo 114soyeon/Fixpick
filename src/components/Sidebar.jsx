@@ -4,7 +4,6 @@ import { setLoginReason } from "@/utils/common/addItemFlow";
 import { useRawFixItems } from "@/hooks/useFixItems";
 import { useSetting } from "@/hooks/useSetting";
 import { buildNotifications, loadRead, saveRead } from "@/utils/sidebar/notifications";
-import { useAuthStore } from "@/store/authStore";
 import { MENU_ITEMS } from "@/constants/sidebar";
 import { LogoMark, Wordmark } from "@/components/common/Logo";
 import { Icons } from "@/components/sidebar/icons";
@@ -19,9 +18,10 @@ export default function Sidebar({
   onNavigate,
   onAddClick,
   onNotificationClick,
+  onLogout,
   user = null, // 로그인 안 했으면 null
 }) {
-  const signOut = useAuthStore((state) => state.signOut);
+  
   const [open, setOpen] = useState(false);
   const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState(null);
@@ -134,7 +134,7 @@ export default function Sidebar({
             </div>
             <div className="gk-menu__list">
               <button type="button" role="menuitem" className="gk-menu__item" onClick={() => { setMenu(false); onNavigate?.("settings"); }}>내 정보 · 설정</button>
-              <button type="button" role="menuitem" className="gk-menu__item gk-menu__item--danger" onClick={() => { setMenu(false); signOut(); }}>로그아웃</button>
+              <button type="button" role="menuitem" className="gk-menu__item gk-menu__item--danger" onClick={() => { setMenu(false); onLogout?.(); }}>로그아웃</button>
             </div>
           </div>
         )}

@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { getUser } from "@/utils/auth/auth";
 
 // 카테고리를 가져와야 함
 export const getCategories = async () => {
@@ -41,3 +42,12 @@ export const getMySubs = async () => {
     }
     return data;
 }
+
+// 내 고정지출 "결제일 알림" 일괄 켜기/끄기 (설정·항목 추가 창의 전역 토글)
+export const updateAllReminds = async (remind) => {
+  const userId = getUser()?.id;
+  if (!userId) return;
+  const { error } = await supabase.from("subscriptions")
+    .update({ remind }).eq("user_id", userId);
+  if (error) throw error;
+};

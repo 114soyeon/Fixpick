@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMyBudget, saveMyBudget } from "@/api/budgets";
+import { useAuthStore } from "@/store/authStore";
 
 /*
   예산 리액트 쿼리 훅 (queries/payment.js 와 같은 방식)
@@ -10,7 +11,8 @@ import { getMyBudget, saveMyBudget } from "@/api/budgets";
 const budgets = "budgets";
 
 export const useBudget = () => {
-  return useQuery({ queryKey: [budgets], queryFn: getMyBudget });
+  const userId = useAuthStore((state) => state.user?.id);
+  return useQuery({ queryKey: [budgets, userId], queryFn: getMyBudget });
 };
 
 export const useSaveBudget = () => {

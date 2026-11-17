@@ -9,7 +9,7 @@ import { useMemo, useState } from "react";
 import "@/styles/setting.css";
 
 import { useUser } from "@/hooks/useUser";
-import { useMySub } from "@/queries/subs";
+import { useMySub, useUpdateAllReminds  } from "@/queries/subs";
 import { fromDbRow } from "@/utils/common/dbItem";
 import { usePayMethods, useAddPayMethod } from "@/queries/payment";
 import { useSetting } from "@/hooks/useSetting";
@@ -20,11 +20,14 @@ import BudgetCard from "@/components/setting/BudgetCard";
 import PayMethodCard from "@/components/setting/PayMethodCard";
 import AccountCard from "@/components/setting/AccountCard";
 import PayModal from "@/components/setting/PayModal";
+import { isPayAlertOn, saveSetting } from "@/utils/setting/setting";
 
 const Setting = () => {
   const user = useUser(); // 로그인 안 했으면 null
   // 내가 등록한 고정지출 — DB(리액트 쿼리 useMySub) → 계산용 모양으로 (rows가 바뀔 때만)
   const { data: rows } = useMySub();
+  const payAll = useUpdateAllReminds();
+  const payOn = isPayAlertOn(rows);
   const items = useMemo(() => (rows ?? []).map(fromDbRow), [rows]);
   const setting = useSetting(); // 알림·예산 (결제 수단은 DB usePayMethods)
 
@@ -61,7 +64,14 @@ const Setting = () => {
 
       <div className="set-body">
         {/* ───── 왼쪽: 알림 ───── */}
-        <AlertCard setting={setting} />
+        <AlertCard 
+          setting={setting}
+          payOn={payOn}
+          onPayAlertChange={(on) => {
+            saveSetting({ alerts: { ...setting.alerts, pay: on } });
+            payAll.mutate(on);
+          }}
+        />
 
         {/* ───── 오른쪽: 예산 + 결제 수단 ───── */}
         <div className="set-side">

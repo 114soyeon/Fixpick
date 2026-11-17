@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getCategories, addSubs, updateSubs, deleteSubs, getMySubs } from "@/api/subs";
+import { getCategories, addSubs, updateSubs, deleteSubs, getMySubs, updateAllReminds } from "@/api/subs";
+import { useAuthStore } from "@/store/authStore";
 
 // 카테고리 목록
 export const useCategories = () => {
@@ -36,5 +37,15 @@ export const useDeleteSub = () => {
 
 // 내 고정지출 목록 리스트
 export const useMySub = () => {
-    return useQuery({queryKey: [subs], queryFn: getMySubs})
-}
+  const userId = useAuthStore((state) => state.user?.id);
+  return useQuery({ queryKey: [subs, userId], queryFn: getMySubs });
+};
+
+// 결제일 알림 전체 켜기/끄기
+export const useUpdateAllReminds = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (remind) => updateAllReminds(remind),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [subs] }),
+  });
+};

@@ -30,6 +30,16 @@ export function readSetting() {
   return cache.value;
 }
 
+/*
+  결제일 알림 전역 스위치
+  - 항목이 하나라도 켜져 있으면 켜진 것 (설정·항목 추가 창이 항상 같은 값)
+  - 아직 목록을 못 불러왔으면(null) 마지막 저장값으로
+*/
+export function isPayAlertOn(rows, fallback = readSetting().alerts.pay) {
+  if (!rows) return fallback;
+  return rows.length === 0 || rows.some((r) => r.remind !== false);
+}
+
 /** 설정 일부 바꾸기 (바꾸면 바로 저장) */
 export function saveSetting(changes) {
   const value = { ...readSetting(), ...changes };

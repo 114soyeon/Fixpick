@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuthStore } from "@/store/authStore";
 import { getPayCategories, getMyMethods, addMyMethod, deleteMyMethod } from "@/api/payment";
 
 /*
@@ -18,7 +19,8 @@ export const usePayCategories = () => {
 
 // 내가 등록한 결제 수단
 export const usePayMethods = () => {
-    return useQuery({ queryKey: [methods], queryFn: getMyMethods });
+    const userId = useAuthStore((state) => state.user?.id);
+    return useQuery({ queryKey: [methods, userId], queryFn: getMyMethods });
 };
 
 // 결제 수단 등록 (설정 > "+ 결제 수단 추가")

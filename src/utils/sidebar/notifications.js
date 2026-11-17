@@ -29,7 +29,7 @@ const ALL_ON = { pay: true, budget: true, big: true, end: true };
 
 /**
  * 등록한 항목(DB, fromDbRow 모양) → 알림 목록 (최근 7일 + 앞으로 다가오는 것)
- * - alerts: 설정 페이지에서 켠 알림 종류 { pay, budget, big, end }
+ * - alerts: 설정 페이지에서 켠 알림 종류 { budget, big, end }
  * - 항목의 "결제 알림 받기"(remind)를 끄면 그 항목 결제·만기 알림은 안 떠요
  * - 항목 상세에서 정한 며칠 전(payAlertDays, endAlertDays)이 있으면 그걸 써요
  */
@@ -47,7 +47,7 @@ export function buildNotifications(items, readIds, alerts = ALL_ON) {
     const big = it.amount >= BIG_AMOUNT;
 
     // 다가오는 결제: 큰 지출은 7일 전부터, 나머지는 3일 전부터 (항목에서 며칠 전으로 정했으면 그 날부터)
-    const wantPay = remind && (big ? on.big : on.pay);
+    const wantPay = remind && (!big || on.big); // 결제일 알림은 항목의 remind 하나로만
     const ahead = new Date(today); ahead.setDate(ahead.getDate() + (Number(it.payAlertDays) || (big ? 7 : 3)));
     if (wantPay) payDatesBetween(it, today, ahead).forEach((date) => {
       const left = dayDiff(date, today);

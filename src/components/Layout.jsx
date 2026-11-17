@@ -6,7 +6,7 @@ import "@/styles/common.css";
 import { onAuthChange } from "@/api/auth";
 import { useEffect, useRef } from "react"; // useRef : 값을 저장해 두었다가 나중에 다시 사용할 수 있도록 해주는 기능
 import { useAuthStore } from "@/store/authStore";
-
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -15,13 +15,20 @@ export default function Layout() {
 
   // 유저가 로그인 상태 여부
   const { user, loading, setAuth } = useAuthStore();
+  const queryClient = useQueryClient();
+  const firstRun = useRef(true);
 
   useEffect(() => {
     // 로그인 상태가 바뀔 때마다 store 에 알려줘요 (Supabase 요청은 api/auth.js)
     const stop = onAuthChange((session) => setAuth(session));
     return stop; // 화면이 사라지면 그만 들어요
-
   }, [setAuth]);
+
+  // 로그인한 사람이 바뀌면(로그인·로그아웃) 서버에서 가져온 목록 캐시를 비움
+  useEffect(() => {
+    if (firstRun.current) { firstRun.current = false; return; } // 첫 진입은 캐시가 비어있으니 패스
+    queryClient.clear();
+  }, [user?.id, queryClient]);
 
   // 주소가 바뀔 때 마다 맨 위로 -> scrollTo(0, 0);
   useEffect(() => {

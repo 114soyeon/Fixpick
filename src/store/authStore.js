@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import * as authApi from "@/api/auth"; // Supabase 요청은 api/auth.js 에서 해요
+import * as authApi from "@/api/auth"; // Supabase 요청은 api/auth.js 에서
 
 /*
- * 로그인 상태 저장소 — "누가 로그인했는지"만 들고 있어요
- * Supabase 를 직접 부르지 않고 api/auth.js 함수를 불러요
- */
+  로그인 상태 저장소 — "누가 로그인했는지"만 들고 있음
+  Supabase 를 직접 부르지 않고 api/auth.js 함수를 부름
+*/
 
 const userInfo = (user) =>
   user
@@ -32,7 +32,7 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  // 로그인 (틀리면 error 를 throw → 로그인 페이지가 문구를 보여줘요)
+  // 로그인 (틀리면 error 를 throw)
   signIn: (email, password) => authApi.signIn(email, password),
 
   // 로그인한 사람의 이름·전화는 users 테이블
@@ -62,7 +62,7 @@ export const useAuthStore = create((set, get) => ({
     } catch {
       return false;
     }
-    // 수정 권한이 없으면 오류 없이 빈 배열([])만 와요 → 돌아온 줄이 없으면 실패로 봐요
+    // 수정 권한이 없으면 오류 없이 빈 배열([]) → 돌아온 줄이 없으면 실패
     if (!data?.length) return false;
 
     const now = get().user;
@@ -84,5 +84,8 @@ export const useAuthStore = create((set, get) => ({
   },
 
   // 로그아웃
-  signOut: () => authApi.signOut(),
+  signOut: async () => {
+    set({ user: null, session: null });
+    try { await authApi.signOut(); } catch { /* 오프라인이어도 로컬 상태는 정리됨 */ }
+  },
 }));

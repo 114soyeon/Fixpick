@@ -9,7 +9,7 @@ import { ALERTS, TIMES } from "@/constants/setting";
 import CardHead from "@/components/setting/CardHead";
 import Switch from "@/components/setting/Switch";
 
-const AlertCard = ({ setting }) => {
+const AlertCard = ({ setting, payOn, onPayAlertChange }) => {
   const setAlert = (key, on) => saveSetting({ alerts: { ...setting.alerts, [key]: on } });
 
   // 알림 한 줄: 제목 + 설명 ....... 스위치
@@ -19,7 +19,9 @@ const AlertCard = ({ setting }) => {
         <p className="set-row-title">{title}</p>
         <p className="set-row-desc">{desc}</p>
       </div>
-      <Switch label={title} on={setting.alerts[key]} onChange={(on) => setAlert(key, on)} />
+      <Switch label={title}
+        on={key === "pay" ? payOn : setting.alerts[key]}                       // ← 파생값
+        onChange={(on) => (key === "pay" ? onPayAlertChange(on) : setAlert(key, on))} />
     </li>
   );
 

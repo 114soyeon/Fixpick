@@ -9,6 +9,7 @@ export default function FindIdModal({ onClose, onFound, onReset }) {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState({ field: "", message: "" });
   const [result, setResult] = useState(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
@@ -16,14 +17,19 @@ export default function FindIdModal({ onClose, onFound, onReset }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const find = (e) => {
+  const find = async (e) => {
     e.preventDefault();
     if (!name.trim()) return setError({ field: "name", message: "이름을 입력해 주세요." });
     if (phone.replace(/[^0-9]/g, "").length < 10) return setError({ field: "phone", message: "휴대폰 번호를 다시 확인해 주세요." });
-    const r = findEmail({ name, phone });
-    if (!r.ok) return setError({ field: "all", message: r.message });
-    setError({ field: "", message: "" });
-    setResult(r.accounts);
+    setBusy(true);
+    try {
+      const r = await findEmail({ name, phone });
+      if (!r.ok) return setError({ field: "all", message: r.message });
+      setError({ field: "", message: "" });
+      setResult(r.accounts);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -46,7 +52,7 @@ export default function FindIdModal({ onClose, onFound, onReset }) {
             {result.map((a) => (
               <div key={a.email} className="gk-login-found">
                 <span className="gk-login-found__label">가입한 이메일</span>
-                <b className="gk-login-found__email">{a.masked}</b>
+                <b className="gk-login-found__email">{a.email}</b>
                 {a.joined && <span className="gk-login-found__joined">{joinedText(a.joined)}</span>}
               </div>
             ))}
@@ -76,7 +82,9 @@ export default function FindIdModal({ onClose, onFound, onReset }) {
           ) : (
             <>
               <button type="button" className="gk-login-btn gk-login-btn--ghost" onClick={onClose}>취소</button>
-              <button type="submit" className="gk-login-btn gk-login-btn--grow">아이디 찾기</button>
+              <button type="submit" className="gk-login-btn gk-login-btn--grow" disabled={busy}>
+              {busy ? "찾는 중..." : "아이디 찾기"}
+            </button>
             </>
           )}
         </div>
