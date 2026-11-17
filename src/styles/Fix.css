@@ -478,3 +478,22 @@
     display: none;
   }
 }
+
+/* ───────── 고정지출 표 스크롤바: 이 표에서만 보이게 (페이지 전체 스크롤바는 common.css 그대로 숨김) ─────────
+   - 세로: 항목이 많아 표 높이를 넘으면 (화면 크기 상관없이)
+   - 가로: 768px 이상에서 화면이 좁아져 표(최소 850px)가 잘릴 때 (767px 이하는 2단 카드라 가로 스크롤 없음) */
+.expenses-page .expense-table--scroll::-webkit-scrollbar {
+  width: 5px; /* 세로 스크롤바 너비 */
+  height: 5px; /* 가로 스크롤바 높이 */
+}
+.expenses-page .expense-table--scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 5px;
+}
+.expenses-page .expense-table--scroll::-webkit-scrollbar-thumb {
+  background: #c5ced8;
+  border-radius: 5px;
+}
+.expenses-page .expense-table--scroll::-webkit-scrollbar-corner {
+  background: transparent; /* 가로·세로가 만나는 모서리 */
+}
