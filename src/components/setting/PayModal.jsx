@@ -5,16 +5,19 @@ import CardIcon from "@/components/add-item/CardIcon";
 
 const onlyNum = (text) => text.replace(/[^0-9]/g, "");
 
-/** 결제 수단 추가 창 (카드 / 계좌 탭)
- *  - saving: 등록 요청 중이면 버튼을 잠가요 (더블 클릭 방지)
- *  - error : 등록 실패 안내문 (Setting.jsx 가 전달해요)
- */
-export default function PayModal({ onClose, onAdd, saving = false, error = "" }) {
-  const [type, setType] = useState("card");
-  const [name, setName] = useState("");
-  const [card, setCard] = useState(["", "", "", ""]); // 카드번호 4칸
-  const [account, setAccount] = useState("");
+/*
+  결제 수단 추가 창 (카드 / 계좌 탭)
+  - saving: 등록 요청 중이면 버튼을 잠가요 (더블 클릭 방지)
+  - error : 등록 실패 안내문 (Setting.jsx 가 전달해요)
+*/
+
+export default function PayModal({ onClose, onAdd, saving = false, error = "", initial = null }) {
+  const [type, setType] = useState(initial?.type ?? "card");   // 카드/계좌 탭
+  const [name, setName] = useState(initial?.name ?? "");       // 카드사·은행 선택
+  const [card, setCard] = useState(["", "", "", ""]);          // 카드번호 4칸
+  const [account, setAccount] = useState("");                  // 계좌번호
   const boxes = useRef([]);
+  const isEdit = !!initial;
 
   // Esc 누르면 닫기
   useEffect(() => {
@@ -41,12 +44,19 @@ export default function PayModal({ onClose, onAdd, saving = false, error = "" })
   };
 
   const number = isCard ? card.join("") : account;
-  const ready = name && (isCard ? number.length === 16 : number.length >= 10);
+    const ready = name && (
+    isEdit
+      ? (isCard
+          ? number.length === 0 || number.length === 16       // 카드: 안 바꾸면 빈 칸
+          : number.length === 0 || number.length >= 10)       // 계좌: 안 바꾸면 빈 칸
+      : (isCard ? number.length === 16 : number.length >= 10) // 추가는 그대로
+  );
 
   const submit = (e) => {
     e.preventDefault();
     if (!ready || saving) return;
-    onAdd({ type, name, last4: number.slice(-4) }); // 끝 4자리만 저장 (카드사는 DB 사전에서 찾아요)
+    const next4 = number.length >= 4 ? number.slice(-4) : initial.last4;
+    onAdd({ type, name, last4: next4 });
   };
 
   return (
@@ -55,8 +65,8 @@ export default function PayModal({ onClose, onAdd, saving = false, error = "" })
         <button type="button" className="set-modal-close" aria-label="닫기" onClick={onClose}>
           <X size={18} strokeWidth={1.8} />
         </button>
-        <h2 id="set-modal-title" className="set-modal-title">결제 수단 추가</h2>
-        <p className="set-modal-desc">고정지출이 빠져나가는 카드나 계좌를 등록해요.</p>
+        <h2 id="set-modal-title" className="set-modal-title">{isEdit ? "결제 수단 수정" : "결제 수단 추가"}</h2>
+        <p className="set-modal-desc">{isEdit ? "번호를 비워두면 기존 번호가 그대로 유지돼요." : "고정지출이 빠져나가는 카드나 계좌를 등록해요."}</p>
 
         <p className="set-label">종류</p>
         <div className="set-tab">
@@ -115,7 +125,7 @@ export default function PayModal({ onClose, onAdd, saving = false, error = "" })
         <div className="set-modal-btns">
           <button type="button" className="set-btn-cancel" onClick={onClose}>취소</button>
           <button type="submit" className="set-btn-add" disabled={!ready || saving}>
-            {saving ? "등록 중..." : "추가하기"}
+            {saving ? "저장 중..." : isEdit ? "수정하기" : "추가하기"}
           </button>
         </div>
       </form>

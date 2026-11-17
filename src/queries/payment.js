@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/authStore";
-import { getPayCategories, getMyMethods, addMyMethod, deleteMyMethod } from "@/api/payment";
+import { getPayCategories, getMyMethods, addMyMethod, updateMyMethod, deleteMyMethod } from "@/api/payment";
 
 /*
     결제 수단 리액트 쿼리 훅 (queries/subs.js 와 같은 방식)
@@ -23,11 +23,20 @@ export const usePayMethods = () => {
     return useQuery({ queryKey: [methods, userId], queryFn: getMyMethods });
 };
 
-// 결제 수단 등록 (설정 > "+ 결제 수단 추가")
+// 결제 수단 등록
 export const useAddPayMethod = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (input) => addMyMethod(input),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [methods] }),
+    });
+};
+
+// 결제 수단 수정
+export const useUpdatePayMethod = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, name, last4 }) => updateMyMethod(id, { name, last4 }),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [methods] }),
     });
 };

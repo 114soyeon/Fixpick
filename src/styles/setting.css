@@ -372,6 +372,25 @@
   background: #f2f9ff;
 }
 
+.set-method-edit, .set-method-del {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.set-method-edit {
+  margin-left: auto;
+}
+.set-method-del {
+  margin-left: 0;
+}
+.set-method-edit:hover, .set-method-del:hover {
+  background: #fdecea;
+}
+
 /* ───── 계정 ───── */
 .set-account {
   display: flex;

@@ -1,14 +1,16 @@
 /*
- * 설정 오른쪽 아래: 결제 수단 카드
- * - methods: 등록한 결제 수단 [{ id, type, name, last4 }]
- * - items: 내가 등록한 고정지출 (결제 수단마다 몇 건 쓰는지 세요)
- * - onAddClick: "+ 결제 수단 추가" 버튼 (추가 창은 페이지에서 띄워요)
- */
+  설정 오른쪽 아래: 결제 수단 카드
+  - methods: 등록한 결제 수단 [{ id, type, name, last4 }]
+  - items: 내가 등록한 고정지출 (결제 수단마다 몇 건 쓰는지 세요)
+  - onAddClick: "+ 결제 수단 추가" 버튼 (추가 창은 페이지에서 띄워요)
+  - onEditClick: 각 줄 "수정" 버튼
+  - onDeleteClick: 각 줄 "삭제" 버튼
+*/
 import { CreditCard } from "lucide-react";
 import CardIcon from "@/components/add-item/CardIcon"; // 카드사 로고 (없으면 첫 글자 배지)
 import CardHead from "@/components/setting/CardHead";
 
-const PayMethodCard = ({ methods, items, onAddClick }) => {
+const PayMethodCard = ({ methods, items, onAddClick, onEditClick, onDeleteClick }) => {
   // 이 결제 수단을 쓰는 고정지출 개수
   const countOf = (m) => items.filter((it) => it.payMethod === m.name).length;
 
@@ -26,6 +28,23 @@ const PayMethodCard = ({ methods, items, onAddClick }) => {
                   {m.type === "card" ? "카드" : "계좌"} •••• {m.last4} · 고정지출 {countOf(m)}건
                 </p>
               </div>
+
+              <button
+                type="button"
+                className="set-method-edit"
+                onClick={() => onEditClick(m)}
+                aria-label={`${m.name} 수정`}
+              >
+                수정
+              </button>
+              <button
+                type="button"
+                className="set-method-del"
+                onClick={() => onDeleteClick(m)}
+                aria-label={`${m.name} 삭제`}
+              >
+                삭제
+              </button>
             </li>
           ))}
         </ul>

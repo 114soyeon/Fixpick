@@ -46,16 +46,11 @@ export const getMyMethods = async () => {
     }));
 };
 
-/*
-    결제 수단 등록 (설정 > + 결제 수단 추가)
-    - name  : 카드사·은행 이름 ("국민카드")
-    - last4 : 뒷 4자리만 저장
-*/
+// 결제 수단 등록
 export const addMyMethod = async ({ name, last4 }) => {
     const { data: auth, error: authError } = await supabase.auth.getUser();
     if (authError || !auth?.user) throw new Error("로그인이 필요해요");
 
-    // 이름 → payment_categories.id (찾지 못하면 등록 불가)
     const { data: cat, error: catError } = await supabase
         .from("payment_categories")
         .select("id")
@@ -75,8 +70,40 @@ export const addMyMethod = async ({ name, last4 }) => {
     }
 };
 
-/* 결제 수단 삭제 (본인 것만 — RLS) */
+// 결제 수단 수정
+export const updateMyMethod = async (id, { name, last4 }) => {
+    const { data: auth, error: authError } = await supabase.auth.getUser();
+    if (authError || !auth?.user) throw new Error("로그인이 필요해요");
+
+    // 이름 → payment_categories.id
+    const { data: cat, error: catError } = await supabase
+        .from("payment_categories")
+        .select("id")
+        .eq("name", name)
+        .maybeSingle();
+    if (catError) throw catError;
+    if (!cat) throw new Error(`"${name}" 카드사/은행이 사전에 없어요`);
+
+    const { error } = await supabase
+        .from("payment_methods")
+        .update({ payment_id: cat.id, last4 })
+        .eq("id", id)
+        .eq("user_id", auth.user.id);   // 내 것만 수정 (RLS와 이중 안전장치)
+    if (error) {
+        console.error("결제 수단 수정 실패:", error);
+        throw error;
+    }
+};
+
+// 결제 수단 삭제
 export const deleteMyMethod = async (id) => {
-    const { error } = await supabase.from("payment_methods").delete().eq("id", id);
+    const { data: auth, error: authError } = await supabase.auth.getUser();
+    if (authError || !auth?.user) throw new Error("로그인이 필요해요");
+
+    const { error } = await supabase
+        .from("payment_methods")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", auth.user.id);
     if (error) throw error;
 };

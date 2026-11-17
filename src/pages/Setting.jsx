@@ -11,7 +11,7 @@ import "@/styles/setting.css";
 import { useUser } from "@/hooks/useUser";
 import { useMySub, useUpdateAllReminds  } from "@/queries/subs";
 import { fromDbRow } from "@/utils/common/dbItem";
-import { usePayMethods, useAddPayMethod } from "@/queries/payment";
+import { usePayMethods, useAddPayMethod, useUpdatePayMethod, useDeletePayMethod } from "@/queries/payment";
 import { useSetting } from "@/hooks/useSetting";
 import { useBudget } from "@/queries/budgets";
 import ProfileCard from "@/components/setting/ProfileCard";
@@ -20,6 +20,7 @@ import BudgetCard from "@/components/setting/BudgetCard";
 import PayMethodCard from "@/components/setting/PayMethodCard";
 import AccountCard from "@/components/setting/AccountCard";
 import PayModal from "@/components/setting/PayModal";
+import SidebarToast from "@/components/sidebar/SidebarToast"; 
 import { isPayAlertOn, saveSetting } from "@/utils/setting/setting";
 
 const Setting = () => {
@@ -33,18 +34,41 @@ const Setting = () => {
 
   // 등록한 결제 수단 — DB(리액트 쿼리)
   const { data: methods = [] } = usePayMethods();
-  const addPay = useAddPayMethod();
+  const addPay = useAddPayMethod();       // 추가
+  const updatePay = useUpdatePayMethod(); // 수정
+  const deletePay = useDeletePayMethod(); // 삭제
   
   // 예산
   const { data: dbBudget } = useBudget();
 
-  // 결제 수단 추가 창
+  // 결제 수단 추가 / 수정 창
   const [modal, setModal] = useState(false);
+  const [editing, setEditing] = useState(null); // null = 추가, 값 있으면 수정
+  const openAdd = () => { setEditing(null); setModal(true); };
+  const openEdit = (m) => { setEditing(m); setModal(true); };
+
   const [payError, setPayError] = useState(""); // 등록 실패 안내문
+  const [toast, setToast] = useState(null); 
 
   const closeModal = () => {
     setModal(false);
+    setEditing(null);
     setPayError("");
+  };
+
+  // 결제 수단 삭제 (window.confirm — FixDetail.jsx·AccountCard.jsx와 같은 방식)
+  const confirmDelete = (m) => {
+    const used = items.filter((it) => it.payMethod === m.name).length;
+    const warn = used > 0 ? `\n이 카드를 쓰는 고정지출 ${used}건의 결제 수단이 비워져요.` : "";
+    if (!window.confirm(`'${m.name}' 결제 수단을 삭제할까요?${warn}`)) return;
+
+    deletePay.mutate(m.id, {
+      onSuccess: () => setToast(`'${m.name}' 결제 수단을 삭제했어요`),
+      onError: (err) => {
+        console.error("결제 수단 삭제 실패:", err);
+        setToast(err?.message || "결제 수단을 삭제하지 못했어요. 다시 시도해 주세요");
+      },
+    });
   };
 
   return (
@@ -76,7 +100,13 @@ const Setting = () => {
         {/* ───── 오른쪽: 예산 + 결제 수단 ───── */}
         <div className="set-side">
           <BudgetCard key={user?.email ?? "guest"} initial={dbBudget ?? setting.budget} />
-          <PayMethodCard methods={methods} items={items} onAddClick={() => setModal(true)} />
+          <PayMethodCard
+            methods={methods}
+            items={items}
+            onAddClick={openAdd}
+            onEditClick={openEdit}
+            onDeleteClick={confirmDelete}
+          />
         </div>
       </div>
 
@@ -86,28 +116,46 @@ const Setting = () => {
       {modal && (
         <PayModal
           onClose={closeModal}
-          saving={addPay.isPending}
+          saving={addPay.isPending || updatePay.isPending}
           error={payError}
+          initial={editing}
           onAdd={({ name, last4 }) => {
             setPayError("");
-            addPay.mutate(
-              { name, last4 },
-              {
-                onSuccess: closeModal,
-                onError: (err) => {
-                  console.error("결제 수단 등록 실패:", err);
-                  // supabase 에러(code 있음)는 문구를 숨기고, 우리 에러 메시지는 그대로 보여요
-                  setPayError(
-                    err?.code
-                      ? "결제 수단을 등록하지 못했어요. 다시 시도해 주세요"
-                      : err?.message || "결제 수단을 등록하지 못했어요. 다시 시도해 주세요"
-                  );
-                },
-              }
-            );
+            const fail = (msg) => (err) => {
+              console.error(msg, err);
+              setPayError(err?.code ? msg : err?.message || msg);
+            };
+
+            if (editing) {
+              // ── 수정 ──
+              updatePay.mutate(
+                { id: editing.id, name, last4 },
+                {
+                  onSuccess: () => {
+                    closeModal();
+                    setToast(`'${name}' 결제 수단을 수정했어요`);
+                  },
+                  onError: fail("결제 수단을 수정하지 못했어요. 다시 시도해 주세요"),
+                }
+              );
+            } else {
+              // ── 추가 ──
+              addPay.mutate(
+                { name, last4 },
+                {
+                  onSuccess: () => {
+                    closeModal();
+                    setToast(`'${name}' 결제 수단을 추가했어요`);
+                  },
+                  onError: fail("결제 수단을 등록하지 못했어요. 다시 시도해 주세요"),
+                }
+              );
+            }
           }}
         />
       )}
+      
+      {toast && (<SidebarToast key={toast} text={toast} onDone={() => setToast(null)} />)}
 
       <footer className="page-copy">Copyright © 2026. Fixpick All rights reserved.</footer>
     </div>
