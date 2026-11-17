@@ -33,7 +33,11 @@ const FixDetail = () => {
 
   // 메모는 브라우저에 "memo-<id>" 로 저장돼 있어요 (저장은 fixStorage.js saveMemo)
   const [memo, setMemo] = useState(() => {
-    try { return localStorage.getItem(`memo-${id}`) ?? ""; } catch { return ""; }
+    try {
+      return localStorage.getItem(`memo-${id}`) ?? "";
+    } catch {
+      return "";
+    }
   });
 
   // 불러오는 중
@@ -69,7 +73,7 @@ const FixDetail = () => {
     });
   };
 
-  // 메모 칸에 글자를 칠 때마다
+  // 메모
   const handleMemoChange = (e) => {
     const newMemo = e.target.value;
     setMemo(newMemo);
@@ -98,7 +102,14 @@ const FixDetail = () => {
         <div className="detail-left">
           <HeroCard item={item} />
 
-          <PaymentInfoCard item={item} onEdit={() => (rawRow ? setIsModalOpen(true) : window.alert("아직 데이터를 불러오지 못했어요"))} />
+          <PaymentInfoCard
+            item={item}
+            onEdit={() =>
+              rawRow
+                ? setIsModalOpen(true)
+                : window.alert("아직 데이터를 불러오지 못했어요")
+            }
+          />
 
           <MemoCard memo={item.memo} onChange={handleMemoChange} />
         </div>
@@ -113,7 +124,12 @@ const FixDetail = () => {
             onChange={(patch) =>
               updateSub.mutate(
                 { id: Number(id), data: patch },
-                { onError: () => window.alert("알림 설정을 저장하지 못했어요. 다시 시도해 주세요") },
+                {
+                  onError: () =>
+                    window.alert(
+                      "알림 설정을 저장하지 못했어요. 다시 시도해 주세요",
+                    ),
+                },
               )
             }
           />
@@ -132,9 +148,13 @@ const FixDetail = () => {
         />
       )}
 
-      {toast && <SidebarToast key={toast} text={toast} onDone={() => setToast(null)} />}
+      {toast && (
+        <SidebarToast key={toast} text={toast} onDone={() => setToast(null)} />
+      )}
 
-      <footer className="page-copy">Copyright © 2026. Fixpick All rights reserved.</footer>
+      <footer className="page-copy">
+        Copyright © 2026. Fixpick All rights reserved.
+      </footer>
     </div>
   );
 };

@@ -467,3 +467,14 @@
 .detail-page .card:has(.alert-row) button {
   font-family: "Pretendard Variable", "Pretendard", sans-serif;
 }
+
+/* ───────── 메모 카드: 왼쪽 열 아래 끝을 오른쪽 열(만기일까지 카드) 아래 끝과 맞춰요 ─────────
+   왼쪽 열이 오른쪽 열보다 짧으면, 남는 높이만큼 메모 카드(왼쪽 열 마지막 카드)와 입력칸이 늘어나요 */
+.detail-page .detail-left > .card:last-child {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.detail-page .detail-left > .card:last-child .memo-input {
+  flex: 1;
+}
