@@ -1,5 +1,4 @@
 import { DEFAULT_BUDGET } from "@/utils/setting/budget";
-import { readSetting } from "@/utils/setting/setting";
 import { monthDay, won } from "@/utils/common/format";
 import { amountIn, isEnded, payDaysIn } from "@/utils/common/payment";
 
@@ -27,13 +26,13 @@ function payDatesBetween(item, from, to) {
 
 const ALL_ON = { pay: true, budget: true, big: true, end: true };
 
-/**
- * 등록한 항목(DB, fromDbRow 모양) → 알림 목록 (최근 7일 + 앞으로 다가오는 것)
- * - alerts: 설정 페이지에서 켠 알림 종류 { budget, big, end }
- * - 항목의 "결제 알림 받기"(remind)를 끄면 그 항목 결제·만기 알림은 안 떠요
- * - 항목 상세에서 정한 며칠 전(payAlertDays, endAlertDays)이 있으면 그걸 써요
- */
-export function buildNotifications(items, readIds, alerts = ALL_ON) {
+/*
+  등록한 항목(DB, fromDbRow 모양) → 알림 목록 (최근 7일 + 앞으로 다가오는 것)
+  - alerts: 설정 페이지에서 켠 알림 종류 { budget, big, end }
+  - 항목의 "결제 알림 받기"(remind)를 끄면 그 항목 결제·만기 알림은 안 떠요
+  - 항목 상세에서 정한 며칠 전(payAlertDays, endAlertDays)이 있으면 그걸 써요
+*/
+export function buildNotifications(items, readIds, alerts = ALL_ON, dbBudget = null) {
   if (!items.length) return [];
   const on = { ...ALL_ON, ...alerts };
   const now = new Date();
@@ -79,7 +78,7 @@ export function buildNotifications(items, readIds, alerts = ALL_ON) {
   });
 
   // 이번 달 예산의 90%를 넘었을 때
-  const budget = readSetting().budget ?? DEFAULT_BUDGET; // 설정 페이지에서 정한 예산
+  const budget = dbBudget ?? DEFAULT_BUDGET; // DB 예산 (없으면 기본 130만)
   const used = items.reduce((sum, it) => sum + amountIn(it, today.getFullYear(), today.getMonth() + 1), 0);
   if (on.budget && budget > 0 && used >= budget * 0.9) {
     const over = used > budget;

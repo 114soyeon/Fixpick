@@ -1,10 +1,9 @@
 /*
- * 설정 페이지
- * - 이 파일은 "데이터 준비 + 화면 배치"만 해요. 각 카드는 components/setting/ 에 있어요
- *   ProfileCard(프로필) / AlertCard(알림) / BudgetCard(예산) / PayMethodCard(결제 수단) / AccountCard(계정)
- * - class는 다른 페이지와 겹치지 않게 모두 "set-" 로 시작 (styles/setting.css)
- * - 데이터: 고정지출(useMySub)·결제 수단(usePayMethods)은 DB, 알림·예산은 아직 브라우저 저장소(useSetting)
- */
+  설정 페이지
+  - 이 파일은 "데이터 준비 + 화면 배치"만 해요. 각 카드는 components/setting/ 에 있어요
+  ProfileCard(프로필) / AlertCard(알림) / BudgetCard(예산) / PayMethodCard(결제 수단) / AccountCard(계정)
+  - class는 다른 페이지와 겹치지 않게 모두 "set-" 로 시작 (styles/setting.css)
+*/
 import { useMemo, useState } from "react";
 import "@/styles/setting.css";
 
@@ -30,7 +29,7 @@ const Setting = () => {
   const payAll = useUpdateAllReminds();
   const payOn = isPayAlertOn(rows);
   const items = useMemo(() => (rows ?? []).map(fromDbRow), [rows]);
-  const setting = useSetting(); // 알림·예산 (결제 수단은 DB usePayMethods)
+  const setting = useSetting(); // "알림 (예산·결제 수단은 DB)"
 
   // 등록한 결제 수단 — DB(리액트 쿼리)
   const { data: methods = [] } = usePayMethods();

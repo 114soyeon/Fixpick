@@ -161,9 +161,9 @@ export default function Signup() {
           <div className="gk-sign-field">
             <label htmlFor="signup-email" className="gk-sign-label">이메일</label>
             <div className="gk-sign-row">
-              <input id="signup-email" type="email" autoComplete="email" disabled={verify.ok} className={`gk-sign-input ${errors.email ? "is-error" : ""}`} placeholder="이메일을 입력하세요" value={form.email}
+              <input id="signup-email" type="email" autoComplete="email" disabled={verify.ok && !errors.email} className={`gk-sign-input ${errors.email ? "is-error" : ""}`} placeholder="이메일을 입력하세요" value={form.email}
                 onChange={(e) => { set("email", e.target.value); setVerify({ sent: false, code: "", ok: false, left: 0 }); }} />
-              {verify.ok ? (
+              {verify.ok && !errors.email ? (
                 <span className="gk-sign-verified"><Check size={16} strokeWidth={3} />인증 완료</span>
               ) : (
                 <button type="button" className={`gk-sign-mini ${verify.sent ? "gk-sign-mini--light" : ""}`} disabled={!emailValid} onClick={sendCode}>
@@ -186,19 +186,14 @@ export default function Signup() {
               <p className="gk-sign-hint">메일로 받은 6자리를 입력해 주세요. (테스트용 인증번호: {DEMO_CODE})</p>
             )}
             {errors.code && <p role="alert" className="gk-sign-error">{errors.code}</p>}
-            {errors.email && (
-              <p role="alert" className="gk-sign-error">
-                {errors.email}{" "}
-                {errors.email.includes("이미") && <button type="button" className="gk-sign-link gk-sign-link--small" onClick={() => navigate("/login")}>로그인하기</button>}
-              </p>
-            )}
+            {errors.email && <p role="alert" className="gk-sign-error">{errors.email}</p>}
           </div>
 
           {/* 비밀번호 */}
           <label className="gk-sign-field">
             <span className="gk-sign-label">비밀번호</span>
             <span className="gk-sign-pw">
-              <input id="signup-pw" type={showPw ? "text" : "password"} autoComplete="new-password" className={`gk-sign-input gk-sign-input--pw ${errors.pw ? "is-error" : ""}`} placeholder="8자 이상, 영문·숫자 섞어서 입력하세요" value={form.pw} onChange={(e) => set("pw", e.target.value)} />
+              <input id="signup-pw" type={showPw ? "text" : "password"} autoComplete="new-password" className={`gk-sign-input gk-sign-input--pw ${errors.pw ? "is-error" : ""}`} placeholder="8자 이상 입력하세요" value={form.pw} onChange={(e) => set("pw", e.target.value)} />
               <button type="button" className="gk-sign-eye" aria-label={showPw ? "비밀번호 숨기기" : "비밀번호 보기"} onClick={() => setShowPw((v) => !v)}>
                 {showPw ? <EyeOff size={20} strokeWidth={2} /> : <Eye size={20} strokeWidth={2} />}
               </button>

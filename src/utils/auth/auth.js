@@ -2,10 +2,7 @@ import { useAuthStore } from "@/store/authStore";
 import { signOut } from "@/api/auth";
 import { supabase } from "@/lib/supabase";
 
-/*
-  로그인 정보를 저장하는 도구예요.
-  - 로그인 상태: Supabase (store/authStore.js) — 여기서 읽고 여기로 알려 줘요
-*/
+// 로그인 정보를 저장하는 도구 : Supabase (store/authStore.js)
 const USER_KEY = "gk-user";
 const ACCOUNTS_KEY = "gk-accounts";
 const EVENT = "gk-auth-change";
@@ -39,7 +36,6 @@ const hash = (text) => {
   return `h${h.toString(36)}`;
 };
 
-const readUser = () => read(USER_KEY, null, "session") || read(USER_KEY, null, "local");
 const notify = () => {
   window.dispatchEvent(new Event(EVENT));
 };
@@ -112,19 +108,21 @@ export async function logout() {
   }
 }
 
-/** 회원 탈퇴: 저장된 계정을 지우고 로그아웃 */
-export function deleteAccount() {
-  const user = readUser();
-  if (user) {
-    const accounts = read(ACCOUNTS_KEY, {});
-    delete accounts[user.email.toLowerCase()];
-    write(ACCOUNTS_KEY, accounts);
-  }
-  logout();
-}
-
 /** 프로필 동그라미 안 글자: 이름 길이와 상관없이 첫 글자 */
 export function initialOf(name = "") {
   const n = name.trim();
   return n.slice(0, 1).toUpperCase();
+}
+
+/** 탈퇴한 계정이 남긴 브라우저 저장 정보 지우기 */
+export function clearLocalAccount(email = "") {
+  try {
+    ["gk-saved-email", "gk-last-login", "gk-accounts", "gk-user"].forEach((k) => localStorage.removeItem(k));
+    const e = (email || "").toLowerCase();
+    if (e) {
+      localStorage.removeItem(`gk-setting:${e}`);
+      localStorage.removeItem(`gk-noti-read:${e}`);
+      localStorage.removeItem(`gk-items:${e}`);
+    }
+  } catch { /* 무시 */ }
 }

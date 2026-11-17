@@ -13,6 +13,7 @@ export const saveLastLogin = (how) => { try { localStorage.setItem(LAST_KEY, how
 export function loginError(error) {
   const code = error?.code || "";
   const msg = error?.message || "";
+  if (code === "account_disabled") return { field: "email", message: "탈퇴한 계정이에요. 다시 가입해 주세요." };
   if (code === "invalid_credentials" || /invalid login credentials/i.test(msg)) {
     return { field: "both", message: "이메일 또는 비밀번호가 맞지 않아요. 다시 확인해 주세요." };
   }

@@ -1,28 +1,41 @@
 import { supabase } from "@/lib/supabase";
 
 /*
- * 로그인·회원 관련 Supabase 요청은 모두 여기서 해요 (api/subs.js 와 같은 방식)
- * - 화면 상태(누가 로그인했는지)는 store/authStore.js 가 들고 있어요
- * - 실패하면 error 를 throw 해요 (signup 만 화면에 보여줄 결과 { ok, field, message } 를 돌려줘요)
- */
+    로그인·회원 관련 Supabase 요청은 모두 여기서 해요 (api/subs.js 와 같은 방식)
+    - 화면 상태(누가 로그인했는지)는 store/authStore.js 가 들고 있어요
+    - 실패하면 error 를 throw 해요 (signup 만 화면에 보여줄 결과 { ok, field, message } 를 돌려줘요)
+*/
 
-/** 지금 로그인 세션 가져오기 (없으면 null) */
+/* 지금 로그인 세션 가져오기 (없으면 null) */
 export const getSession = async () => {
     const { data, error } = await supabase.auth.getSession();
     if (error) throw error;
     return data.session;
 };
 
-/** 로그인 상태가 바뀔 때마다 callback(session) 을 불러요 → 그만 듣는 함수를 돌려줘요 */
+/* 로그인 상태가 바뀔 때마다 callback(session) 을 불러요 → 그만 듣는 함수를 돌려줘요 */
 export const onAuthChange = (callback) => {
     const { data } = supabase.auth.onAuthStateChange((_event, session) => callback(session));
     return () => data.subscription.unsubscribe();
 };
 
-/** 이메일·비밀번호로 로그인 */
+/* 이메일·비밀번호로 로그인 */
 export const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+
+    // 탈퇴한 계정(users.is_active = false)은 들어올 수 없음
+    const { data: profile } = await supabase
+        .from("users")
+        .select("is_active")
+        .eq("id", data.user.id)
+        .maybeSingle();
+    if (profile?.is_active === false) {
+        try { await supabase.auth.signOut(); } catch { /* 세션 정리 실패는 무시 */ }
+        const err = new Error("탈퇴한 계정이에요. 다시 가입해 주세요.");
+        err.code = "account_disabled";
+        throw err;
+    }
     return data;
 };
 
@@ -37,22 +50,28 @@ export const signup = async ({ name, phone = "", email, password }) => {
     return { ok: true };
 };
 
-/** 로그아웃 */
+/* 로그아웃 */
 export const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
 };
 
-/** users 테이블에서 이름·전화 가져오기 */
+/* users 테이블에서 이름·전화 가져오기 */
 export const getProfile = async (id) => {
     const { data, error } = await supabase.from("users").select("name, phone").eq("id", id).single();
     if (error) throw error;
     return data;
 };
 
-/** users 테이블의 이름 바꾸기 → 바뀐 줄 목록 (수정 권한이 없으면 오류 없이 빈 배열 [] 이 와요) */
+/* users 테이블의 이름 바꾸기 → 바뀐 줄 목록 (수정 권한이 없으면 오류 없이 빈 배열 [] 이 와요) */
 export const updateUserName = async (id, name) => {
     const { data, error } = await supabase.from("users").update({ name }).eq("id", id).select("name");
     if (error) throw error;
     return data;
+};
+
+/* 회원 탈퇴 : users.is_active = false 로 바꿈(행은 남음. 로그인은 불가) */
+export const deleteAccount = async () => {
+    const { error } = await supabase.rpc("delete_my_account");
+    if (error) throw error;
 };

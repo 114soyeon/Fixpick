@@ -3,6 +3,7 @@ import { initialOf } from "@/utils/auth/auth";
 import { setLoginReason } from "@/utils/common/addItemFlow";
 import { useRawFixItems } from "@/hooks/useFixItems";
 import { useSetting } from "@/hooks/useSetting";
+import { useBudget } from "@/queries/budgets";
 import { buildNotifications, loadRead, saveRead } from "@/utils/sidebar/notifications";
 import { MENU_ITEMS } from "@/constants/sidebar";
 import { LogoMark, Wordmark } from "@/components/common/Logo";
@@ -27,15 +28,16 @@ export default function Sidebar({
   const [toast, setToast] = useState(null);
   const [menu, setMenu] = useState(false);
   const boxRef = useRef(null);
-  const dbItems = useRawFixItems(); // 내가 등록한 고정지출 (DB)
-  const myItems = user ? dbItems : []; // 로그아웃하면 알림도 비워요
-  const { alerts } = useSetting(); // 설정 페이지에서 켠 알림 종류
+  const dbItems = useRawFixItems();         // 내가 등록한 고정지출 (DB)
+  const myItems = user ? dbItems : [];      // 로그아웃하면 알림도 비워요
+  const { alerts } = useSetting();          // 설정 페이지에서 켠 알림 종류
+  const { data: dbBudget } = useBudget();   // DB에서 이번 달 예산
   const usedPayMethods = [...new Set(myItems.map((it) => it.payMethod).filter(Boolean))];
 
   // 읽은 알림 (로그인한 사람이 바뀌면 그 사람 기록을 다시 읽어요)
   const [read, setRead] = useState(() => ({ email: user?.email, ids: loadRead(user?.email) }));
   const readIds = read.email === user?.email ? read.ids : loadRead(user?.email);
-  const items = buildNotifications(myItems, readIds, alerts); // 알림은 내가 등록한 고정지출로 만들어요
+ const items = buildNotifications(myItems, readIds, alerts, dbBudget); // 알림은 내가 등록한 고정지출로 만들어요
   const notificationCount = items.filter((n) => n.unread).length;
 
   const markRead = (ids) => {
