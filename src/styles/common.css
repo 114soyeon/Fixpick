@@ -39,4 +39,18 @@ body {
   text-align: center;
   font-size: 13px;
   color: #8A9098;
+  letter-spacing: normal;
+  font-variant-numeric: normal;
+}
+
+::-webkit-scrollbar {
+  width: 0px;  /* 세로 스크롤바 너비 */
+  height: 5px; /* 가로 스크롤바 높이 */
+  
+}
+
+/* 스크롤바 뒷 배경 (Track) */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 5px;
 }
