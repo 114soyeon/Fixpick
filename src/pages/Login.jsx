@@ -146,13 +146,13 @@ export default function Login() {
             {SOCIALS.map((s) => (
               <button key={s.key} type="button" className={`gk-login-social gk-login-social--${s.key}`}
                 aria-describedby={lastLogin === s.key ? "gk-last-login" : undefined}
-                onClick={async () => {
+                                onClick={async () => {
                   saveLastLogin(s.key);
-                  if (s.key === "kakao") {
+                  if (s.key === "kakao" || s.key === "google") {
                     try {
-                      await signInWithProvider("kakao"); // 성공하면 페이지가 카카오로 넘어감
+                      await signInWithProvider(s.key); // 성공하면 페이지가 카카오/구글로 넘어감
                     } catch {
-                      setToast({ text: "카카오 로그인에 실패했어요", id: Date.now() });
+                      setToast({ text: `${s.name} 로그인에 실패했어요`, id: Date.now() });
                     }
                     return;
                   }
