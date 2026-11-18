@@ -1,3 +1,7 @@
+/*
+  고정 지출 항목 관련 Supabase 요청 js
+*/
+
 import { supabase } from "@/lib/supabase";
 import { getUser } from "@/utils/auth/auth";
 

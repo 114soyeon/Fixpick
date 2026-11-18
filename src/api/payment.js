@@ -1,18 +1,15 @@
-import { supabase } from "@/lib/supabase";
-
 /*
   결제 수단 관련 Supabase 요청 js
   - payment_categories, payment_methods 같이 사용
   - payment_id 로 payment_categories를 가리킴
 */
 
-/* DB type ("카드"/"계좌") → 프론트 type ("card"/"bank") */
+import { supabase } from "@/lib/supabase";
+
+// DB type ("카드"/"계좌") → 프론트 type ("card"/"bank")
 const toFrontType = (dbType) => (dbType === "카드" ? "card" : "bank");
 
-/*
-    카드사·은행 사전 (설정 > 결제 수단 추가 창의 셀렉트박스)
-    - [{ id, type: "card"|"bank", name: "국민카드" }]
-*/
+// 결제 수단 추가 창의 셀렉트박스 카드사·은행
 export const getPayCategories = async () => {
     const { data, error } = await supabase
         .from("payment_categories")
@@ -25,10 +22,7 @@ export const getPayCategories = async () => {
     return (data ?? []).map((c) => ({ id: c.id, type: toFrontType(c.type), name: c.name }));
 };
 
-/*
-    내가 등록한 결제 수단 (설정 > 우측 "결제 수단" 카드 + 항목 추가 모달 셀렉트 박스)
-    - [{ id, type: "card"|"bank", name: "국민카드", last4: "1234" }]
-*/
+// 내가 등록한 결제 수단 (설정 > 우측 "결제 수단" 카드 + 항목 추가 모달 셀렉트 박스)
 export const getMyMethods = async () => {
     const { data, error } = await supabase
         .from("payment_methods")
@@ -75,7 +69,6 @@ export const updateMyMethod = async (id, { name, last4 }) => {
     const { data: auth, error: authError } = await supabase.auth.getUser();
     if (authError || !auth?.user) throw new Error("로그인이 필요해요");
 
-    // 이름 → payment_categories.id
     const { data: cat, error: catError } = await supabase
         .from("payment_categories")
         .select("id")
@@ -88,7 +81,7 @@ export const updateMyMethod = async (id, { name, last4 }) => {
         .from("payment_methods")
         .update({ payment_id: cat.id, last4 })
         .eq("id", id)
-        .eq("user_id", auth.user.id);   // 내 것만 수정 (RLS와 이중 안전장치)
+        .eq("user_id", auth.user.id);
     if (error) {
         console.error("결제 수단 수정 실패:", error);
         throw error;
