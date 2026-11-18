@@ -71,7 +71,7 @@ export const deleteAccount = async () => {
 /* 비밀번호 재설정 링크 보내기 */
 export const sendResetLink = async (email) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/login`,
+        redirectTo: `${window.location.origin}/reset-password`,
     });
     if (error) throw error;
 };
