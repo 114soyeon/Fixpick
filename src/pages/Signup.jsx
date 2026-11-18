@@ -4,7 +4,7 @@ import { Check, ChevronRight, Eye, EyeOff } from "lucide-react";
 import { LogoMark, Wordmark } from "@/components/common/Logo";
 import { emailExists } from "@/utils/auth/auth";
 import { signup } from "@/api/auth";
-import { DEMO_CODE, STEPS, STRENGTH, TERMS } from "@/constants/signup";
+import { STEPS, STRENGTH, TERMS } from "@/constants/signup";
 import { formatPhone, isValidEmail, isValidPhone, strengthOf } from "@/utils/common/validate";
 import TermsModal from "@/components/signup/TermsModal";
 import "@/styles/signup.css"; // 이 페이지 스타일은 전부 여기 (class는 gk-sign- 로 시작)
@@ -18,6 +18,7 @@ export default function Signup() {
   const [viewing, setViewing] = useState(null); // 보고 있는 약관
   const [verify, setVerify] = useState({ sent: false, code: "", ok: false, left: 0 }); // 이메일 인증
   const [busy, setBusy] = useState(false); // 가입 요청 진행 중
+  const [sending, setSending] = useState(false); // 인증번호 발송·확인 요청 중
 
   // 인증번호 남은 시간 (3분)
   useEffect(() => {
@@ -32,16 +33,43 @@ export default function Signup() {
   const emailValid = isValidEmail(form.email);
   const phoneValid = isValidPhone(form.phone);
   const sendCode = async () => {
-    if (!emailValid) return setErrors((e) => ({ ...e, email: "이메일 주소를 다시 확인해 주세요." }));
-    if (await emailExists(form.email)) return setErrors((e) => ({ ...e, email: "이미 가입된 이메일이에요." }));
-    setErrors((e) => ({ ...e, email: "", code: "" }));
-    setVerify({ sent: true, code: "", ok: false, left: 180 });
+      if (!emailValid) return setErrors((e) => ({ ...e, email: "이메일 주소를 다시 확인해 주세요." }));
+      if (await emailExists(form.email)) return setErrors((e) => ({ ...e, email: "이미 가입된 이메일이에요." }));
+      setErrors((e) => ({ ...e, email: "", code: "" }));
+      setSending(true);
+      try {
+        const r = await fetch("/api/send-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: form.email }),
+        });
+        const data = await r.json();
+        if (!data.ok) return setErrors((e) => ({ ...e, email: data.message || "인증번호 발송에 실패했어요." }));
+        setVerify({ sent: true, code: "", ok: false, left: 180 });
+      } catch {
+        setErrors((e) => ({ ...e, email: "네트워크 오류가 발생했어요." }));
+      } finally {
+        setSending(false);
+      }
   };
-  const checkCode = () => {
-    if (verify.left <= 0) return setErrors((e) => ({ ...e, code: "시간이 지났어요. 인증번호를 다시 받아 주세요." }));
-    if (verify.code !== DEMO_CODE) return setErrors((e) => ({ ...e, code: "인증번호가 맞지 않아요." }));
-    setErrors((e) => ({ ...e, code: "", email: "" }));
-    setVerify((v) => ({ ...v, ok: true }));
+  const checkCode = async () => {
+      if (verify.left <= 0) return setErrors((e) => ({ ...e, code: "시간이 지났어요. 인증번호를 다시 받아 주세요." }));
+      setSending(true);
+      try {
+        const r = await fetch("/api/verify-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: form.email, code: verify.code }),
+        });
+        const data = await r.json();
+        if (!data.ok) return setErrors((e) => ({ ...e, code: data.message || "인증번호가 맞지 않아요." }));
+        setErrors((e) => ({ ...e, code: "", email: "" }));
+        setVerify((v) => ({ ...v, ok: true }));
+      } catch {
+        setErrors((e) => ({ ...e, code: "네트워크 오류가 발생했어요." }));
+      } finally {
+        setSending(false);
+      }
   };
   const mmss = `${Math.floor(verify.left / 60)}:${String(verify.left % 60).padStart(2, "0")}`;
 
@@ -169,7 +197,7 @@ export default function Signup() {
               {verify.ok && !errors.email ? (
                 <span className="gk-sign-verified"><Check size={16} strokeWidth={3} />인증 완료</span>
               ) : (
-                <button type="button" className={`gk-sign-mini ${verify.sent ? "gk-sign-mini--light" : ""}`} disabled={!emailValid} onClick={sendCode}>
+                <button type="button" className={`gk-sign-mini ${verify.sent ? "gk-sign-mini--light" : ""}`} disabled={!emailValid || sending} onClick={sendCode}>
                   {verify.sent ? "다시 받기" : "인증번호 받기"}
                 </button>
               )}
@@ -182,11 +210,11 @@ export default function Signup() {
                     onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); checkCode(); } }} />
                   <span className={`gk-sign-code__timer ${verify.left > 30 ? "" : "is-low"}`}>{mmss}</span>
                 </div>
-                <button type="button" className="gk-sign-mini" disabled={verify.code.length !== 6} onClick={checkCode}>확인</button>
+                <button type="button" className="gk-sign-mini" disabled={verify.code.length !== 6 || sending} onClick={checkCode}>확인</button>
               </div>
             )}
             {verify.sent && !verify.ok && !errors.code && (
-              <p className="gk-sign-hint">메일로 받은 6자리를 입력해 주세요. (테스트용 인증번호: {DEMO_CODE})</p>
+              <p className="gk-sign-hint">메일로 받은 6자리를 입력해 주세요.</p>
             )}
             {errors.code && <p role="alert" className="gk-sign-error">{errors.code}</p>}
             {errors.email && <p role="alert" className="gk-sign-error">{errors.email}</p>}
