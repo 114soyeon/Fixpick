@@ -26,7 +26,7 @@ from (values
   ('주거',          '월세·관리비·공과금',      'Building2',      '#154A7D'),
   ('통신',          '휴대폰·인터넷·IPTV',      'Smartphone',     '#0A6480'),
   ('구독 서비스',    'OTT·음악·웹툰',           'CirclePlay',     '#9E2152'),
-  ('가전',          '정수기·안마의자·건조기',   'WashingMachine', '#0C6B5E'),
+  ('가전',          '정수기·세탁기·건조기',   'WashingMachine', '#0C6B5E'),
   ('보험',          '실손·자동차·운전자',       'ShieldCheck',    '#5B3FC4'),
   ('금융/저축',     '적금·청약·대출이자',       'PiggyBank',      '#5E5300'),
   ('교통',          '교통카드·주차',            'BusFront',       '#A04508'),
