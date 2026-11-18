@@ -15,19 +15,15 @@ export default function ResetPassword() {
   const [busy, setBusy] = useState(false);
 
   // 링크를 열면 Supabase가 code → 세션으로 바꾸고 알려 줘요
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("error_description") || params.get("error")) {
-      setState("error"); // 만료된 링크
-      return;
-    }
-    const stop = onAuthChange((session) => {
-      if (session) setState("ready"); // 세션 완료 = 링크 확인됨
-    });
-    // 10초 안에 세션이 안 오면 만료된 링크로 보고해요
-    const t = setTimeout(() => setState((s) => (s === "checking" ? "error" : s)), 10000);
-    return () => { stop(); clearTimeout(t); };
-  }, []);
+    useEffect(() => {
+        const q = new URLSearchParams(window.location.search);
+        const h = new URLSearchParams(window.location.hash.slice(1)); // # 뒤쪽 파싱
+        const err = h.get("error_description") || h.get("error") || q.get("error_description") || q.get("error");
+        if (err) { setState("error"); return; } // 만료 링크면 바로 "링크가 만료됐어요" 표시
+        const stop = onAuthChange((session) => { if (session) setState("ready"); });
+        const t = setTimeout(() => setState((s) => (s === "checking" ? "error" : s)), 10000);
+        return () => { stop(); clearTimeout(t); };
+    }, []);
 
   const submit = async (e) => {
     e.preventDefault();
