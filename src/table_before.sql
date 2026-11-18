@@ -181,7 +181,7 @@ insert into categories (user_id, name, example, icon, color, sort_order) values
   (null, '주거',       '월세·관리비·공과금',   'home',    '#4C7EF3', 1),
   (null, '통신',       '휴대폰·인터넷·IPTV',  'phone',   '#2DD4BF', 2),
   (null, '구독 서비스','OTT·음악·웹툰',       'play',    '#F472B6', 3),
-  (null, '가전',       '정수기·안마의자·건조기','appliance','#22C55E', 4),
+  (null, '가전',       '정수기·세탁기·건조기','appliance','#22C55E', 4),
   (null, '보험',       '실손·자동차·운전자',   'shield',  '#A78BFA', 5),
   (null, '금융/저축',  '적금·청약·대출이자',  'wallet',  '#FBBF24', 6),
   (null, '교통',       '교통카드·주차',       'bus',     '#F87171', 7);

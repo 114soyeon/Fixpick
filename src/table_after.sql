@@ -280,7 +280,7 @@ insert into categories (name, example, icon, chart, color, key, bg) values
   ('주거·공과', '월세·관리비·공과금', 'Building2', '#4C8DF6', '#154A7D', 'home', '#E1EEF9'),
   ('통신', '휴대폰·인터넷·IPTV', 'Smartphone', '#36C2CE', '#0A6480', 'phone', '#DDF3F9'),
   ('구독','OTT·음악·웹툰', 'CirclePlay', '#FF7EB3', '#9E2152', 'sub', '#FBE6EE'),
-  ('가전 구독', '정수기·안마의자·건조기','WashingMachine', '#5ED3A0', '#0C6B5E', 'rental', '#DCF5F1'),
+  ('가전 구독', '정수기·세탁기·건조기','WashingMachine', '#5ED3A0', '#0C6B5E', 'rental', '#DCF5F1'),
   ('보험', '실손·자동차·운전자', 'ShieldCheck', '#9B8AFB', '#5B3FC4', 'insure', '#EEE9FF'),
   ('금융·저축', '적금·청약·대출이자', 'PiggyBank', '#FFC94D', '#5E5300', 'saving', '#F1EFCB'),
   ('교통', '교통카드·주차', 'BusFront', '#FF9466', ' #A04508', 'transit', '#FCEADD'),
