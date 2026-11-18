@@ -9,11 +9,13 @@ import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import FixDetail from "@/pages/FixDetail";
 import ResetPassword from "@/pages/ResetPassword";
+import Privacy from "@/pages/Privacy";
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
   { path: "/reset-password", element: <ResetPassword /> },
+  { path: "/privacy", element: <Privacy /> },
   {
     path: "/",
     element: <Layout />,
