@@ -2,7 +2,7 @@
  * 지출 리포트 — 월간 화면 (pages/Report.jsx에서 "월간"일 때 보여줘요)
  * 매년 결제는 ÷12 해서 넣어요 (utils/report/report.js monthShare)
  */
-import { byCategory, byItem, monthShare, monthsAgo, prevMonthOf, sumValue } from "@/utils/report/report";
+import { byCategory, byItem, monthShare, monthsAgo, prevMonthOf, sumValue, endDateOf } from "@/utils/report/report";
 import { scheduleText, signedWon, won } from "@/utils/common/format";
 import { useCategoryOf } from "@/hooks/useCategoryOf";
 import StatCard from "@/components/common/StatCard";
@@ -43,7 +43,14 @@ const MonthlyReport = ({ items, year, month, loading }) => {
     const before = prevByCat[key] ?? 0;
     const now = curByCat[key] ?? 0;
     // 지난달엔 있었는데 이번 달엔 끝난(만기) 항목 → "왓챠 해지로 줄었어요"
-    const endedNames = prev.filter((it) => it.category === key && !curIds.has(it.id)).map((it) => it.name);
+    const endedNames = prev
+      .filter((it) => {
+        if (it.category !== key || curIds.has(it.id)) return false;
+        const end = endDateOf(it);
+        return end && end < new Date(year, month - 1, 1); // 이번 달 시작 전에 만기로 끝난 것만
+      })
+      .map((it) => it.name);
+    
     return {
       key,
       before,

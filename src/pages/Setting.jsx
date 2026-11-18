@@ -38,7 +38,7 @@ const Setting = () => {
   const deletePay = useDeletePayMethod(); // 삭제
   
   // 예산
-  const { data: dbBudget } = useBudget();
+  const { data: dbBudget, isSuccess } = useBudget();
 
   // 결제 수단 추가 / 수정 창
   const [modal, setModal] = useState(false);
@@ -92,13 +92,20 @@ const Setting = () => {
           payOn={payOn}
           onPayAlertChange={(on) => {
             saveSetting({ alerts: { ...setting.alerts, pay: on } });
-            payAll.mutate(on);
+            payAll.mutate(on, {
+              onError: () => {
+                saveSetting({ alerts: { ...setting.alerts, pay: !on } });
+                setToast("결제일 알림을 저장하지 못했어요. 다시 시도해 주세요");
+              },
+            });
           }}
         />
 
         {/* ───── 오른쪽: 예산 + 결제 수단 ───── */}
         <div className="set-side">
-          <BudgetCard key={user?.email ?? "guest"} initial={dbBudget ?? setting.budget} />
+          {isSuccess && (
+            <BudgetCard key={`${user?.email}:${dbBudget ?? setting.budget}`} initial={dbBudget ?? setting.budget} />
+          )}
           <PayMethodCard
             methods={methods}
             items={items}

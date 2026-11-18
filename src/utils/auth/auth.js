@@ -58,10 +58,11 @@ const moveGuestItems = (email) => {
 /** 지금 로그인한 사람 (Supabase 세션 기준 — 로그인 안 했으면 null) */
 export const getUser = () => useAuthStore.getState().user;
 
-/** 이미 가입한 이메일인지 */
-export function emailExists(email = "") {
-  const accounts = read(ACCOUNTS_KEY, {});
-  return Boolean(accounts[email.trim().toLowerCase()]);
+/** 이미 가입한 이메일인지 (DB 확인) */
+export async function emailExists(email = "") {
+  const { data, error } = await supabase.rpc("email_exists", { p_email: email.trim() });
+  if (error) return false; // 조회 실패 시 중복 검사 건너뛰기
+  return Boolean(data);
 }
 
 /** 이메일 일부를 가려요: minji.kim@gmail.com → min*****@gmail.com */

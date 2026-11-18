@@ -22,16 +22,6 @@ export const useAuthStore = create((set, get) => ({
   session: null,
   loading: true,
 
-  // 초기 로그인 상태 확인
-  initialize: async () => {
-    try {
-      const session = await authApi.getSession();
-      set({ session, user: userInfo(session?.user), loading: false });
-    } catch {
-      set({ loading: false });
-    }
-  },
-
   // 로그인 (틀리면 error 를 throw)
   signIn: (email, password) => authApi.signIn(email, password),
 

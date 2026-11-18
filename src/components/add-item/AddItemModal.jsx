@@ -121,6 +121,13 @@ export default function AddItemModal({ onClose, setToast, payMethods = [], item 
     e.preventDefault();
     if (!valid) return;
 
+    // 로그인 안 한 상태로는 DB에 저장할 수 없음(user.id가 없으면 insert 실패)
+    if (!user) {
+      (setToast ?? window.alert)("로그인한 뒤 다시 시도해 주세요");
+      close();
+      return;
+    }
+
     // 수정 모드에서 결제일(주기·날짜·요일·월)을 안 바꿨으면 원래 시작일을 그대로 써요
     const scheduleChanged =
       !isEdit ||
@@ -179,39 +186,38 @@ export default function AddItemModal({ onClose, setToast, payMethods = [], item 
     };
 
     // "결제일 알림"은 전체 스위치 → 바뀌었을 때만 내 고정지출 전부를 한 번에 저장 (취소하면 실행 안 해요)
-    if (remindOn !== payOn) payAll.mutate(remindOn);
+    if (remindOn !== payOn) {
+      payAll.mutate(remindOn, {
+        onError: () => (setToast ?? window.alert)("알림 설정을 저장하지 못했어요"),
+      });
+    }
 
     // 수정: 원래 항목을 고쳐요 (메모·알림 설정 같은 다른 값은 그대로 둬요)
     if (isEdit) {
       updateSub.mutate(
         { id: item.id, data },
         {
-          onError: () =>
-            (setToast ?? window.alert)("저장하지 못했어요. 다시 시도해 주세요"),
+          onSuccess: () => {
+            setToast?.(`'${form.name.trim()}' 항목을 수정했어요`);
+            close();
+          },
+          onError: () => (setToast ?? window.alert)("저장하지 못했어요. 다시 시도해 주세요"),
         }
       );
-      setToast?.(`'${form.name.trim()}' 항목을 수정했어요`);
-      close();
       return;
     }
 
     // 추가: 새 항목을 만들어요
     addSub.mutate(
+      { ...data, user_id: user.id, payment_method_id: null, memo: null },
       {
-        ...data,
-        user_id: user.id,
-        payment_method_id: null,
-        memo: null,
-      },
-      {
-        onError: () => {
-          setToast("항목을 추가하지 못했어요. 다시 시도해 주세요");
+        onSuccess: () => {
+          (setToast ?? window.alert)(`'${form.name.trim()}' 항목을 추가했어요`);
+          close();
         },
+        onError: () => (setToast ?? window.alert)("항목을 추가하지 못했어요. 다시 시도해 주세요"),
       }
     );
-
-    setToast(`'${form.name.trim()}' 항목을 추가했어요`);
-    close();
   };
 
   return createPortal(

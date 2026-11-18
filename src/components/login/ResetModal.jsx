@@ -14,10 +14,10 @@ export default function ResetModal({ initialEmail, onClose }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const send = (e) => {
+  const send = async (e) => {
     e.preventDefault();
     if (!isValidEmail(email)) return setError("이메일 주소를 다시 확인해 주세요.");
-    if (!emailExists(email)) return setError("가입되지 않은 이메일이에요.");
+    if (!(await emailExists(email))) return setError("가입되지 않은 이메일이에요.");
     setError("");
     setSent(true);
   };

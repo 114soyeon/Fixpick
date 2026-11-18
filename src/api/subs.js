@@ -3,7 +3,11 @@ import { getUser } from "@/utils/auth/auth";
 
 // 카테고리를 가져와야 함
 export const getCategories = async () => {
-    const {data} = await supabase.from("categories").select("*").order("id", { ascending: true });
+    const { data, error } = await supabase.from("categories").select("*").order("id", { ascending: true });
+    if (error) {
+        console.error("카테고리 조회 실패:", error);
+        throw error;
+    }
     return data;
 }
 

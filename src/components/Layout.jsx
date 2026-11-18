@@ -16,7 +16,7 @@ export default function Layout() {
   // 유저가 로그인 상태 여부
   const { user, loading, setAuth } = useAuthStore();
   const queryClient = useQueryClient();
-  const firstRun = useRef(true);
+  const prevUserId = useRef(undefined); // 직전에 알던 로그인 사람 (아직 세션 확인 전에는 undefined)
 
   useEffect(() => {
     // 로그인 상태가 바뀔 때마다 store 에 알려줘요 (Supabase 요청은 api/auth.js)
@@ -24,10 +24,15 @@ export default function Layout() {
     return stop; // 화면이 사라지면 그만 들어요
   }, [setAuth]);
 
-  // 로그인한 사람이 바뀌면(로그인·로그아웃) 서버에서 가져온 목록 캐시를 비움
+  // 로그인한 사람이 "바뀔 때"(로그아웃·다른 계정 로그인)만 서버에서 가져온 목록 캐시를 비워요
+  // 새로고침은 null → 로그인으로 바뀌는 게 아니라 세션을 다시 확인하는 것이므로 비우면 안 돼요.
+  // (비우면 방금 시작한 조회가 취소되고, 화면에 걸려 있던 조회가 죽어서 목록이 빈 채로 남아요)
   useEffect(() => {
-    if (firstRun.current) { firstRun.current = false; return; } // 첫 진입은 캐시가 비어있으니 패스
-    queryClient.clear();
+    const id = user?.id;
+    if (prevUserId.current === id) return; // 그대로면 할 일 없어요
+    const wasLoggedIn = !!prevUserId.current;
+    prevUserId.current = id;
+    if (wasLoggedIn) queryClient.clear(); // 로그아웃·계정 전환일 때만
   }, [user?.id, queryClient]);
 
   // 주소가 바뀔 때 마다 맨 위로 -> scrollTo(0, 0);

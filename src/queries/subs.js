@@ -38,7 +38,7 @@ export const useDeleteSub = () => {
 // 내 고정지출 목록 리스트
 export const useMySub = () => {
   const userId = useAuthStore((state) => state.user?.id);
-  return useQuery({ queryKey: [subs, userId], queryFn: getMySubs });
+  return useQuery({ queryKey: [subs, userId], queryFn: () => getMySubs() });
 };
 
 // 결제일 알림 전체 켜기/끄기

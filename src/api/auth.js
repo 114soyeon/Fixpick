@@ -6,13 +6,6 @@ import { supabase } from "@/lib/supabase";
     - 실패하면 error 를 throw 해요 (signup 만 화면에 보여줄 결과 { ok, field, message } 를 돌려줘요)
 */
 
-/* 지금 로그인 세션 가져오기 (없으면 null) */
-export const getSession = async () => {
-    const { data, error } = await supabase.auth.getSession();
-    if (error) throw error;
-    return data.session;
-};
-
 /* 로그인 상태가 바뀔 때마다 callback(session) 을 불러요 → 그만 듣는 함수를 돌려줘요 */
 export const onAuthChange = (callback) => {
     const { data } = supabase.auth.onAuthStateChange((_event, session) => callback(session));

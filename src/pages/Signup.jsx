@@ -6,7 +6,6 @@ import { emailExists } from "@/utils/auth/auth";
 import { signup } from "@/api/auth";
 import { DEMO_CODE, STEPS, STRENGTH, TERMS } from "@/constants/signup";
 import { formatPhone, isValidEmail, isValidPhone, strengthOf } from "@/utils/common/validate";
-import SignupComplete from "@/components/signup/SignupComplete";
 import TermsModal from "@/components/signup/TermsModal";
 import "@/styles/signup.css"; // 이 페이지 스타일은 전부 여기 (class는 gk-sign- 로 시작)
 
@@ -18,7 +17,6 @@ export default function Signup() {
   const [errors, setErrors] = useState({});
   const [viewing, setViewing] = useState(null); // 보고 있는 약관
   const [verify, setVerify] = useState({ sent: false, code: "", ok: false, left: 0 }); // 이메일 인증
-  const [done] = useState(null); // 가입 완료한 사람 이름 (지금은 가입 후 로그인 페이지로 보내서 안 써요)
   const [busy, setBusy] = useState(false); // 가입 요청 진행 중
 
   // 인증번호 남은 시간 (3분)
@@ -70,8 +68,9 @@ export default function Signup() {
   const submit = async (e) => {
     e.preventDefault();
 
+    const name = form.name.replace(/[^가-힣a-zA-Z\s]/g, "").trim(); // 저장 직전에 한글·영문만 추려내기
     const next = {};
-    if (!form.name.trim()) next.name = "이름을 입력해 주세요.";
+    if (!name) next.name = "이름을 입력해 주세요.";
     if (!phoneValid) next.phone = "휴대폰 번호를 다시 확인해 주세요.";
     if (!emailValid) next.email = "이메일 주소를 다시 확인해 주세요.";
     else if (!verify.ok) next.email = "이메일 인증을 해 주세요.";
@@ -85,7 +84,7 @@ export default function Signup() {
     setBusy(true); // 회원가입이 진행중
 
     try {
-      const res = await signup({ name: form.name, phone: form.phone, email: form.email, password: form.pw });
+      const res = await signup({ name, phone: form.phone, email: form.email, password: form.pw });
       if (!res.ok) return setErrors({ [res.field]: res.message });
 
       navigate("/login")
@@ -128,9 +127,6 @@ export default function Signup() {
 
       {/* 오른쪽: 회원가입 폼 */}
       <section className="gk-sign-form-wrap">
-        {done ? (
-          <SignupComplete name={done} onHome={() => navigate("/")} onAdd={() => navigate("/fix", { state: { openAdd: true } })} />
-        ) : (
         <form onSubmit={submit} noValidate className="gk-sign-rise gk-sign-form">
           {/* 작은 화면에서만 보이는 로고 */}
           <button type="button" className="gk-sign-logo gk-sign-mobile-logo" onClick={() => navigate("/")} aria-label="고정콕 홈으로 가기">
@@ -145,7 +141,14 @@ export default function Signup() {
           {/* 이름 */}
           <label className="gk-sign-field">
             <span className="gk-sign-label">이름</span>
-            <input id="signup-name" autoComplete="name" maxLength={12} className={`gk-sign-input ${errors.name ? "is-error" : ""}`} placeholder="이름을 입력해주세요" value={form.name} onChange={(e) => set("name", e.target.value.replace(/[^가-힣a-zA-Z\s]/g, ""))} />
+            <input id="signup-name"
+              autoComplete="name"
+              maxLength={12}
+              className={`gk-sign-input ${errors.name ? "is-error" : ""}`}
+              placeholder="이름을 입력해주세요"
+              value={form.name}
+              onChange={(e) => set("name", e.target.value)}
+            />
             {errors.name && <p role="alert" className="gk-sign-error">{errors.name}</p>}
           </label>
 
@@ -249,7 +252,6 @@ export default function Signup() {
             <button type="button" className="gk-sign-link" onClick={() => navigate("/login")}>로그인</button>
           </p>
         </form>
-        )}
       </section>
 
       {viewing && (

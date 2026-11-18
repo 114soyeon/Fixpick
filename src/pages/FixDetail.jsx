@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "@/styles/FixDetail.css";
 import AddItemModal from "@/components/add-item/AddItemModal.jsx"; // 항목 추가 창을 "수정 모드"로 재사용
@@ -12,7 +12,6 @@ import { getAmountHistory, getPayMethods } from "@/utils/fix/fixCalculations";
 import { useFixItems } from "@/hooks/useFixItems";
 import { useMySub, useUpdateSub, useDeleteSub } from "@/queries/subs";
 import SidebarToast from "@/components/sidebar/SidebarToast";
-import { saveMemo } from "@/utils/fix/fixStorage";
 
 const FixDetail = () => {
   const navigate = useNavigate();
@@ -31,14 +30,13 @@ const FixDetail = () => {
   const found = allItems.find((e) => e.id === Number(id));
   const rawRow = rows?.find((r) => Number(r.id) === Number(id)); // 수정 창에 미리 채울 DB 원본 값
 
-  // 메모는 브라우저에 "memo-<id>" 로 저장돼 있어요 (저장은 fixStorage.js saveMemo)
-  const [memo, setMemo] = useState(() => {
-    try {
-      return localStorage.getItem(`memo-${id}`) ?? "";
-    } catch {
-      return "";
-    }
-  });
+  // 안 건드렸으면 DB 메모를 보여주고, 건드렸으면 입력한 값을 보여줘요
+  const [memoDraft, setMemoDraft] = useState(null); // null = 아직 안 건드림
+  const memo = memoDraft ?? rawRow?.memo ?? "";
+
+  // 디바운스 타이머
+  const memoTimer = useRef(null);
+  useEffect(() => () => clearTimeout(memoTimer.current), []);
 
   // 불러오는 중
   if (isLoading) {
@@ -76,8 +74,17 @@ const FixDetail = () => {
   // 메모
   const handleMemoChange = (e) => {
     const newMemo = e.target.value;
-    setMemo(newMemo);
-    saveMemo(id, newMemo);
+    setMemoDraft(newMemo);
+    clearTimeout(memoTimer.current);
+    // 0.6초 쉬었다가 한 번만 DB 저장 (글자를 누를 때마다 저장 안 함)
+    memoTimer.current = setTimeout(() => {
+      updateSub.mutate(
+        { id: Number(id), data: { memo: newMemo } },
+        {
+          onError: () => setToast("메모를 저장하지 못했어요. 다시 시도해 주세요"),
+        }
+      );
+    }, 600);
   };
 
   return (
