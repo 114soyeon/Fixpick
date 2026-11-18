@@ -13,6 +13,7 @@ import ResetPassword from "@/pages/ResetPassword";
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
+  { path: "/reset-password", element: <ResetPassword /> },
   {
     path: "/",
     element: <Layout />,
@@ -23,7 +24,6 @@ const router = createBrowserRouter([
       { path: "report", element: <Report /> },
       { path: "setting", element: <Setting /> },
       { path: "fix/:id", element: <FixDetail /> },
-      { path: "/reset-password", element: <ResetPassword /> },
     ],
   },
 ]);
