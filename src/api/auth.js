@@ -67,3 +67,17 @@ export const deleteAccount = async () => {
     const { error } = await supabase.rpc("delete_my_account");
     if (error) throw error;
 };
+
+/* 비밀번호 재설정 링크 보내기 */
+export const sendResetLink = async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/login`,
+    });
+    if (error) throw error;
+};
+
+/* 링크를 연 뒤 새 비밀번호로 바꾸기 */
+export const updateUserPassword = async (password) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+};

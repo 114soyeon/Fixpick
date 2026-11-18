@@ -7,6 +7,7 @@ export default function ResetModal({ initialEmail, onClose }) {
   const [email, setEmail] = useState(initialEmail);
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
@@ -19,8 +20,16 @@ export default function ResetModal({ initialEmail, onClose }) {
     if (!isValidEmail(email)) return setError("이메일 주소를 다시 확인해 주세요.");
     if (!(await emailExists(email))) return setError("가입되지 않은 이메일이에요.");
     setError("");
-    setSent(true);
-  };
+    setBusy(true);
+    try {
+        await sendResetLink(email);   // ← 실제로 메일 발송
+        setSent(true);
+    } catch {
+        setError("메일을 보내지 못했어요. 잠시 후 다시 시도해 주세요.");
+    } finally {
+        setBusy(false);
+    }
+};
 
   return (
     <div className="gk-modal" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
