@@ -31,6 +31,31 @@ export const signIn = async (email, password) => {
     return data;
 };
 
+/* 간편 로그인 : 카카오. 브라우저가 Supabase → 카카오로 넘어갔다가 복귀하면 세션으로 자동 로그인됨 */
+export const signInWithProvider = async (provider) => {
+    const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: `${window.location.origin}/` },
+    });
+    if (error) throw error;
+};
+
+/* 소셜 로그인은 users 행이 따로 없어서 이름·전화가 비어 → 없을 때만 하나 만들어 둔다 */
+export const ensureProfile = async (user) => {
+    const { data } = await supabase.from("users").select("id, is_active").eq("id", user.id).maybeSingle();
+    if (data) {
+        // 탈퇴한 계정은 다시 들어올 수 없음 (local 로그인과 같은 규칙)
+        if (data.is_active === false) {
+            try { await supabase.auth.signOut(); } catch { /* 무시 */ }
+        }
+        return;
+    }
+    const meta = user.user_metadata || {};
+    const name = meta.name || meta.full_name || meta.preferred_username || "카카오 사용자";
+    const { error } = await supabase.from("users").insert({ id: user.id, name, phone: "" });
+    if (error) console.error("users 저장 실패:", error);
+};
+
 // 회원가입 : 계정 저장 + users 테이블에 이름·전화 저장. 회원가입 후 로그인 페이지로 이동
 export const signup = async ({ name, phone = "", email, password }) => {
     const { data, error } = await supabase.auth.signUp({ email, password });

@@ -65,12 +65,14 @@ export const useAuthStore = create((set, get) => ({
   // 로그인 상태 변경
   setAuth: (session) => {
     const userSession = session?.user;
-    set({
-      session,
-      user: userInfo(userSession),
-      loading: false
-    });
-    if (userSession) get().loadProfile(userSession.id); // 세션이 오면 이름·전화를 users 테이블에서 덮어씀
+    set({ session, user: userInfo(userSession), loading: false });
+    if (!userSession) return;
+    // 소셜 로그인(카카오 등)은 users 행이 없을 수 있음 → 먼저 만들고 그 다음 이름 불러오기
+    if (userSession.app_metadata?.provider !== "email") {
+      authApi.ensureProfile(userSession).finally(() => get().loadProfile(userSession.id));
+    } else {
+      get().loadProfile(userSession.id); // 세션이 오면 이름·전화를 users 테이블에서 덮어씀
+    }
   },
 
   // 로그아웃
