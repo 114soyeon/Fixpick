@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { emailExists } from "@/utils/auth/auth";
 import { isValidEmail } from "@/utils/common/validate";
+import { sendResetLink } from "@/api/auth"; 
 
 /** 비밀번호 찾기 창 */
 export default function ResetModal({ initialEmail, onClose }) {
