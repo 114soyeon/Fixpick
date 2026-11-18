@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { LogoMark, Wordmark } from "@/components/common/Logo";
 import { onAuthChange, updateUserPassword } from "@/api/auth";
 import "@/styles/login.css"; // gk-login-* 클래스 재사용
+import "@/styles/reset.css"; // 이 페이지만 쓰는 간격 (gk-reset-*)
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -42,10 +43,11 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="gk-login-page">
+    <div className="gk-login-page gk-reset-page">
       <section className="gk-login-form-wrap">
-        <div className="gk-login-rise gk-login-form">
-          <button type="button" className="gk-login-mobile-logo" onClick={() => navigate("/")}>
+        {/* 로그인 페이지처럼 form 자체가 gk-login-form (칸 사이 22px) */}
+        <form onSubmit={submit} noValidate className="gk-login-rise gk-login-form">
+          <button type="button" className="gk-login-mobile-logo" onClick={() => navigate("/")} aria-label="고정콕 홈으로 가기">
             <LogoMark size={36} /><Wordmark height={26} />
           </button>
 
@@ -59,35 +61,45 @@ export default function ResetPassword() {
           </div>
 
           {state === "ready" && (
-            <form onSubmit={submit} noValidate>
+            <>
+              {/* 로그인 페이지 비밀번호 칸과 같은 구조 (gk-login-pw 안에 눈 버튼) */}
               <label className="gk-login-field">
                 <span className="gk-login-label">새 비밀번호</span>
-                <input type={showPw ? "text" : "password"} autoComplete="new-password"
-                  className="gk-login-input" placeholder="8자 이상 입력하세요"
-                  value={pw} onChange={(e) => { setPw(e.target.value); setError(""); }} />
+                <span className="gk-login-pw">
+                  <input type={showPw ? "text" : "password"} autoComplete="new-password"
+                    className="gk-login-input gk-login-input--pw" placeholder="8자 이상 입력하세요"
+                    value={pw} onChange={(e) => { setPw(e.target.value); setError(""); }} />
+                  <button type="button" className="gk-login-eye" aria-label={showPw ? "비밀번호 숨기기" : "비밀번호 보기"} onClick={() => setShowPw((v) => !v)}>
+                    {showPw ? <EyeOff size={20} strokeWidth={2} /> : <Eye size={20} strokeWidth={2} />}
+                  </button>
+                </span>
               </label>
               <label className="gk-login-field">
                 <span className="gk-login-label">새 비밀번호 확인</span>
                 <input type={showPw ? "text" : "password"} autoComplete="new-password"
                   className="gk-login-input" placeholder="한 번 더 입력하세요"
                   value={pw2} onChange={(e) => { setPw2(e.target.value); setError(""); }} />
-                <button type="button" className="gk-login-eye" onClick={() => setShowPw((v) => !v)}>
-                  {showPw ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
+                {/* 회원가입 비밀번호 확인과 같은 안내 (오류 문구가 떠 있을 땐 숨김) */}
+                {pw2 && !error && (
+                  <p className={`gk-reset-hint ${pw === pw2 ? "is-ok" : ""}`}>
+                    {pw === pw2 ? "비밀번호가 일치해요" : "비밀번호를 똑같이 입력해 주세요"}
+                  </p>
+                )}
               </label>
-              {error && <p role="alert" className="gk-login-error">{error}</p>}
-              <button type="submit" className="gk-login-btn" disabled={busy}>
+              {error && <p role="alert" className="gk-login-alert">{error}</p>}
+              {/* 회원가입 약관 박스 ~ 가입하기 버튼 간격(14px)과 같게 */}
+              <button type="submit" className="gk-login-btn gk-reset-btn" disabled={busy}>
                 {busy ? "저장 중이에요" : "새 비밀번호로 저장"}
               </button>
-            </form>
+            </>
           )}
 
           {state === "error" && (
-            <button className="gk-login-btn" onClick={() => navigate("/login")}>
+            <button type="button" className="gk-login-btn" onClick={() => navigate("/login")}>
               비밀번호 찾기 다시 하기
             </button>
           )}
-        </div>
+        </form>
       </section>
     </div>
   );

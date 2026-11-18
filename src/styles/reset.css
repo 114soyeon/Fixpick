@@ -1,0 +1,40 @@
+/* 비밀번호 재설정 페이지 — 나머지 모양은 login.css(gk-login-*)를 그대로 씀
+ * 로그인 페이지에 영향이 없게 .gk-reset-page 안에서만 덮어씀 */
+
+/* 마지막 칸 ~ 저장 버튼: 회원가입 약관 박스 ~ 가입하기 버튼 간격(14px)과 같게.
+   gk-login-form의 gap이 22px라서 8px을 당김 */
+.gk-reset-btn {
+  margin-top: -8px;
+}
+
+/* 비밀번호 확인 안내 — 회원가입 .gk-sign-hint와 같은 모양 */
+.gk-reset-hint {
+  margin: 0;
+  font-size: 13px;
+  color: #5B5F66;
+}
+.gk-reset-hint.is-ok {
+  color: #2E9D6B;
+}
+
+/* 왼쪽 브랜드 영역이 없는 페이지라 고정콕 로고를 모든 너비에서 폼 위에 보여 줌
+   (로그인 페이지는 1000px 이하에서만 보임) */
+.gk-reset-page .gk-login-mobile-logo {
+  display: flex;
+}
+
+/* 폼이 화면보다 넓어지지 않게 (440px 고정 → 화면이 좁으면 줄어듦) */
+.gk-reset-page .gk-login-form-wrap {
+  min-width: 0;
+}
+.gk-reset-page .gk-login-form {
+  width: 100%;
+  max-width: 440px;
+}
+
+/* 반응형: Laptop 1024 미만 — 바깥 여백을 로그인 페이지 작은 화면과 같은 32px 24px로 */
+@media (max-width: 1023px) {
+  .gk-reset-page .gk-login-form-wrap {
+    padding: 32px 24px;
+  }
+}
