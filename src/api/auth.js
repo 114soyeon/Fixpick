@@ -31,7 +31,7 @@ export const signIn = async (email, password) => {
     return data;
 };
 
-/* 간편 로그인 : 카카오. 브라우저가 Supabase → 카카오로 넘어갔다가 복귀하면 세션으로 자동 로그인됨 */
+// 간편 로그인 : 카카오. 브라우저가 Supabase → 카카오로 넘어갔다가 복귀하면 세션으로 자동 로그인됨
 export const signInWithProvider = async (provider) => {
     const { error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -40,11 +40,11 @@ export const signInWithProvider = async (provider) => {
     if (error) throw error;
 };
 
-/* 소셜 로그인은 users 행이 따로 없어서 이름·전화가 비어 → 없을 때만 하나 만들어 둔다 */
+// 소셜 로그인은 users 행이 따로 없어서 이름·전화가 비어 → 없을 때만 하나 만들어 둔다
 export const ensureProfile = async (user) => {
     const { data } = await supabase.from("users").select("id, is_active").eq("id", user.id).maybeSingle();
     if (data) {
-        // 탈퇴한 계정은 다시 들어올 수 없음 (local 로그인과 같은 규칙)
+        // 탈퇴한 계정은 다시 들어올 수 없음(local 로그인과 같은 규칙)
         if (data.is_active === false) {
             try { await supabase.auth.signOut(); } catch { /* 무시 */ }
         }
@@ -93,7 +93,7 @@ export const deleteAccount = async () => {
     if (error) throw error;
 };
 
-/* 비밀번호 재설정 링크 보내기 */
+// 비밀번호 재설정 링크 보내기
 export const sendResetLink = async (email) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
@@ -101,7 +101,7 @@ export const sendResetLink = async (email) => {
     if (error) throw error;
 };
 
-/* 링크를 연 뒤 새 비밀번호로 바꾸기 */
+// 링크를 연 뒤 새 비밀번호로 바꾸기
 export const updateUserPassword = async (password) => {
     const { error } = await supabase.auth.updateUser({ password });
     if (error) throw error;
