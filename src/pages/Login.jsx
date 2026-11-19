@@ -11,6 +11,7 @@ import { loginError, readLastLogin, saveLastLogin, readSavedEmail, saveEmail, cl
 import { isValidEmail } from "@/utils/common/validate";
 import { useAuthStore } from "@/store/authStore";
 import "@/styles/login.css";
+import { signInWithProvider } from "@/api/auth";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -145,8 +146,16 @@ export default function Login() {
             {SOCIALS.map((s) => (
               <button key={s.key} type="button" className={`gk-login-social gk-login-social--${s.key}`}
                 aria-describedby={lastLogin === s.key ? "gk-last-login" : undefined}
-                onClick={() => {
-                  saveLastLogin(s.key); // 실제 간편 로그인을 붙이면 로그인 성공한 뒤에 저장하면 돼요
+                                onClick={async () => {
+                  saveLastLogin(s.key);
+                  if (s.key === "kakao" || s.key === "google") {
+                    try {
+                      await signInWithProvider(s.key); // 성공하면 페이지가 카카오/구글로 넘어감
+                    } catch {
+                      setToast({ text: `${s.name} 로그인에 실패했어요`, id: Date.now() });
+                    }
+                    return;
+                  }
                   setToast({ text: `${s.name} 로그인은 준비 중이에요`, id: Date.now() });
                 }}>
                 {s.logo && <img src={s.logo} alt="" aria-hidden="true" className="gk-login-social__logo" />}
