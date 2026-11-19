@@ -17,7 +17,7 @@ import "@/styles/dashboard.css";
 
 // 사이드바는 components/Layout.jsx에서 그려요.
 
-/* ───────── 1. 이번 달에 나갈 구독료 ───────── */
+/* ───────── 1. 이번 달에 나갈 고정 지출 ───────── */
 function TotalCard({ data }) {
   const { mode, cats, total, count } = data;
   const shown = useCountUp(total);
@@ -26,7 +26,7 @@ function TotalCard({ data }) {
   return (
     <section className="gk-rise gk-dash-total">
       <div className="gk-dash-total__head">
-        <h2 className="gk-dash-h2">{MONTH}월에 나갈 구독료</h2>
+        <h2 className="gk-dash-h2">{MONTH}월에 나갈 고정지출</h2>
         {mode === "mine" && (
           <span className="gk-dash-total__count">이번 달 {count}건 등록됨</span>
         )}
@@ -184,7 +184,7 @@ function MonthlyChart({ data }) {
       <div className="gk-dash-monthly__head">
         <div className="gk-dash-monthly__title">
           <h2 className="gk-dash-h2">월별 지출</h2>
-          <span className="gk-dash-monthly__desc">{recorded.length > 1 ? `구독 서비스 · 평균 ${won(avg)}원` : "구독 서비스 · 이번 달부터 기록이 쌓여요"}</span>
+          <span className="gk-dash-monthly__desc">{recorded.length > 1 ? `고정지출 · 평균 ${won(avg)}원` : "고정지출 · 이번 달부터 기록이 쌓여요"}</span>
         </div>
       </div>
       <svg viewBox={`0 0 ${W} 180`} width="100%" role="img" aria-label={monthly.map((m) => `${m.label} ${m.value === null ? "기록 없음" : `${won(m.value)}원`}`).join(", ")} className="gk-chart">
@@ -385,7 +385,7 @@ export default function Dashboard() {
     <main className="gk-dash-main">
       <div className="gk-rise gk-dash-head">
         <h1 className="gk-dash-title">
-          {user ? `${user.name}님, ${MONTH}월 구독 현황이에요` : `${MONTH}월 고정지출 현황이에요`}
+          {user ? `${user.name}님, ${MONTH}월 지출 현황이에요` : `${MONTH}월 고정지출 현황이에요`}
         </h1>
         {!user && (
           <div className="gk-dash-login">
