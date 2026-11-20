@@ -1,16 +1,332 @@
-# React + Vite
+<p align="center">
+  <img src="docs/images/logo.png" alt="고정콕 로고" width="300" />
+</p>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# 고정콕 (Fixpick)
 
-Currently, two official plugins are available:
+> **고정지출을 콕 집어 확인하다**
+> 구독 서비스, 월세, 통신비처럼 흩어진 고정지출을 한곳에서 관리하는 웹 서비스
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+링크
 
-## React Compiler
+- 배포 사이트 : [고정콕 바로가기](https://fixpick-beta.vercel.app)
+- Figma : [디자인 보기](https://www.figma.com/design/AdH1F4MqDZuF1zycdoRsKx/%EA%B3%A0%EC%A0%95%EC%BD%95?node-id=4-6)
+- GitHub: [저장소](https://github.com/114soyeon/Fixpick)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+<br>
 
-## Expanding the ESLint configuration
+## 기획 의도
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+넷플릭스, 티빙, 유튜브 프리미엄 같은 구독 서비스부터 월세, 통신비, 보험료까지 매달 빠져나가는 돈은 많은데, 결제일과 결제 수단이 제각각이라 한눈에 보기 어렵습니다.
+
+**이런 불편을 해결하고 싶었습니다**
+
+- 구독과 고정지출이 여러 곳에서 빠져나가서 무엇이 언제 나가는지 모른다
+- 1년에 한 번 나가는 큰돈(자동차세, 보험 갱신)을 놓친다
+- 한 달 고정지출이 정확히 얼마인지 모른다
+
+**그래서 이렇게 만들었습니다**
+
+| 모아 보기                       | 미리 알기                            | 돌아보기                          |
+| ------------------------------- | ------------------------------------ | --------------------------------- |
+| 매달 나가는 돈을 한 화면에 등록 | 결제일 전에 알림, 캘린더로 일정 확인 | 월간·연간 리포트로 지출 흐름 확인 |
+
+<br>
+
+## 프로젝트 정보
+
+| 구분      | 내용                                        |
+| --------- | ------------------------------------------- |
+| 기간      | 2026.11.02 ~ 2026.11.27 (약 1개월)          |
+| 팀 구성   | 4명 (UI/UX 디자인 3명, 프론트엔드 개발 1명) |
+| 디자인 툴 | Figma                                       |
+| 협업 툴   | Slack, GitHub, Figma, Google 스프레드시트   |
+
+**기술 스택**
+
+| 구분       | 사용 기술                   |
+| ---------- | --------------------------- |
+| 프론트엔드 | React, React Query, Zustand |
+| DB         | Supabase                    |
+| 배포       | Vercel                      |
+
+<br>
+
+## 주요 화면 & 기능
+
+### 0-1. 회원가입
+
+<img src="docs/images/signup.png" alt="회원가입 화면" width="100%" />
+
+> 권지원: 회원가입, 로그인 화면 디자인<br>
+> 김소연: 이메일 인증, 카카오, Google 로그인, 아이디 찾기 비밀번호 재설정, 탈퇴
+
+  <img src="docs/images/login.png" alt="로그인 화면" width="100%" />
+
+- 온보딩: 이메일·카카오·Google 로그인, 3단계 회원가입, 아이디·비밀번호 찾기
+
+> 나혜진: 설정 디자인 화면<br>
+> 김소연: 결제 수단, 예산, 알림 설정 연동
+
+<img src="docs/images/settings.png" alt="설정 화면" width="100%" />
+
+- 설정: 알림(결제일, 예산 초과, 큰 지출, 약정·만기), 한 달 예산, 카드·계좌 등록
+
+### 1. 홈 (대시보드 + 사이드바)
+
+> 권지원: 디자인 화면, 공통 사이드바, 알림 패널
+
+<img src="docs/images/main.png" alt="홈 화면" width="100%" />
+
+- 이번 달 나갈 금액: 총액과 카테고리 구성
+- 내 고정지출: 금액이 큰 카테고리부터 표시
+- 월별 지출과 예산: 지출 추이와 예산 사용량
+- 이달의 결제일: 달력과 다가오는 결제 D-day
+
+### 2. 항목 추가
+
+> 권지원: 디자인 화면<br>
+> 김소연: 항목 추가 Supabase 연동
+
+<img src="docs/images/add-item.png" alt="항목 추가 화면" width="100%" />
+
+- 항목 입력: 카테고리, 이름, 금액, 결제일, 만기일
+- 결제 수단 선택: 등록해 둔 카드나 계좌에서 선택
+
+### 3. 내 고정지출
+
+> 변예담: 요약 카드, 표 영역 무한 스크롤, 상세 화면(바로 저장되는 메모, 결제 정보 수정 창)<br>
+> 김소연: 추가, 수정, 삭제 데이터 연동, 필터 정렬, 다음 결제일 계산
+
+<img src="docs/images/list.png" alt="내 고정지출 화면" width="100%" />
+
+- 요약: 한 달 고정지출, 자동으로 빠지는 저축, 다가오는 큰 지출
+- 필터·정렬: 카테고리별 보기와 정렬
+- 항목 표: 주기, 다음 결제일, 월 환산액, 큰 지출 태그
+
+<img src="docs/images/detail.png" alt="고정지출 상세 화면" width="100%" />
+
+- 상세·수정: 결제 정보, 금액 변화, 알림, 만기까지 남은 날
+
+### 4. 결제 캘린더
+
+> 나혜진: 디자인 화면, 데이터 연결
+
+<img src="docs/images/calendar.png" alt="결제 캘린더 화면" width="100%" />
+
+- 월간 달력: 날짜별 결제를 아이콘과 이름으로 표시
+- 남은 결제: 이번 달 남은 금액과 진행 상황
+- 선택한 날: 그날의 결제 항목과 합계
+- 큰 지출 미리 보기: 자주 나가지 않아 놓치기 쉬운 결제
+
+### 5. 지출 리포트
+
+> 나혜진: 디자인 화면, 데이터 연결
+
+<img src="docs/images/report-month.png" alt="월간 지출 리포트 화면" width="100%" />
+
+- 월간: 이번 달 현황, 카테고리 비율, 지난달 비교
+
+<img src="docs/images/report-year.png" alt="연간 지출 리포트 화면" width="100%" />
+
+- 연간: 올해 지출, 월별 흐름, 작년과 달라진 점
+
+<br>
+
+## 팀원별 역할
+
+- **김소연** ([@114soyeon](https://github.com/114soyeon)) 프론트엔드: 인증·로그인, Supabase DB·RLS 설계와 연동, Vercel 배포
+- **권지원** ([@alice207116116-debug](https://github.com/alice207116116-debug)) UI/UX 디자인: 홈, 로그인·회원가입, 사이드바, 항목 추가
+- **변예담** ([@yeadm](https://github.com/yeadm)) UI/UX 디자인: 내 고정지출, 고정지출 상세
+- **나혜진** ([@nahj272](https://github.com/nahj272)) UI/UX 디자인: 결제 캘린더, 지출 리포트, 설정, 카테고리 컬러 규칙
+
+<br>
+
+## 협업 방식
+
+- 화면별로 담당을 나누고, 디자이너도 맡은 화면을 직접 구현
+- Slack으로 매일 진행 상황·막힌 부분·병합 일정 공유, 정할 일이 생기면 바로 회의
+- 맡은 부분은 팀원들에게 의견을 구해 보완
+- 할 일과 일정은 각자 Google 스프레드시트로 관리
+- 디자인은 Figma 파일 하나에서 함께 작업
+- 개인 브랜치에서 작업 → `api` 브랜치에서 확인 → `main`에 병합
+- CSS 클래스 접두사 규칙을 정하고, 큰 정리 작업은 병합 직후 진행 후 Slack으로 공유
+
+<br>
+
+## 트러블 슈팅
+
+### 김소연 (114soyeon)
+
+**어려웠던 점**
+
+1. 외부 서비스 연동: 코드 로직은 다 완성했는데 실제 환경에서 계속 실패했다. 공식 SMTP 제한 때문에 메일이 오지 않았고, 배포 후에는 비밀번호 재설정 링크가 404, API가 405/502를 냈다. 카카오 로그인은 KOE205 오류가 났고, 구글은 앱 게시 버튼이 눌리지 않았다.
+2. 목업 데이터 걷어내기: 화면은 완성됐지만 대부분 목업과 localStorage 데이터였다. Supabase로 바꾸자 RLS 때문에 데이터가 읽히지 않았고, 로그아웃해도 대시보드가 비워지지 않았으며, 페이지를 이동하면 로그아웃됐다.
+3. 결제일 규칙과 알림 상태 불일치: 매일·매주·매달·매년·사용자화 주기가 목록과 상세 페이지에서 다르게 계산됐다. 알림 토글도 항목 추가 창, 설정, 상세 페이지에서 서로 어긋났다.
+
+**해결 방법**
+
+1. HTTP 상태 코드와 에러 코드(KOE205, otp_expired)를 단서로 원인을 좁혀 갔다. 메일은 Vercel 서버리스 함수에서 직접 보내도록 바꿨고, 재설정 링크 404는 vercel.json rewrite로 해결했다. 카카오는 추가 기능 신청과 도메인 승인을 받았고, 구글은 데이터 액세스 범위와 개인정보처리방침 URL을 등록하고 Search Console 확인을 마친 뒤 게시했다.
+2. 인증 상태는 authStore 하나로 통일하고, 서버 상태는 React Query로 분리했다. 로그아웃할 때는 페이지만 이동하지 않고 queryClient.clear()로 캐시도 함께 지웠다. RLS 정책과 API select 컬럼도 다시 정리했다.
+3. 주기 규칙을 문서로 정리해 디자이너와 합의한 뒤, 다른 주기 계산에 영향을 주지 않는 범위에서만 고쳤다. 알림은 "전체 범위"와 "개별 범위"를 먼저 정의한 다음 동기화했다.
+
+**배운 점**
+
+- 외부 연동은 코드보다 설정과 승인에서 막혔다. 실제 서비스는 대시보드 설정, 검증, 승인 단계에서 멈춘다.
+- 화면이 동작하는 것과 데이터가 연결되는 것은 다른 문제다. 목업으로 완성한 화면은 아직 구현이 끝난 게 아니다.
+- 상태는 종류별로 나눠야 한다. 인증, 서버, UI 상태를 한곳에 섞으면 로그아웃과 캐시 문제가 다시 생긴다.
+- 같은 규칙을 화면마다 따로 구현하면 결국 어긋난다. 공통 계산은 한곳에 두고, 상태는 적용 범위부터 정해야 한다.
+
+### 권지원 (alice207116116-debug)
+
+**어려웠던 점**
+
+1. 홈 화면 결제 달력에 '매일' 결제를 하나 등록했더니 달력의 모든 칸이 결제일 색으로 칠해졌다. 다른 결제는 '교통카드 외 1'처럼 한데 묶여 보여서, 무엇이 언제 나가는지 알기 어려웠다.
+2. 사이드바 알림이 하나도 뜨지 않았다. 고정지출을 등록하고 결제일이 코앞이어도 알림창은 계속 비어 있었다. 알고 보니 알림은 예전에 쓰던 브라우저 저장소(localStorage)에서 항목을 읽고 있었는데, 항목은 이미 DB에 저장되도록 바뀐 상태였다. 그래서 알림은 늘 빈 목록을 보고 있었다.
+
+**해결 방법**
+
+1. 칸 배경색과 결제 이름을 빼고, 그날 나가는 항목마다 카테고리 색 둥근 밑줄을 날짜 아래에 하나씩 그렸다. 이제 며칠에 어떤 카테고리가 몇 건 나가는지 한눈에 보인다.
+2. 알림도 DB에 저장된 항목을 읽도록 바꿨다. 그러면서 항목마다 정해 둔 알림 시점과 알림 켜기/끄기 설정이 실제로 반영되게 하고, 설정 페이지에서 알림 종류를 끄면 그 알림은 뜨지 않게 했다. 예산 초과 알림도 설정에 저장한 예산을 기준으로 계산하게 했다.
+
+**배운 점**
+
+- 매일 나가는 결제처럼 자주 반복되는 데이터까지 고려해야 화면이 복잡해지지 않는다.
+- 기능 하나만 바꿔도 그 데이터를 쓰는 다른 곳까지 같이 확인해야 한다는 걸 배웠다. 항목 저장 위치를 DB로 옮기면서 알림 쪽은 미처 신경 쓰지 못했고, 에러도 안 나서 한동안 문제인 줄 몰랐다. 그 뒤로는 데이터 구조를 바꿀 때 그 데이터를 어디서 읽는지부터 찾아보고, 화면에 실제로 잘 나오는지도 직접 확인하고 있다.
+
+<p>
+  <img src="docs/troubleshooting/06-calendar-before-ui.jpg" alt="수정 전 홈 달력" width="49%" />
+  <img src="docs/troubleshooting/06-calendar-after-ui.jpg" alt="수정 후 홈 달력" width="49%" />
+</p>
+
+### 변예담 (yeadm)
+
+**어려웠던 점**
+
+1. 수정한 값이 목록에 반영되지 않음: 상세 페이지에서 금액·주기를 수정하면 그 페이지에는 바뀐 값이 보였지만, 목록에는 이전 값이 그대로 남았다.
+2. 표 영역에서만 무한 스크롤: 무한 스크롤이 페이지 전체 스크롤을 기준으로 동작했다. 요약 카드와 필터는 고정하고 표 안에서만 스크롤되게 하고 싶었는데, 표 안에서 스크롤되게 바꾸자 헤더 위로 아래 행이 비치고 스크롤바가 보이지 않았다.
+
+**해결 방법**
+
+1. 저장, 읽기, 표시 순서로 데이터 흐름을 따라가 원인 세 가지를 찾았다. handleSave 안에 같은 이름의 함수가 중첩 선언돼 저장 코드가 실행되지 않았고, 중첩을 없애고 저장 로직을 바깥 함수로 옮겼다. localStorage를 컴포넌트 밖에서 읽어 앱을 처음 불러올 때 한 번만 실행되던 코드는 컴포넌트 안으로 옮겨 렌더링할 때마다 최신 값을 읽게 했다. 필터가 수정본(allItems)이 아닌 원본(expenses)을 쓰고 있어서 allItems를 쓰도록 고쳤다.
+2. 표에 max-height와 overflow-y: auto를 주고, IntersectionObserver의 기준(root)을 화면에서 표(tableRef)로 바꿔 10줄씩 더 보여 주게 했다. 행이 비친 건 표의 padding-top 8px 틈 때문이어서 고정 헤더를 top: -8px로 올려 덮었다. 스크롤바는 공통 CSS의 전역 숨김 설정(width: 0)이 표에도 적용된 탓이라, 전역 설정은 그대로 두고 이 표에만 스크롤바를 다시 지정했다. 요약 카드 합계가 전체 데이터 기준이라 서버에서 나눠 받지 않고 전체를 받아 화면에서 나눠 보여 주었고, 필터나 정렬을 바꾸면 처음 10줄로 돌아가게 했다.
+
+**배운 점**
+
+- 화면에 보이는 값이 저장된 값이라는 보장은 없다. 데이터를 어디서 저장하고, 언제 읽고, 무엇으로 그리는지 끝까지 따라가야 원인이 보인다.
+- 같은 스크롤이라도 기준이 페이지인지 특정 영역인지에 따라 구현이 완전히 달라진다. 의도대로 동작하지 않을 때는 전역 CSS처럼 다른 곳에서 덮어쓰는 설정이 있는지부터 확인해야 한다.
+
+### 나혜진 (nahj272)
+
+**어려웠던 점**
+
+1. 결제 캘린더의 칩이 모두 같은 연한 파란색이고 아이콘도 11px로 작아서, 어떤 카테고리의 결제인지 구분할 수 없었다.
+
+**해결 방법**
+
+1. 아이콘을 14px로 키우고, 칩 배경을 DB에 저장한 카테고리별 연한 색으로 칠했다. 이제 칩 색과 아이콘만 보고도 카테고리를 구분할 수 있다.
+
+**배운 점**
+
+- 디자인에서 정한 카테고리 색 규칙을 실제 화면까지 그대로 적용해야 사용자가 한눈에 알아볼 수 있다.
+
+<p>
+  <img src="docs/troubleshooting/07-chip-before.png" alt="수정 전 결제 캘린더" width="49%" />
+  <img src="docs/troubleshooting/07-chip-after.png" alt="수정 후 결제 캘린더" width="49%" />
+</p>
+
+<br>
+
+---
+
+## 부록
+
+### 정보 구조 (IA)
+
+```
+로그인 ─┬─ 회원가입
+        ├─ 아이디 찾기 · 결과
+        └─ 비밀번호 찾기
+
+사이드바 메뉴
+├─ 홈 ─────────── 항목 추가 ── 결제 수단 선택
+├─ 내 고정지출 ── 상세 ── 결제 정보 수정
+├─ 결제 캘린더
+├─ 지출 리포트 ── 월간 / 연간
+└─ 설정 ───────── 결제 수단 추가 ── 카드 · 계좌
+```
+
+### 카테고리
+
+모든 화면에서 같은 색과 아이콘으로 표시합니다.
+
+| 카테고리                                                               | 색        | 포함 항목                                          |
+| ---------------------------------------------------------------------- | --------- | -------------------------------------------------- |
+| <img src="docs/icons/category-home.svg" alt="주거" /> 주거             | `#154A7D` | 월세, 관리비, 전기·가스·수도, 주담대·전세대출 이자 |
+| <img src="docs/icons/category-phone.svg" alt="통신" /> 통신            | `#0A6480` | 휴대폰 요금·할부, 인터넷·IPTV, 가족 결합, 알뜰폰   |
+| <img src="docs/icons/category-sub.svg" alt="구독" /> 구독              | `#9E2152` | 영상, 음악·오디오, 클라우드·툴, 쇼핑 멤버십, 게임  |
+| <img src="docs/icons/category-rental.svg" alt="가전 구독" /> 가전 구독 | `#0C6B5E` | 정수기, 공기청정기, 세탁기, 식기세척기 등          |
+| <img src="docs/icons/category-insure.svg" alt="보험" /> 보험           | `#5B3FC4` | 실손·건강·암, 자동차·운전자, 종신·연금             |
+| <img src="docs/icons/category-saving.svg" alt="금융·저축" /> 금융·저축 | `#5E5300` | 적금, 청약, 연금저축·IRP, 펀드, 대출 원리금        |
+| <img src="docs/icons/category-transit.svg" alt="교통" /> 교통          | `#A04508` | 대중교통 정기권, 모두의 카드(K-패스), KTX 정기권   |
+| <img src="docs/icons/category-car.svg" alt="자동차" /> 자동차          | `#536579` | 유류비, 자동차세, 유지비, 자동차 할부, 주차비 등   |
+| <img src="docs/icons/category-etc.svg" alt="기타" /> 기타              | `#4E433C` | 경조사비, 세금, 헬스·관리, 반려동물 등             |
+
+### 디자인 규칙
+
+**색의 역할**
+
+| 색        | HEX       | 역할                        |
+| --------- | --------- | --------------------------- |
+| 하늘      | `#5CB8F2` | 선택 상태, 오늘 날짜        |
+| 연한 하늘 | `#DCEFFD` | 강조 카드, 선택한 메뉴 배경 |
+| 노랑      | `#FFE57A` | 주요 버튼, 배지             |
+| 초록      | `#067647` | 지출 감소                   |
+| 네이비    | `#0B2A45` | 제목, 숫자                  |
+
+**레이아웃**
+
+- 화면 규격: 1920 × 1080
+- 사이드바: 248px
+- 내용 패딩: 40px
+- 카드 간격: 24px
+
+**글꼴·아이콘**
+
+- 글꼴: Pretendard, Noto Sans
+- 아이콘: Lucide
+
+### DB 구조
+
+<img src="docs/images/erd.png" alt="DB 구조 (ERD)" width="100%" />
+
+| 테이블               | 역할                     | 주요 컬럼                                                                                                                              |
+| -------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `users`              | 회원 정보                | name, phone, is_active, is_alarm                                                                                                       |
+| `subscriptions`      | 등록한 고정지출 항목     | category_id, name, amount, cycle, amount_type, payment_method_id, start_date, expiry_date, payment_alert_days, expiry_alert_days, memo |
+| `categories`         | 카테고리 이름·아이콘·색  | name, icon, color, bg, chart                                                                                                           |
+| `payments`           | 결제 기록                | subscription_id, due_date, amount                                                                                                      |
+| `payment_methods`    | 등록한 카드·계좌         | payment_id, last4                                                                                                                      |
+| `payment_categories` | 카드사·은행 목록         | type, name, icon                                                                                                                       |
+| `budgets`            | 월 예산                  | month, amount, category_id                                                                                                             |
+| `notifications`      | 알림 내역                | subscription_id, title, body, is_read                                                                                                  |
+| `user_settings`      | 알림·예산 설정           | payment_alert_enabled, budget_alert_rate, large_expense_threshold, expiry_alert_enabled                                                |
+| `email_codes`        | 회원가입 이메일 인증번호 | email, code, attempts                                                                                                                  |
+
+### 폴더 구조
+
+```
+src
+├─ pages        # 화면 (홈, 내 고정지출, 캘린더, 리포트, 설정, 로그인, 회원가입)
+├─ components   # 화면별 컴포넌트 (add-item, calendar, report, setting, sidebar, signup)
+├─ api          # Supabase 요청 함수 (인증, 고정지출 등)
+├─ queries      # React Query 데이터 불러오기
+├─ store        # Zustand 로그인 상태
+├─ hooks        # 공통 훅
+├─ constants    # 카테고리, 카드 로고 등 고정 데이터
+├─ utils        # 날짜·금액 포맷, 인증, 리포트 계산 등
+├─ lib          # Supabase 연결
+├─ styles       # 화면별 CSS
+├─ router.jsx   # 페이지 경로
+└─ main.jsx
+```
