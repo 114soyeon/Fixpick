@@ -183,8 +183,8 @@
 - 김소연 ([@114soyeon](https://github.com/114soyeon)) : 인증·로그인, Supabase DB·RLS 설계와 연동, Vercel 배포
 
 **UI/UX 디자인**
-- **권지원** ([@alice207116116-debug](https://github.com/alice207116116-debug)) : 홈, 로그인·회원가입, 사이드바, 항목 추가
-- **변예담** ([@yeadm](https://github.com/yeadm)) : 내 고정지출, 고정지출 상세
+- **권지원** ([@alice207116116-debug](https://github.com/alice207116116-debug)) : 로그인·회원가입, 아이디·비밀번호 찾기, 홈, 사이드바, 항목 추가 모달
+- **변예담** ([@yeadm](https://github.com/yeadm)) : 내 고정지출, 고정지출 상세, 결제 수단 변경 모달
 - **나혜진** ([@nahj272](https://github.com/nahj272)) : 결제 캘린더, 지출 리포트, 설정, 카테고리 컬러 규칙
 
 <br>
