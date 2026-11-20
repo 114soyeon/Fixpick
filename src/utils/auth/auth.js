@@ -29,7 +29,7 @@ const write = (key, value, kind = "local") => {
   }
 };
 
-/** 비밀번호를 그대로 저장하지 않도록 간단히 바꿔서 저장 (연습용) */
+// 비밀번호를 그대로 저장하지 않도록 간단히 바꿔서 저장
 const hash = (text) => {
   let h = 5381;
   for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) >>> 0;
@@ -46,7 +46,7 @@ const saveUser = (user, keep = true) => {
 };
 const publicUser = (a) => ({ name: a.name, phone: a.phone || "", email: a.email, subscriptionCount: 5 });
 
-/** 로그인 없이 등록한 항목(gk-items:guest)을 그 계정으로 옮겨요 */
+// 로그인 없이 등록한 항목(gk-items:guest)을 그 계정으로 옮김
 const moveGuestItems = (email) => {
   const guest = read("gk-items:guest", []);
   if (!guest.length) return;
@@ -55,24 +55,24 @@ const moveGuestItems = (email) => {
   write("gk-items:guest", null);
 };
 
-/** 지금 로그인한 사람 (Supabase 세션 기준 — 로그인 안 했으면 null) */
+// 지금 로그인한 사람(Supabase 세션 기준 — 로그인 안 했으면 null)
 export const getUser = () => useAuthStore.getState().user;
 
-/** 이미 가입한 이메일인지 (DB 확인) */
+// 이미 가입한 이메일인지 DB 확인
 export async function emailExists(email = "") {
   const { data, error } = await supabase.rpc("email_exists", { p_email: email.trim() });
   if (error) return false; // 조회 실패 시 중복 검사 건너뛰기
   return Boolean(data);
 }
 
-/** 이메일 일부를 가려요: minji.kim@gmail.com → min*****@gmail.com */
+// 이메일 일부 마스킹
 export function maskEmail(email = "") {
   const [id, domain = ""] = email.split("@");
   const show = id.length <= 3 ? id.slice(0, 1) : id.slice(0, 3);
   return `${show}${"*".repeat(Math.max(3, id.length - show.length))}@${domain}`;
 }
 
-/** 아이디(이메일) 찾기: 이름 + 휴대폰 번호로 Supabase 에서 찾아요 */
+// 아이디(이메일) 찾기: 이름 + 휴대폰 번호로 Supabase에서 찾음
 export async function findEmail({ name = "", phone = "" }) {
   const { data, error } = await supabase.rpc("find_email", {
     p_name: name.trim(),
@@ -83,7 +83,7 @@ export async function findEmail({ name = "", phone = "" }) {
   return { ok: true, accounts: data.map((a) => ({ email: a.email, masked: maskEmail(a.email) })) };
 }
 
-/** 로그인: 가입한 이메일인지, 비밀번호가 맞는지 확인 */
+// 로그인: 가입한 이메일인지, 비밀번호가 맞는지 확인
 export function login({ email, password, keep = true }) {
   const key = email.trim().toLowerCase();
   const accounts = read(ACCOUNTS_KEY, {});
@@ -100,7 +100,7 @@ export function login({ email, password, keep = true }) {
   return { ok: true };
 }
 
-/** 로그아웃 (Supabase 세션을 지워요) */
+// 로그아웃
 export async function logout() {
   try {
     await signOut(); // Supabase 요청은 api/auth.js
@@ -109,13 +109,13 @@ export async function logout() {
   }
 }
 
-/** 프로필 동그라미 안 글자: 이름 길이와 상관없이 첫 글자 */
+// 프로필 동그라미 안 글자: 이름 길이와 상관없이 첫 글자
 export function initialOf(name = "") {
   const n = name.trim();
   return n.slice(0, 1).toUpperCase();
 }
 
-/** 탈퇴한 계정이 남긴 브라우저 저장 정보 지우기 */
+// 탈퇴한 계정이 남긴 브라우저 저장 정보 지우기
 export function clearLocalAccount(email = "") {
   try {
     ["gk-saved-email", "gk-last-login", "gk-accounts", "gk-user"].forEach((k) => localStorage.removeItem(k));
