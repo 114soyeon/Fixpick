@@ -1,5 +1,5 @@
 import { useCategoryOf } from "@/hooks/useCategoryOf";
-import { monthAmount, nextPayDate } from "@/utils/common/payment";
+import { monthAmount, nextPayDate, BIG_AMOUNT } from "@/utils/common/payment";
 import { fromDbRow } from "@/utils/common/dbItem";
 import { dateToKorean, getToday } from "@/utils/common/date";
 import { won } from "@/utils/common/format";
@@ -29,18 +29,24 @@ const cycleLabel = (it) => {
 
 const ExpenseRow = ({ item, onClick }) => {
   const { icon: CategoryIcon } = useCategoryOf()(item.categories?.key); // DB 카테고리 아이콘 (모르는 key면 "기타")
+  const isBig = Number(item.amount) >= BIG_AMOUNT; // 큰 지출: 아이콘도 네이비로 강조
 
   return (
     <div className="table-row" onClick={onClick}>
       <div className="expense-name">
         <div
           className={`expense-icon expense-icon--${item.categories.key}`}
-          style={{ background: item.categories.bg, color: item.categories.color }} // DB 색
+          style={
+            isBig
+              ? { background: "#102f4b", color: "#ffffff" }
+              : { background: item.categories.bg, color: item.categories.color }
+          }
         >
           <CategoryIcon size={20} strokeWidth={2} aria-hidden="true" />
         </div>
         <strong>{item.name}</strong>
         {item.amount_type === "변동" && <span className="expected-badge">예상</span>}
+        {isBig && <span className="big-badge">큰 지출</span>}
       </div>
       <span>{item.categories.name}</span>
       <span>{cycleLabel(item)}</span>
