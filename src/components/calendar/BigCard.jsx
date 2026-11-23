@@ -10,7 +10,6 @@ const BigCard = ({ list }) => (
   <div className="paycal-card paycal-detail paycal-big-card">
     <div className="paycal-detail-head paycal-detail-head-col">
       <h3 className="paycal-detail-title">큰 지출 미리 보기</h3>
-      <p className="paycal-detail-desc">자주 안 나가서 놓치기 쉬운 돈이에요</p>
     </div>
     {list.length > 0 ? (
       <ul className="paycal-list">
