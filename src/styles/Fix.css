@@ -245,6 +245,17 @@
   margin-left: 12px;
 }
 
+/* "큰 지출" 뱃지 (BIG_AMOUNT 이상) */
+.big-badge {
+  background-color: #102f4b;
+  color: white;
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-size: 11px;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
 /* 금액 */
 .amount {
   text-align: left;
@@ -439,7 +450,8 @@
     height: 32px;
     border-radius: 9px;
   }
-  .expenses-page .expected-badge {
+  .expenses-page .expected-badge,
+  .expenses-page .big-badge {
     flex-shrink: 0;
     margin-left: 0;
     padding: 4px 8px;

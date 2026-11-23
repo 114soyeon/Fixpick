@@ -139,25 +139,40 @@ export function paymentsInMonth(items, year, month) {
     .filter((it) => !isEnded(it, it.date));
 }
 
-/** 오늘부터 3개월 안에 나가는 "매년" 결제 중 금액이 큰 count개 (모자라면 있는 만큼) */
+/**
+ * "큰 지출"로 보는 최소 금액 (원)
+ * 상단 "다가오는 큰 지출" 카드 · 캘린더 "큰 지출 미리 보기" · 목록 "큰 지출" 뱃지가 다 이 값으로 판단해요
+ * (사이드바 "큰 지출이 다가와요" 알림은 utils/sidebar/notifications.js BIG_AMOUNT 로 따로 관리해요)
+ */
+export const BIG_AMOUNT = 300000;
+
+/**
+ * 오늘부터 3개월 안에 나가는 결제 중 금액 BIG_AMOUNT 이상인 것 큰 순서로 count개 (모자라면 있는 만큼)
+ * - 주기 상관없이 전부 봐요 (매달·매년·매주·매일·사용자화)
+ * - 같은 항목이 매주·매일로 여러 번 나가면 "결제 한 번" 금액으로 각각 비교해요
+ */
 export function bigPayments(items, today, count = 4) {
   const start = new Date(today.year, today.month - 1, today.day);
   const end = new Date(today.year, today.month - 1 + 3, today.day); // 3개월 뒤
 
-  return items
-    .filter((it) => it.cycle === "매년") // 매달 결제는 제외 (자주 나가니까)
-    .map((it) => {
-      // 올해 결제일이 이미 지났으면 내년 결제일
-      let y = today.year;
-      let date = new Date(y, it.month - 1, payDayIn(it, y, it.month));
-      if (date < start) {
-        y += 1;
-        date = new Date(y, it.month - 1, payDayIn(it, y, it.month));
-      }
-      return { ...it, date };
+  // 3개월 구간이 걸치는 달 (오늘 달 ~ 3개월 뒤 달, 연말·연초 넘어가는 달까지)
+  const months = [];
+  for (let i = 0; i < 4; i++) {
+    const m0 = today.month - 1 + i;
+    months.push([today.year + Math.floor(m0 / 12), (m0 % 12) + 1]);
+  }
+
+  const seen = new Set();
+  return months
+    .flatMap(([y, m]) => paymentsInMonth(items, y, m)) // 그 달에 실제로 나가는 날
+    .filter((it) => it.date >= start && it.date < end && Number(it.amount) >= BIG_AMOUNT) // 오늘부터 3개월 안 + 큰 지출 기준 금액
+    .sort((a, b) => a.date - b.date) // 같은 항목은 가장 가까운 결제일부터
+    .filter((it) => { // 항목당 한 번만 (매달·매주는 3개월치로 여러 번 나가지만 "이 항목" 하나로 세요)
+      if (seen.has(it.id)) return false;
+      seen.add(it.id);
+      return true;
     })
-    .filter((it) => it.date < end && !isEnded(it, it.date)) // 3개월 안 + 만기 전
-    .sort((a, b) => b.amount - a.amount) // 금액 큰 순서
+    .sort((a, b) => Number(b.amount) - Number(a.amount)) // 금액 큰 순서
     .slice(0, count);
 }
 

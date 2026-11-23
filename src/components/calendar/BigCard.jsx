@@ -1,6 +1,6 @@
 /*
  * 결제 캘린더 오른쪽 아래: 큰 지출 미리 보기
- * - list: 오늘부터 3개월 안 "매년" 결제 중 큰 순서 최대 4개 (utils/items.js bigPayments)
+ * - list: 오늘부터 3개월 안 BIG_AMOUNT(30만원) 이상 결제 중 큰 순서 최대 4개 (utils/common/payment.js bigPayments)
  */
 import { monthDay } from "@/utils/common/format";
 import { daysUntil, ddayText } from "@/utils/common/date";

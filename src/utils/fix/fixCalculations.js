@@ -18,7 +18,8 @@ export const calculateMonthlySavings = (items) =>
 
 /**
  * 다가오는 큰 지출 1건 → { title, amount, month } (없으면 null)
- * rawItems: utils/items.js 의 useItems() 결과 (항목 추가 창에서 저장한 원본)
+ * rawItems: hooks/useFixItems.js useRawFixItems() 결과 (DB 내 고정지출)
+ * 기준: 오늘부터 3개월 안 + BIG_AMOUNT(30만원) 이상 중 금액 큰 순 (utils/common/payment.js)
  */
 export const getUpcomingExpense = (rawItems) => {
   const [big] = bigPayments(rawItems, getToday(), 1);

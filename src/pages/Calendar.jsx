@@ -67,7 +67,7 @@ const Calendar = () => {
     .filter((p) => isSameDay(p.date, selectedDate))
     .sort((a, b) => a.name.localeCompare(b.name, "ko")); // 이름 순 (달력 칩 순서와 같게)
 
-  // ④ 큰 지출 미리 보기: 오늘부터 3개월 안 "매년" 결제 중 큰 순서로 최대 4개
+  // ④ 큰 지출 미리 보기: 오늘부터 3개월 안 BIG_AMOUNT(30만원) 이상 결제 중 큰 순서로 최대 4개
   //    (5개는 카드 높이를 넘쳐서 4개로 정함)
   const bigList = bigPayments(dbItems, today, 4);
 
