@@ -41,13 +41,12 @@ export function dashData(items, categories = []) {
   });
   const total = cats.reduce((sum, c) => sum + c.amount, 0);
   const count = cats.reduce((sum, c) => sum + c.count, 0);
-  const subNow = cats.find((c) => c.key === "sub")?.amount ?? 0; // DB 카테고리를 불러오는 중이면 0
   return {
     mode: count ? "mine" : "empty",
     cats,
     total,
     count,
-    monthly: monthlyRows([null, null, null, null, null, subNow]), // 지난달 기록은 다음 달부터 쌓여요
+    monthly: monthlyRows([null, null, null, null, null, count ? total : null]), // 이번 달 = 전체 예정 합계 / 지난달 기록은 다음 달부터 쌓여요
   };
 }
 

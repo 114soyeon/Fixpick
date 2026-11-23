@@ -1,10 +1,10 @@
 import { DEFAULT_BUDGET } from "@/utils/setting/budget";
 import { monthDay, won } from "@/utils/common/format";
-import { amountIn, isEnded, payDaysIn } from "@/utils/common/payment";
+import { amountIn, isEnded, payDaysIn, BIG_AMOUNT } from "@/utils/common/payment";
 
 /* 사이드바 알림: 내가 등록한 고정지출로 만들어요 (등록한 게 없으면 알림도 없어요) */
 
-export const BIG_AMOUNT = 100000; // 이 금액 이상이면 "큰 지출"
+// "큰 지출" 기준 금액은 결제 캘린더·내 고정지출 뱃지와 같은 상수를 써요 (utils/common/payment.js BIG_AMOUNT = 30만원)
 
 const keyOfDate = (d) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 const dayDiff = (a, b) => Math.round((a - b) / 86400000);
