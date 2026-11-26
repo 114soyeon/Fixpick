@@ -81,8 +81,9 @@ const FixDetail = () => {
       updateSub.mutate(
         { id: Number(id), data: { memo: newMemo } },
         {
-          onError: () => setToast("메모를 저장하지 못했어요. 다시 시도해 주세요"),
-        }
+          onError: () =>
+            setToast("메모를 저장하지 못했어요. 다시 시도해 주세요"),
+        },
       );
     }, 600);
   };
