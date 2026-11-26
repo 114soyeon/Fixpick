@@ -37,13 +37,20 @@ export const getPayMethods = (items) => [
 ];
 
 /**
- * 상세 > 금액 변화 그래프 데이터
- * 아직 지난 금액 기록이 저장되지 않아서 올해 금액 1건만 있어요.
- * (기록 데이터가 생기면 여기서 [{ year, amount }, ...] 로 돌려주면 돼요)
+ * 상세 > 금액 변화 그래프 데이터 — 이번달 포함 전 3개월 (예: 26.09 / 26.10 / 26.11)
+ * 과거 금액 이력이 저장되지 않아서 세 달 다 "지금 금액"을 줘요.
+ * (이력 테이블을 쓰게 되면 그 시점 금액으로 갈아끼우면 돼요)
  */
-export const getAmountHistory = (item) => [
-  { year: new Date().getFullYear(), amount: item.amount },
-];
+export const getAmountHistory = (item) => {
+  const now = new Date();
+  return Array.from({ length: 3 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - 2 + i, 1);
+    return {
+      year: `${String(d.getFullYear()).slice(2)}.${String(d.getMonth() + 1).padStart(2, "0")}`,
+      amount: item.amount,
+    };
+  });
+};
 
 /** 그래프 막대 높이 단계 1~10 (가장 큰 금액 = 10) → CSS .chart-bar--<단계> */
 export const getBarLevel = (amount, maxAmount) =>
