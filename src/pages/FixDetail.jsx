@@ -124,7 +124,7 @@ const FixDetail = () => {
 
         {/* 오른쪽 */}
         <div className="detail-right">
-          <AmountChart history={getAmountHistory(fromDbRow(rawRow))} />
+          <AmountChart history={getAmountHistory(fromDbRow(rawRow), rawRow?.created_at)} />
 
           <AlertSettings
             payDays={item.payAlertDays}

@@ -41,15 +41,21 @@ export const getPayMethods = (items) => [
   그 달에 결제 예정이었고 오늘까지 지난 금액의 합 (결제 없으면 0원)
   - 오늘 이후 예정된 결제는 아직 안 나간 것으로 안 셈 (이번달은 지나간 결제일까지만)
   - 결제일 계산에 cycle·day 등이 필요해서 item은 DB 원본 모양(fromDbRow)
+  - createdAt(DB created_at): 항목을 등록한 날 → 등록한 달보다 앞선 달은 0원
 */
-export const getAmountHistory = (item) => {
+export const getAmountHistory = (item, createdAt) => {
   const today = getToday();
   const now = new Date(today.year, today.month - 1, today.day);   // 오늘 00:00
+  const created = createdAt ? new Date(createdAt) : null;
+  const createdKey = created && !isNaN(created)
+    ? created.getFullYear() * 12 + created.getMonth()             // 등록한 달
+    : null;
   return Array.from({ length: 3 }, (_, i) => {
     const d = new Date(today.year, today.month - 1 - (2 - i), 1); // 이번달 기준 전 3개월
     const y = d.getFullYear();
     const m = d.getMonth() + 1;
-    const amount = paymentsInMonth([item], y, m)
+    const beforeCreated = createdKey !== null && y * 12 + (m - 1) < createdKey;
+    const amount = beforeCreated ? 0 : paymentsInMonth([item], y, m)
       .filter((p) => p.date <= now)                               // 오늘까지 지난 결제만
       .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
     return {
