@@ -7,6 +7,7 @@ import { onAuthChange } from "@/api/auth";
 import { useEffect, useRef } from "react"; // useRef : 값을 저장해 두었다가 나중에 다시 사용할 수 있도록 해주는 기능
 import { useAuthStore } from "@/store/authStore";
 import { useQueryClient } from "@tanstack/react-query";
+import { takeLoginReason, openAddItem } from "@/utils/common/addItemFlow";
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -30,6 +31,13 @@ export default function Layout() {
     prevUserId.current = id;
     if (wasLoggedIn) queryClient.clear();
   }, [user?.id, queryClient]);
+
+  // 로그인된 사람이 확정되면, "항목 추가하려고 로그인한" 사람이면 모달을 바로 연다
+  // 간편로그인은 복귀 경로가 대시보드라 여기서만 가능
+  useEffect(() => {
+    if (!user) return; // 세션 확인 전엔 기다려요
+    if (takeLoginReason() === "add") openAddItem();
+  }, [user]);
 
   // 주소가 바뀔 때 마다 맨 위로 -> scrollTo(0, 0);
   useEffect(() => {

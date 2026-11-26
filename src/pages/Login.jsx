@@ -6,7 +6,7 @@ import LoginToast from "@/components/login/LoginToast";
 import ResetModal from "@/components/login/ResetModal";
 import FindIdModal from "@/components/login/FindIdModal";
 import { BRAND_TAGS, SOCIALS } from "@/constants/login";
-import { openAddItem, takeLoginReason } from "@/utils/common/addItemFlow";
+import { peekLoginReason } from "@/utils/common/addItemFlow";
 import { loginError, readLastLogin, saveLastLogin, readSavedEmail, saveEmail, clearSavedEmail } from "@/utils/auth/login";
 import { isValidEmail } from "@/utils/common/validate";
 import { useAuthStore } from "@/store/authStore";
@@ -23,8 +23,8 @@ export default function Login() {
   const [resetOpen, setResetOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
   const [toast, setToast] = useState(null);
-  const [lastLogin] = useState(readLastLogin); // 페이지를 열 때 한 번만 읽어요
-  const [reason] = useState(takeLoginReason); // "add": 항목 추가하려다 넘어왔어요
+  const [lastLogin] = useState(readLastLogin); // 페이지를 열 때 한 번만 읽음
+  const [reason] = useState(peekLoginReason); // "add": 항목 추가하려다 넘어옴(지금은 안 지움 — 로그인 성공 때 Layout이 지움)
 
   const login = useAuthStore((state) => state.signIn);
 
@@ -44,7 +44,6 @@ export default function Login() {
     if (keep) saveEmail(email);   // 체크돼 있으면 저장
     else clearSavedEmail();       // 해제하고 로그인하면 지우기
     navigate("/");                // 로그인 후 홈으로
-    if (reason === "add") setTimeout(openAddItem, 400); // 하려던 항목 추가 창을 바로 열어 줘요
   };
 
   return (
