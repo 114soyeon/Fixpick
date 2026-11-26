@@ -115,10 +115,7 @@ export default function Login() {
 
           {error.message && (
             <p role="alert" className="gk-login-alert">
-              {error.message}{" "}
-              {error.field === "email" && error.message.includes("가입되지") && (
-                <button type="button" className="gk-login-link gk-login-link--strong" onClick={() => navigate("/signup")}>회원가입하기</button>
-              )}
+              {error.message}
             </p>
           )}
 
