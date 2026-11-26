@@ -1,5 +1,5 @@
-import { bigPayments } from "@/utils/common/payment";
-import { getToday, toDate } from "@/utils/common/date";
+import { bigPayments, paymentsInMonth } from "@/utils/common/payment";
+import { getToday, toDate, keyToDate } from "@/utils/common/date";
 
 // 저축으로 따로 계산하는 카테고리 (DB categories.key)
 const SAVING_KEY = "saving";
@@ -36,18 +36,26 @@ export const getPayMethods = (items) => [
   ...new Set(items.map((item) => item.method).filter(Boolean)),
 ];
 
-/**
- * 상세 > 금액 변화 그래프 데이터 — 이번달 포함 전 3개월 (예: 26.09 / 26.10 / 26.11)
- * 과거 금액 이력이 저장되지 않아서 세 달 다 "지금 금액"을 줘요.
- * (이력 테이블을 쓰게 되면 그 시점 금액으로 갈아끼우면 돼요)
- */
+/*
+  상세 > 금액 변화 그래프 — 이번달 포함 전 3개월 (예: 26.09 / 26.10 / 26.11)
+  그 달에 실제로 나간 금액의 합 (결제 없으면 0원)
+  - 아직 안 지난 결제(오늘 이후)는 안 세고, 첫 결제 이전 날도 X
+  - 결제일 계산에 cycle·day 등이 필요해서 item은 DB 원본 모양(fromDbRow)
+*/
 export const getAmountHistory = (item) => {
-  const now = new Date();
+  const today = getToday();
+  const now = new Date(today.year, today.month - 1, today.day);   // 오늘 00:00
+  const start = keyToDate(item.start);                            // 첫 결제일 (없으면 null → 필터 없음)
   return Array.from({ length: 3 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - 2 + i, 1);
+    const d = new Date(today.year, today.month - 1 - (2 - i), 1); // 이번달 기준 전 3개월
+    const y = d.getFullYear();
+    const m = d.getMonth() + 1;
+    const amount = paymentsInMonth([item], y, m)
+      .filter((p) => (!start || p.date >= start) && p.date <= now) // 첫 결제 이후 + 오늘까지
+      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
     return {
-      year: `${String(d.getFullYear()).slice(2)}.${String(d.getMonth() + 1).padStart(2, "0")}`,
-      amount: item.amount,
+      year: `${String(y).slice(2)}.${String(m).padStart(2, "0")}`,
+      amount,
     };
   });
 };

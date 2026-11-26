@@ -9,6 +9,7 @@ import HeroCard from "@/components/fix-detail/HeroCard.jsx";
 import MemoCard from "@/components/fix-detail/MemoCard.jsx";
 import EndDateCard from "@/components/fix-detail/EndDateCard.jsx";
 import { getAmountHistory, getPayMethods } from "@/utils/fix/fixCalculations";
+import { fromDbRow } from "@/utils/common/dbItem";
 import { useFixItems } from "@/hooks/useFixItems";
 import { useMySub, useUpdateSub, useDeleteSub } from "@/queries/subs";
 import SidebarToast from "@/components/sidebar/SidebarToast";
@@ -123,7 +124,7 @@ const FixDetail = () => {
 
         {/* 오른쪽 */}
         <div className="detail-right">
-          <AmountChart history={getAmountHistory(item)} />
+          <AmountChart history={getAmountHistory(fromDbRow(rawRow))} />
 
           <AlertSettings
             payDays={item.payAlertDays}
