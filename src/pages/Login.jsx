@@ -38,7 +38,7 @@ export default function Login() {
       try { localStorage.setItem("gk-keep", keep ? "on" : "off"); } catch { /* 무시 */ }
       await login(email, pw);
     } catch (err) {
-      const { field, message } = loginError(err); // 틀렸을 때 문구 (utils/auth/login.js)
+      const { field, message } = await loginError(err, email); // 틀렸을 때 문구 (utils/auth/login.js) — 이메일 존재 여부도 함께 확인
       return fail(field, message);
     }
     setError({ field: "", message: "" });

@@ -1,4 +1,5 @@
 /* 로그인 페이지에서 쓰는 함수들 */
+import { emailExists } from "@/utils/auth/auth";
 
 // 최근에 쓴 로그인 방법 기억하기 ("kakao" | "google" | "email")
 const LAST_KEY = "gk-last-login";
@@ -7,14 +8,18 @@ export const saveLastLogin = (how) => { try { localStorage.setItem(LAST_KEY, how
 
 /*
   로그인 실패 오류 → 화면에 보여줄 { field, message }
-  Supabase는 이메일이 없을 때와 비밀번호가 틀렸을 때를 구분해 주지 않아서(보안) 둘 다 표시
+  Supabase는 이메일이 없을 때와 비밀번호가 틀렸을 때를 구분해 주지 않아서(보안),
+  그 둘만 오면 email_exists로 이메일 존재 여부를 따로 확인해 갈라요
   field: "both"면 이메일·비밀번호 칸 모두 빨갛게
 */
-export function loginError(error) {
+export async function loginError(error, email = "") {
   const code = error?.code || "";
   const msg = error?.message || "";
   if (code === "account_disabled") return { field: "email", message: "탈퇴한 계정이에요. 다시 가입해 주세요." };
   if (code === "invalid_credentials" || /invalid login credentials/i.test(msg)) {
+    if (email && !(await emailExists(email))) {
+      return { field: "email", message: "가입되지않은 이메일입니다." };
+    }
     return { field: "both", message: "이메일 또는 비밀번호가 맞지 않아요. 다시 확인해 주세요." };
   }
   if (code === "email_not_confirmed" || /email not confirmed/i.test(msg)) {
