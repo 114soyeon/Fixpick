@@ -1,4 +1,5 @@
 import { getBarLevel } from "@/utils/fix/fixCalculations";
+import { won } from "@/utils/common/format";
 
 // history: [{ year: 숫자, amount: 숫자 }, ...] 형태의 배열을 받아서 그리기만 해요
 // 막대 높이는 FixDetail.css 의 .chart-bar--<1~10> 클래스로 정해요
@@ -13,7 +14,7 @@ const AmountChart = ({ history }) => {
         {history.map((h) => (
           <div className="chart-col" key={h.year}>
             <span className="chart-value">
-              {Math.round(h.amount / 10000)}만
+              {won(h.amount)}
             </span>
             <div
               className={[

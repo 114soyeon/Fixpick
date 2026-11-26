@@ -6,7 +6,7 @@ import LoginToast from "@/components/login/LoginToast";
 import ResetModal from "@/components/login/ResetModal";
 import FindIdModal from "@/components/login/FindIdModal";
 import { BRAND_TAGS, SOCIALS } from "@/constants/login";
-import { openAddItem, takeLoginReason } from "@/utils/common/addItemFlow";
+import { peekLoginReason } from "@/utils/common/addItemFlow";
 import { loginError, readLastLogin, saveLastLogin, readSavedEmail, saveEmail, clearSavedEmail } from "@/utils/auth/login";
 import { isValidEmail } from "@/utils/common/validate";
 import { useAuthStore } from "@/store/authStore";
@@ -23,8 +23,8 @@ export default function Login() {
   const [resetOpen, setResetOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
   const [toast, setToast] = useState(null);
-  const [lastLogin] = useState(readLastLogin); // 페이지를 열 때 한 번만 읽어요
-  const [reason] = useState(takeLoginReason); // "add": 항목 추가하려다 넘어왔어요
+  const [lastLogin] = useState(readLastLogin); // 페이지를 열 때 한 번만 읽음
+  const [reason] = useState(peekLoginReason); // "add": 항목 추가하려다 넘어옴(지금은 안 지움 — 로그인 성공 때 Layout이 지움)
 
   const login = useAuthStore((state) => state.signIn);
 
@@ -35,16 +35,16 @@ export default function Login() {
     if (!isValidEmail(email)) return fail("email", "이메일 주소를 다시 확인해 주세요.");
     if (!pw) return fail("pw", "비밀번호를 입력해 주세요.");
     try {
+      try { localStorage.setItem("gk-keep", keep ? "on" : "off"); } catch { /* 무시 */ }
       await login(email, pw);
     } catch (err) {
-      const { field, message } = loginError(err); // 틀렸을 때 문구 (utils/auth/login.js)
+      const { field, message } = await loginError(err, email); // 틀렸을 때 문구 (utils/auth/login.js) — 이메일 존재 여부도 함께 확인
       return fail(field, message);
     }
     setError({ field: "", message: "" });
     if (keep) saveEmail(email);   // 체크돼 있으면 저장
     else clearSavedEmail();       // 해제하고 로그인하면 지우기
     navigate("/");                // 로그인 후 홈으로
-    if (reason === "add") setTimeout(openAddItem, 400); // 하려던 항목 추가 창을 바로 열어 줘요
   };
 
   return (
@@ -115,10 +115,7 @@ export default function Login() {
 
           {error.message && (
             <p role="alert" className="gk-login-alert">
-              {error.message}{" "}
-              {error.field === "email" && error.message.includes("가입되지") && (
-                <button type="button" className="gk-login-link gk-login-link--strong" onClick={() => navigate("/signup")}>회원가입하기</button>
-              )}
+              {error.message}
             </p>
           )}
 

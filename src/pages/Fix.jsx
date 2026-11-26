@@ -81,6 +81,11 @@ const Fix = () => {
     return () => io.disconnect();
   }, [hasMore, shownCount]);
 
+  // 카테고리·정렬이 바뀌면 표 안쪽 스크롤만 맨 위로
+  useEffect(() => {
+    tableRef.current?.scrollTo(0, 0);
+  }, [view]);
+
   // 다가오는 큰 지출: { title, amount, month } 또는 null
   const upcomingExpense = getUpcomingExpense(rawItems);
 

@@ -198,6 +198,7 @@
   color: #5CB8F2;
 }
 .gk-sign-code__timer.is-low { color: #D9534F; }
+.gk-sign-hint.is-expired { color: #D9534F; }
 
 /* 비밀번호 + 눈 버튼 */
 .gk-sign-pw { position: relative; }

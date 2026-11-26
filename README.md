@@ -8,10 +8,9 @@
 > 구독 서비스, 월세, 통신비처럼 흩어진 고정지출을 한곳에서 관리하는 웹 서비스
 
 링크
-- 배포 사이트 : [고정콕 바로가기](https://fixpick-beta.vercel.app)
-- Figma : [디자인 보기](https://www.figma.com/design/AdH1F4MqDZuF1zycdoRsKx/%EA%B3%A0%EC%A0%95%EC%BD%95?node-id=4-6)
-- GitHub: [저장소](https://github.com/114soyeon/Fixpick)
-
+- 배포 사이트 : <a href="https://fixpick-beta.vercel.app" target="_blank" rel="noopener noreferrer">고정콕 바로가기</a>
+- Figma      : <a href="https://www.figma.com/design/AdH1F4MqDZuF1zycdoRsKx/%EA%B3%A0%EC%A0%95%EC%BD%95?node-id=4-6" target="_blank" rel="noopener noreferrer">디자인 보기</a>
+- GitHub     : <a href="https://github.com/114soyeon/Fixpick" target="_blank" rel="noopener noreferrer">저장소</a>
 <br>
 
 ## 기획 의도
@@ -132,7 +131,8 @@
 - 월간 달력 : 날짜별 결제를 아이콘과 이름으로 표시
 - 남은 결제 : 이번 달 남은 금액과 진행 상황
 - 선택한 날 : 그날의 결제 항목과 합계
-- 큰 지출 미리 보기 : 자주 나가지 않아 놓치기 쉬운 결제
+- 큰 지출 미리 보기 : 3개월 안에 나갈 금액이 큰 지출
+
 
 ### 5. 지출 리포트
 <p>

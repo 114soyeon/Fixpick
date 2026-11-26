@@ -49,7 +49,10 @@ const ProfileCard = ({ user, items }) => {
               className="set-name-input"
               autoFocus
               value={newName}
-              onChange={(e) => setNewName(e.target.value)}
+              onChange={(e) => {
+                if (e.nativeEvent.isComposing) return setNewName(e.target.value);
+                setNewName(e.target.value.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z\s]/g, ""));
+              }}
               onBlur={() => finishEdit(true)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") finishEdit(true);
