@@ -212,13 +212,17 @@ export default function Signup() {
                   <input id="signup-code" inputMode="numeric" autoComplete="one-time-code" className={`gk-sign-input gk-sign-code__input ${errors.code ? "is-error" : ""}`} placeholder="인증번호 6자리" value={verify.code}
                     onChange={(e) => { setVerify((v) => ({ ...v, code: e.target.value.replace(/[^0-9]/g, "").slice(0, 6) })); setErrors((er) => ({ ...er, code: "" })); }}
                     onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); checkCode(); } }} />
-                  <span className={`gk-sign-code__timer ${verify.left > 30 ? "" : "is-low"}`}>{mmss}</span>
+                    {verify.left > 0 && (
+                      <span className={`gk-sign-code__timer ${verify.left > 30 ? "" : "is-low"}`}>{mmss}</span>
+                    )}
                 </div>
                 <button type="button" className="gk-sign-mini" disabled={verify.code.length !== 6 || sending} onClick={checkCode}>확인</button>
               </div>
             )}
             {verify.sent && !verify.ok && !errors.code && (
-              <p className="gk-sign-hint">메일로 받은 6자리를 입력해 주세요.</p>
+              <p className={`gk-sign-hint ${verify.left <= 0 ? "is-expired" : ""}`}>
+                {verify.left <= 0 ? "시간이 지났어요. 인증번호를 다시 받아 주세요." : "메일로 받은 6자리를 입력해 주세요."}
+              </p>
             )}
             {errors.code && <p role="alert" className="gk-sign-error">{errors.code}</p>}
             {errors.email && <p role="alert" className="gk-sign-error">{errors.email}</p>}
